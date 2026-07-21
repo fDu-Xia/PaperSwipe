@@ -1,0 +1,1697 @@
+{
+  "version": 1,
+  "actions": {
+    "29d16e00da123029e3b0ecc309bf1d07d44e89b7": {
+      "paper": {
+        "id": "29d16e00da123029e3b0ecc309bf1d07d44e89b7",
+        "title": "Scalable spatiotemporal prediction with Bayesian neural fields",
+        "abstract": "Spatiotemporal datasets, which consist of spatially-referenced time series, are ubiquitous in diverse applications, such as air pollution monitoring, disease tracking, and cloud-demand forecasting. As the scale of modern datasets increases, there is a growing need for statistical methods that are flexible enough to capture complex spatiotemporal dynamics and scalable enough to handle many observations. This article introduces the Bayesian Neural Field (BayesNF), a domain-general statistical model that infers rich spatiotemporal probability distributions for data-analysis tasks including forecasting, interpolation, and variography. BayesNF integrates a deep neural network architecture for high-capacity function estimation with hierarchical Bayesian inference for robust predictive uncertainty quantification. Evaluations against prominent baselines show that BayesNF delivers improvements on prediction problems from climate and public health data containing tens to hundreds of thousands of measurements. Accompanying the paper is an open-source software package (https://github.com/google/bayesnf) that runs on GPU and TPU accelerators through the Jax machine learning platform. Spatiotemporal data consisting of measurements gathered at different times and locations is challenging to analyse due to variability and noise impact across different scales. The authors propose a statistical approach that delivers models of large-scale spatiotemporal datasets applicable to data-analysis tasks of forecasting and interpolation.",
+        "authors": [
+          {
+            "name": "Feras A. Saad"
+          },
+          {
+            "name": "Jacob Burnim"
+          },
+          {
+            "name": "Colin Carroll"
+          },
+          {
+            "name": "Brian Patton"
+          },
+          {
+            "name": "Urs Köster"
+          },
+          {
+            "name": "Rif A. Saurous"
+          },
+          {
+            "name": "Matthew D. Hoffman"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-03-12",
+        "venue": "Nature Communications",
+        "citation_count": 29,
+        "influential_citation_count": 0,
+        "fields": [
+          "Computer Science",
+          "Mathematics",
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/29d16e00da123029e3b0ecc309bf1d07d44e89b7",
+        "pdf_url": "https://www.nature.com/articles/s41467-024-51477-5.pdf",
+        "external_ids": {
+          "ArXiv": "2403.07657",
+          "CorpusId": "2.68364255e+08",
+          "DBLP": "journals/corr/abs-2403-07657",
+          "DOI": "10.1038/s41467-024-51477-5",
+          "PubMed": "39261468",
+          "PubMedCentral": "11390735"
+        },
+        "match_score": 66,
+        "read_minutes": 9,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "主题有交集，但需要先确认任务设定",
+          "problem": "Evaluations against prominent baselines show that BayesNF delivers improvements on prediction problems from climate and public health data containing…",
+          "novelty": "As the scale of modern datasets increases, there is a growing need for statistical methods that are flexible enough to capture complex spatiotemporal…",
+          "method": "As the scale of modern datasets increases, there is a growing need for statistical methods that are flexible enough to capture complex spatiotemporal…",
+          "result": "Evaluations against prominent baselines show that BayesNF delivers improvements on prediction problems from climate and public health data containing…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Computer Science / Mathematics 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-20T05:27:09.748931Z"
+    },
+    "34c4925097d3bf1838e0bfae2ffb28ebf62af7f3": {
+      "paper": {
+        "id": "34c4925097d3bf1838e0bfae2ffb28ebf62af7f3",
+        "title": "GRAPH NEURAL NETWORKS FOR TRAFFIC FLOW PREDICTION: INNOVATIVE APPROACHES, PRACTICAL USAGE, AND SUPERIORITY IN SPATIO-TEMPORAL FORECASTING",
+        "abstract": "Traffic flow prediction remains a cornerstone of intelligent transportation systems (ITS), facilitating congestion mitigation, route optimization, and sustainable urban planning. Graph Neural Networks (GNNs) have revolutionized this domain by adeptly modeling the intricate graph-structured nature of traffic networks, where nodes represent sensors or intersections and edges denote spatial relationships. Recent years (2023–2025) have witnessed a surge in scientific innovation, with several novel approaches pushing the boundaries of traffic prediction accuracy and robustness. Notably, hybrid GNN-Transformer architectures have emerged, leveraging the spatial reasoning of GNNs and the temporal sequence modeling power of Transformers to capture long-range dependencies and complex spatiotemporal patterns. Physics-informed GNNs integrate domain knowledge, such as conservation laws and traffic flow theory, directly into the learning process, enhancing interpretability and generalization to unseen scenarios. Uncertainty-aware frameworks, including Bayesian GNNs and ensemble methods, provide probabilistic forecasts, crucial for risk-sensitive applications and adaptive traffic management in volatile urban environments. This article provides a comprehensive guide to implementing GNNs for traffic flow prediction, detailing best practices in data preparation (e.g., graph construction, feature engineering, handling missing data), model training (e.g., loss functions, regularization, hyperparameter tuning), and real-time deployment (e.g., edge computing, latency optimization). We critically compare GNNs to traditional statistical and deep learning methods, highlighting their superior ability to capture non-Euclidean spatial dependencies, adapt to dynamic and evolving network topologies, and seamlessly integrate multi-modal data sources such as weather, events, and sensor readings. Empirical evidence from widely used benchmarks, including PeMS and METR-LA, demonstrates that state-of-the-art GNN models achieve up to 15–20 % improvements in accuracy metrics such as Mean Absolute Error (MAE) and Root Mean Square Error (RMSE) over conventional baselines. These gains are attributed to the models’ capacity for dynamic graph learning, attention-based feature selection, and robust handling of heterogeneous data. Drawing on these recent innovations, this synthesis highlights GNNs' pivotal role in fostering resilient, AI-driven traffic systems for future smart cities, setting the stage for next-generation ITS solutions that are adaptive, interpretable, and scalable. In addition to these advancements, the integration of real-time sensor data and external information sources has further improved the responsiveness of traffic prediction models. Modern GNN frameworks are capable of handling large-scale urban networks, making them suitable for deployment in metropolitan areas with complex road infrastructures. The use of transfer learning and domain adaptation techniques allows models trained in one city to be effectively applied to others, reducing the need for extensive retraining. Furthermore, explainable AI approaches within GNNs are gaining traction, enabling stakeholders to understand and trust model decisions in critical traffic management scenarios. Recent research also explores the fusion of GNNs with reinforcement learning, enabling adaptive control strategies for traffic signals and congestion pricing. The scalability of GNNs ensures that they can process data from thousands of sensors in real time, supporting city-wide traffic optimization. Advances in hardware acceleration, such as GPU and edge computing, have made it feasible to deploy these models in latency-sensitive environments. Collaborative efforts between academia, industry, and government agencies are driving the adoption of GNN-based solutions in smart city initiatives. As urban mobility continues to evolve, the ability of GNNs to incorporate emerging data modalities, such as connected vehicle telemetry and mobile device traces, will be crucial for future developments. The ongoing refinement of model architectures and training protocols promises even greater accuracy and robustness in traffic flow prediction. Ultimately, the convergence of GNNs with other AI technologies is set to transform intelligent transportation systems, paving the way for safer, more efficient, and sustainable urban mobility.",
+        "authors": [
+          {
+            "name": "Bohdan Dokhniak"
+          },
+          {
+            "name": "Viktor Khavalko"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-12-29",
+        "venue": "Bulletin of National Technical University KhPI Series System Analysis Control and Information Technologies",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [],
+        "url": "https://www.semanticscholar.org/paper/34c4925097d3bf1838e0bfae2ffb28ebf62af7f3",
+        "pdf_url": "https://doi.org/10.20998/2079-0023.2025.02.05",
+        "external_ids": {
+          "CorpusId": "2.86026611e+08",
+          "DOI": "10.20998/2079-0023.2025.02.05"
+        },
+        "match_score": 77,
+        "read_minutes": 25,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Traffic flow prediction remains a cornerstone of intelligent transportation systems (ITS), facilitating congestion mitigation, route optimization, an…",
+          "novelty": "Recent years (2023–2025) have witnessed a surge in scientific innovation, with several novel approaches pushing the boundaries of traffic prediction…",
+          "method": "Graph Neural Networks (GNNs) have revolutionized this domain by adeptly modeling the intricate graph-structured nature of traffic networks, where nod…",
+          "result": "Empirical evidence from widely used benchmarks, including PeMS and METR-LA, demonstrates that state-of-the-art GNN models achieve up to 15–20 % impro…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-20T05:26:24.121032Z"
+    },
+    "4713c365937496d7df92eb4542d89c25a66f0c76": {
+      "paper": {
+        "id": "4713c365937496d7df92eb4542d89c25a66f0c76",
+        "title": "KESOZI Digital Twin: Physics-Informed Neural Network for Independent Estimation and Prediction of Childhood Diarrheal Disease Burden in Kenya, Somaliland, and Zimbabwe",
+        "abstract": "Childhood diarrheal disease remains a leading cause of morbidity and mortality among children under five years in sub-Saharan Africa, particularly in settings affected by inadequate sanitation, climate variability, malnutrition, and limited healthcare access. Conventional forecasting approaches are often constrained by sparse surveillance data, weak spatial representation, and limited incorporation of mechanistic disease dynamics. This study presents a Physics-Informed Multimodal Artificial Intelligence Digital Twin framework that integrates Physics-Informed Neural Networks, Graph Neural Networks, diffusion-reaction epidemiological modeling, multimodal fusion learning, and Digital Twin simulation to estimate and predict childhood diarrheal disease burden in Kenya, Somaliland, and Zimbabwe. Using public epidemiological, environmental, climate, sanitation, and synthetic proof-of-concept datasets, the framework modeled temporal disease dynamics, spatial transmission, pathogen-attributed burden, and outbreak trajectories while enforcing epidemiological consistency through physics-informed optimization. Results demonstrated robust forecasting performance, enhanced spatial transmission modeling, uncertainty-aware predictions, and realistic outbreak simulations across the three countries. Rotavirus, Shigella, and Cryptosporidium were identified as major contributors to modeled mortality burden, while unsafe water exposure, poor sanitation, malnutrition, and climate-sensitive transmission substantially increased disease risk. Compared with a Bayesian baseline model, the multimodal framework achieved superior nonlinear risk characterization, geospatial learning, and temporal prediction. These findings highlight the potential of scientific machine learning and digital twin systems for infectious disease surveillance, outbreak forecasting, climate-health analytics, and evidence-based public health decision-making in low-resource African settings. Keywords: Physics-Informed Neural Networks, Graph Neural Networks, Digital Twin, Childhood Diarrheal Disease, Epidemiology, Kenya, Somaliland, Zimbabwe, Scientific Machine Learning, Spatial Epidemiology, Multimodal Fusion",
+        "authors": [
+          {
+            "name": "KESOZI Digital Twin"
+          },
+          {
+            "name": "J. Agumba"
+          },
+          {
+            "name": "L. Namusonge"
+          },
+          {
+            "name": "J. Ogendo"
+          },
+          {
+            "name": "M. A. Hassan"
+          },
+          {
+            "name": "A. Pembere"
+          },
+          {
+            "name": "M. Takavarasha"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-06-04",
+        "venue": "medRxiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/4713c365937496d7df92eb4542d89c25a66f0c76",
+        "pdf_url": "https://doi.org/10.64898/2026.06.03.26354823",
+        "external_ids": {
+          "CorpusId": "2.88941289e+08",
+          "DOI": "10.64898/2026.06.03.26354823"
+        },
+        "match_score": 62,
+        "read_minutes": 12,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "主题有交集，但需要先确认任务设定",
+          "problem": "Childhood diarrheal disease remains a leading cause of morbidity and mortality among children under five years in sub-Saharan Africa, particularly in…",
+          "novelty": "Conventional forecasting approaches are often constrained by sparse surveillance data, weak spatial representation, and limited incorporation of mech…",
+          "method": "Conventional forecasting approaches are often constrained by sparse surveillance data, weak spatial representation, and limited incorporation of mech…",
+          "result": "Results demonstrated robust forecasting performance, enhanced spatial transmission modeling, uncertainty-aware predictions, and realistic outbreak si…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-20T05:27:11.950114Z"
+    },
+    "4f7ac51ff58a0b5743671078f440ac83d5af7412": {
+      "paper": {
+        "id": "4f7ac51ff58a0b5743671078f440ac83d5af7412",
+        "title": "HSE-GNN-CP: Spatiotemporal Teleconnection Modeling and Conformalized Uncertainty Quantification for Global Crop Yield Forecasting",
+        "abstract": "Global food security faces escalating threats from climate variability and resource constraints. Accurate crop yield forecasting is essential; however, existing methods frequently overlook complex spatial dependencies driven by climate teleconnections, such as the ENSO, and lacks rigorous uncertainty quantification. This paper presents HSE-GNN-CP, a novel framework integrating heterogeneous stacked ensembles, graph neural networks (GNNs), and conformal prediction (CP). Domain-specific features are engineered, including growing degree days and climate suitability scores, and explicitly model spatial patterns via rainfall correlation graphs. The ensemble combines random forest and gradient boosting learners with bootstrap aggregation, while GNNs encode inter-regional climate dependencies. Conformalized quantile regression ensures statistically valid prediction intervals. Evaluated on a global dataset spanning 15 countries and six major crops from 1990 to 2023, the framework achieves an R2 of 0.9594 and an RMSE of 4882 hg/ha. Crucially, it delivers calibrated 80% prediction intervals with 80.72% empirical coverage, significantly outperforming uncalibrated baselines at 40.03%. SHAP analysis identifies crop type and rainfall as dominant predictors, while the integrated drought classifier achieves perfect accuracy. These contributions advance agricultural AI by merging robust ensemble learning with explicit teleconnection modeling and trustworthy uncertainty quantification.",
+        "authors": [
+          {
+            "name": "Salman Mahmood"
+          },
+          {
+            "name": "Raza Hasan"
+          },
+          {
+            "name": "Shakeel Ahmad"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-02-01",
+        "venue": "Inf.",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/4f7ac51ff58a0b5743671078f440ac83d5af7412",
+        "pdf_url": "https://www.mdpi.com/2078-2489/17/2/141/pdf?version=1769947220",
+        "external_ids": {
+          "CorpusId": "2.85327453e+08",
+          "DBLP": "journals/information/MahmoodHA26",
+          "DOI": "10.3390/info17020141"
+        },
+        "match_score": 67,
+        "read_minutes": 9,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "主题有交集，但需要先确认任务设定",
+          "problem": "Global food security faces escalating threats from climate variability and resource constraints.",
+          "novelty": "This paper presents HSE-GNN-CP, a novel framework integrating heterogeneous stacked ensembles, graph neural networks (GNNs), and conformal prediction…",
+          "method": "Accurate crop yield forecasting is essential; however, existing methods frequently overlook complex spatial dependencies driven by climate teleconnec…",
+          "result": "Evaluated on a global dataset spanning 15 countries and six major crops from 1990 to 2023, the framework achieves an R2 of 0.",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Computer Science 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-20T05:27:07.588132Z"
+    },
+    "5bbf0d5a471c56e7e4f574c884a0777b446a4227": {
+      "paper": {
+        "id": "5bbf0d5a471c56e7e4f574c884a0777b446a4227",
+        "title": "tmGNN-XAI: An Explainable Graph Neural Network Tool for Predicting Electronic Properties of Transition Metal Complexes from SMILES.",
+        "abstract": "Predicting the electronic properties of transition metal complexes (TMCs) from 2D molecular graphs remains challenging; organic-trained property models lack TMC transferability, universal interatomic potentials require 3D coordinates rather than SMILES, and tools providing holistic electronic property prediction with atom-level explainability and calibrated uncertainty remain limited. We present tmGNN-XAI, a multitask relational graph convolutional network that predicts seven quantum-chemical properties of TMCs directly from SMILES strings and produces perturbation-based atom-level attributions for each prediction. The model encodes dative coordination bonds as a dedicated edge type distinct from covalent bonds and is trained on 100,703 complexes from the tmQM data set spanning 30 transition metals. Test-set performance is competitive with a Chemprop D-MPNN baseline, achieving R2 = 0.979 for metal partial charge and R2 = 0.964 and 0.949 for HOMO and LUMO energies. Across all 100,703 complexes, donor atoms (N, O, S, P) appear among the top-five most important atoms in more than 99.8% of complexes for every property, a large-scale data-driven result consistent with ligand field theory. A trust framework combining ensemble agreement with attribution direction separates predictions into four reliability scenarios; confident predictions achieve 1.6 to 2.5 times lower mean absolute error than uncertain ones for five of seven properties. The framework generalizes to cross-level DFT validation, phototherapy candidate screening (area under the ROC curve (AUC) = 0.735), and indirect redox prediction via Koopmans' theorem. An interactive web application makes property predictions, atom-level attributions, and trust labels accessible without programming or DFT expertise. tmGNN-XAI is designed as an explainable, first-tier screening tool for TMC electronic property estimation.",
+        "authors": [
+          {
+            "name": "Abdulmujeeb T. Onawole"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-07-03",
+        "venue": "Journal of Chemical Information and Modeling",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/5bbf0d5a471c56e7e4f574c884a0777b446a4227",
+        "external_ids": {
+          "CorpusId": "2.89850261e+08",
+          "DOI": "10.1021/acs.jcim.6c01047",
+          "PubMed": "42398017"
+        },
+        "match_score": 70,
+        "read_minutes": 12,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Predicting the electronic properties of transition metal complexes (TMCs) from 2D molecular graphs remains challenging; organic-trained property mode…",
+          "novelty": "tmGNN-XAI is designed as an explainable, first-tier screening tool for TMC electronic property estimation.",
+          "method": "Predicting the electronic properties of transition metal complexes (TMCs) from 2D molecular graphs remains challenging; organic-trained property mode…",
+          "result": "A trust framework combining ensemble agreement with attribution direction separates predictions into four reliability scenarios; confident prediction…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-20T05:27:06.343346Z"
+    },
+    "6cc14d8c4564063bd17fe9744433b1284c379a0b": {
+      "paper": {
+        "id": "6cc14d8c4564063bd17fe9744433b1284c379a0b",
+        "title": "GRIT: Graph Transformer For Internal Ice Layer Thickness Prediction",
+        "abstract": "Gaining a deeper understanding of the thickness and variability of internal ice layers in Radar imagery is essential in monitoring the snow accumulation, better evaluating ice dynamics processes, and minimizing uncertainties in climate models. Radar sensors, capable of penetrating ice, capture detailed radargram images of internal ice layers. In this work, we introduce GRIT, graph transformer for ice layer thickness. GRIT integrates an inductive geometric graph learning framework with an attention mechanism, designed to map the relationships between shallow and deeper ice layers. Compared to baseline graph neural networks, GRIT demonstrates consistently lower prediction errors. These results highlight the attention mechanism’s effectiveness in capturing temporal changes across ice layers, while the graph transformer combines the strengths of transformers for learning long-range dependencies with graph neural networks for capturing spatial patterns, enabling robust modeling of complex spatiotemporal dynamics.",
+        "authors": [
+          {
+            "name": "Zesheng Liu"
+          },
+          {
+            "name": "Maryam Rahnemoonfar"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-07-09",
+        "venue": "IEEE International Geoscience and Remote Sensing Symposium",
+        "citation_count": 4,
+        "influential_citation_count": 0,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/6cc14d8c4564063bd17fe9744433b1284c379a0b",
+        "external_ids": {
+          "ArXiv": "2507.07388",
+          "CorpusId": "2.80266155e+08",
+          "DBLP": "journals/corr/abs-2507-07388",
+          "DOI": "10.1109/IGARSS55030.2025.11243115"
+        },
+        "match_score": 64,
+        "read_minutes": 7,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "主题有交集，但需要先确认任务设定",
+          "problem": "Gaining a deeper understanding of the thickness and variability of internal ice layers in Radar imagery is essential in monitoring the snow accumulat…",
+          "novelty": "Radar sensors, capable of penetrating ice, capture detailed radargram images of internal ice layers.",
+          "method": "Gaining a deeper understanding of the thickness and variability of internal ice layers in Radar imagery is essential in monitoring the snow accumulat…",
+          "result": "Compared to baseline graph neural networks, GRIT demonstrates consistently lower prediction errors.",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Computer Science 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-20T05:27:10.700064Z"
+    },
+    "6d334ce05d3e7de3de5fe4d5f5a3e4c3fc005e8e": {
+      "paper": {
+        "id": "6d334ce05d3e7de3de5fe4d5f5a3e4c3fc005e8e",
+        "title": "Toward transparent groundwater contamination risk forecasting: Integrating causal discovery and Bayesian graph neural networks.",
+        "abstract": "Groundwater contamination poses severe risks to ecosystems, agriculture, and public health. However, predictive modeling is limited by the complexity of environmental systems and the opacity of conventional machine learning models. This study introduces the Enhanced Bayesian Causal Graph Neural Network (EBC-GNN), a novel framework that integrates causal discovery via DYNOTEARS, spatiotemporal graph neural networks, and Bayesian uncertainty quantification to address these challenges. Leveraging heterogeneous, multi-source datasets, including EPA water quality records, land cover classifications, climate data, and industrial facility registries-the EBC-GNN identifies causal environmental drivers and produces robust, interpretable predictions with quantified uncertainty. Applied to California's Yolo and Tulare counties, the framework achieved a 70 % positive R2 success rate, substantially outperforming conventional machine learning baselines. Beyond predictive improvements, the model uncovered policy-relevant insights highlighting the protective effects of wetlands and the elevated contamination risks associated with agricultural land use. By coupling interpretability with regulatory alignment, the EBC-GNN establishes a new benchmark for environmental risk modeling and decision support, offering a scalable and transparent tool for guiding sustainable groundwater management strategies.",
+        "authors": [
+          {
+            "name": "Yue Zhu"
+          },
+          {
+            "name": "Qingyang Liu"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-08-16",
+        "venue": "Science of the Total Environment",
+        "citation_count": 2,
+        "influential_citation_count": 0,
+        "fields": [
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/6d334ce05d3e7de3de5fe4d5f5a3e4c3fc005e8e",
+        "external_ids": {
+          "CorpusId": "2.8067528e+08",
+          "DOI": "10.1016/j.scitotenv.2025.180233",
+          "PubMed": "40819395"
+        },
+        "match_score": 71,
+        "read_minutes": 8,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "This study introduces the Enhanced Bayesian Causal Graph Neural Network (EBC-GNN), a novel framework that integrates causal discovery via DYNOTEARS,…",
+          "novelty": "This study introduces the Enhanced Bayesian Causal Graph Neural Network (EBC-GNN), a novel framework that integrates causal discovery via DYNOTEARS,…",
+          "method": "However, predictive modeling is limited by the complexity of environmental systems and the opacity of conventional machine learning models.",
+          "result": "Applied to California's Yolo and Tulare counties, the framework achieved a 70 % positive R2 success rate, substantially outperforming conventional ma…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-20T05:27:05.133846Z"
+    },
+    "6f12567339b2d584c7bfcdf5b8256b5124ad678d": {
+      "paper": {
+        "id": "6f12567339b2d584c7bfcdf5b8256b5124ad678d",
+        "title": "Improved prediction of chlorophyll-a concentrations using advancing graph neural network variants.",
+        "abstract": "Accurate estimation of harmful algal blooms is essential for protecting surface water. Chlorophyll-a (Chl-a), commonly used as a proxy for estimating algal concentration, is influenced by a broad range of weather and physicochemical factors that operate across various spatial and temporal scales. This study aims to propose a deep learning (DL)-based framework for long-term Chl-a simulation, consisting of two separate blocks for processing multi-modal sources together: one for incorporating irregularly measured water quality observations and the other for integrating climate data measured at constant time steps. Besides a fully connected network for encoding irregular water quality observations, we benchmark several state-of-the-art graph neural network (GNN) architectures, including ChebNet and Graph Convolutional Network (GCN), for encoding continuous climate data. Specifically, we represent water quality stations as nodes in a graph, model the spatiotemporal dependencies between these nodes, and utilize the learned relationships to predict Chl-a simulations simultaneously across all nodes in the graph. Additionally, we introduce a gating mechanism to integrate the outputs from the two blocks. The performance of advanced GNN models is evaluated using a daily dataset from the upper Han River basins in South Korea. The results indicate that our proposed models are promising, outperforming several baseline models developed for similar objectives with improvements up to 47 % in the R2. In particular, the combination of the GCN algorithm with Long Short-Term Memory (LSTM) in our DL framework achieves superior performance. We then conduct further analyses to assess the effectiveness of the gating mechanism, revealing that it enhances prediction performance by achieving a 12 % improvement in the R2 compared to the model without the gating mechanism. We conclude that the proposed GNN-variant framework shows promise as a robust machine learning-based approach for aggregating spatiotemporal information to achieve reliable Chl-a predictions.",
+        "authors": [
+          {
+            "name": "Sunghyun Yoon"
+          },
+          {
+            "name": "Kuk‐Hyun Ahn"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-04-24",
+        "venue": "Science of the Total Environment",
+        "citation_count": 2,
+        "influential_citation_count": 0,
+        "fields": [
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/6f12567339b2d584c7bfcdf5b8256b5124ad678d",
+        "external_ids": {
+          "CorpusId": "2.78079475e+08",
+          "DOI": "10.1016/j.scitotenv.2025.179481",
+          "PubMed": "40280091"
+        },
+        "match_score": 66,
+        "read_minutes": 14,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "主题有交集，但需要先确认任务设定",
+          "problem": "This study aims to propose a deep learning (DL)-based framework for long-term Chl-a simulation, consisting of two separate blocks for processing mult…",
+          "novelty": "Chlorophyll-a (Chl-a), commonly used as a proxy for estimating algal concentration, is influenced by a broad range of weather and physicochemical fac…",
+          "method": "This study aims to propose a deep learning (DL)-based framework for long-term Chl-a simulation, consisting of two separate blocks for processing mult…",
+          "result": "The results indicate that our proposed models are promising, outperforming several baseline models developed for similar objectives with improvements…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-20T05:27:08.686298Z"
+    },
+    "817aed47973558f1a12b45d8328a789eeb5a3b78": {
+      "paper": {
+        "id": "817aed47973558f1a12b45d8328a789eeb5a3b78",
+        "title": "Explainable Text-Based Depression and Suicide Risk Prediction from Social Media Using Deep Learning and Graph Neural Networks",
+        "abstract": "Objectives: The rise in the frequency of mental health concerns (depression and suicide) expressed on social media calls for reliable, explainable, and efficient computational methods for mental health surveillance. In this paper, we propose an interpretable framework for text-based detection of post- and community-level mental health risk on social media. Methods: The framework combines (i) Secretary Bird Optimization (SBO) for feature selection of informative linguistic and psychological features, (ii) a BERT (Bidirectional Encoder Representations from Transformers)—CNN (Convolutional Neural Network) model for post-level reasoning, and (iii) a Graph Neural Network (GraphSAGE) for community-level reasoning. The graph is estimated based on semantic similarity between posts and author relations, instead of social interactions (e.g., mentions, replies) between authors. We use SHAP and LIME for model interpretability, uncertainty, and calibration analysis to evaluate the trustworthiness of predictions. Results: The model delivers 93.1% accuracy, 0.91 F1-score, and 0.944 ROC-AUC on the eRisk and CLPsych datasets using a strict user-disjoint validation strategy. SBO lowers the number of features by about 38%, leading to better generalization. The graph-based model enables improved learning of post and user representations by capturing relational dependencies. Conclusions: Our approach offers an explainable and robust means of detecting mental health risk from text. Graph-based representations of semantic and authorship interactions enable community-level analyses, while interpretability and uncertainty estimation facilitate possible human-in-the-loop decision-making. This research does not explicitly consider a human-in-the-loop experiment.",
+        "authors": [
+          {
+            "name": "Atiq Ur Rehman"
+          },
+          {
+            "name": "Abid Iqbal"
+          },
+          {
+            "name": "Ali Sayyed"
+          },
+          {
+            "name": "Zaheer Aslam"
+          },
+          {
+            "name": "M. I. Mohmand"
+          },
+          {
+            "name": "G. Husnain"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-05-22",
+        "venue": "Healthcare",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Medicine"
+        ],
+        "url": "https://www.semanticscholar.org/paper/817aed47973558f1a12b45d8328a789eeb5a3b78",
+        "pdf_url": "https://doi.org/10.3390/healthcare14111440",
+        "external_ids": {
+          "CorpusId": "2.88624331e+08",
+          "DOI": "10.3390/healthcare14111440",
+          "PubMed": "42278693",
+          "PubMedCentral": "13257188"
+        },
+        "match_score": 73,
+        "read_minutes": 11,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Objectives: The rise in the frequency of mental health concerns (depression and suicide) expressed on social media calls for reliable, explainable, a…",
+          "novelty": "The graph-based model enables improved learning of post and user representations by capturing relational dependencies.",
+          "method": "Objectives: The rise in the frequency of mental health concerns (depression and suicide) expressed on social media calls for reliable, explainable, a…",
+          "result": "Results: The model delivers 93.",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-20T05:26:59.851127Z"
+    },
+    "ae516151b46a9a4df6f065d64c5869654ef49bb3": {
+      "paper": {
+        "id": "ae516151b46a9a4df6f065d64c5869654ef49bb3",
+        "title": "Short-Term Forecasting of Photovoltaic Clusters Based on Spatiotemporal Graph Neural Networks",
+        "abstract": "Driven by the dual-carbon goals, photovoltaic (PV) battery systems at renewable energy stations are increasingly clustered on the distribution side. The rapid expansion of these clusters, together with the pronounced uncertainty and spatio-temporal heterogeneity of PV generation, degrades battery utilization and forces conservative dispatch. To address this, we propose a “spatio-temporal clustering–deep estimation” framework for short-term interval forecasting of PV clusters. First, a graph is built from meteorological–geographical similarity and partitioned into sub-clusters by a self-supervised DAEGC. Second, an attention-based spatio-temporal graph convolutional network (ASTGCN) is trained independently for each sub-cluster to capture local dynamics; the individual forecasts are then aggregated to yield the cluster-wide point prediction. Finally, kernel density estimation (KDE) non-parametrically models the residuals, producing probabilistic power intervals for the entire cluster. At the 90% confidence level, the proposed framework improves PICP by 4.01% and reduces PINAW by 7.20% compared with the ASTGCN-KDE baseline without spatio-temporal clustering, demonstrating enhanced interval forecasting performance.",
+        "authors": [
+          {
+            "name": "Zhong Wang"
+          },
+          {
+            "name": "Mao Yang"
+          },
+          {
+            "name": "Yitao Li"
+          },
+          {
+            "name": "Bo Wang"
+          },
+          {
+            "name": "Zhao Wang"
+          },
+          {
+            "name": "Zheng Wang"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-10-24",
+        "venue": "Processes",
+        "citation_count": 1,
+        "influential_citation_count": 0,
+        "fields": [],
+        "url": "https://www.semanticscholar.org/paper/ae516151b46a9a4df6f065d64c5869654ef49bb3",
+        "pdf_url": "https://doi.org/10.3390/pr13113422",
+        "external_ids": {
+          "CorpusId": "2.8267514e+08",
+          "DOI": "10.3390/pr13113422"
+        },
+        "match_score": 72,
+        "read_minutes": 7,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Driven by the dual-carbon goals, photovoltaic (PV) battery systems at renewable energy stations are increasingly clustered on the distribution side.",
+          "novelty": "Driven by the dual-carbon goals, photovoltaic (PV) battery systems at renewable energy stations are increasingly clustered on the distribution side.",
+          "method": "To address this, we propose a “spatio-temporal clustering–deep estimation” framework for short-term interval forecasting of PV clusters.",
+          "result": "20% compared with the ASTGCN-KDE baseline without spatio-temporal clustering, demonstrating enhanced interval forecasting performance.",
+          "audience": "适合关注「explainable graph neural networks…」的研究者",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-20T05:27:02.039334Z"
+    },
+    "arxiv:1703.01357v7": {
+      "paper": {
+        "id": "arxiv:1703.01357v7",
+        "title": "A Computational Model of Systems Memory Consolidation and Reconsolidation",
+        "abstract": "In the mammalian brain, newly acquired memories depend on the hippocampus for maintenance and recall, but over time the neocortex takes over these functions, rendering memories hippocampus-independent. The process responsible for this transformation is called systems memory consolidation. However, reactivation of a well-consolidated memory can trigger a temporary return to a hippocampus-dependent state, a phenomenon known as systems memory reconsolidation. The neural mechanisms underlying systems memory consolidation and reconsolidation are not well understood. Here, we propose a neural model based on well-documented mechanisms of synaptic plasticity and stability and describe a computational implementation that demonstrates the model's ability to account for a range of findings from the systems consolidation and reconsolidation literature. We derive several predictions from the computational model and suggest experiments that may test its validity.",
+        "authors": [
+          {
+            "name": "Peter Helfer"
+          },
+          {
+            "name": "Thomas R. Shultz"
+          }
+        ],
+        "year": 2017,
+        "publication_date": "2017-03-03",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "q-bio.NC"
+        ],
+        "url": "http://arxiv.org/abs/1703.01357v7",
+        "pdf_url": "https://arxiv.org/pdf/1703.01357v7",
+        "external_ids": {
+          "ArXiv": "1703.01357v7"
+        },
+        "match_score": 86,
+        "read_minutes": 6,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐",
+          "problem": "系统记忆巩固与再巩固机制不明",
+          "novelty": "提出基于突触可塑性的计算模型",
+          "method": "建立神经计算模型模拟记忆巩固过程",
+          "result": "模型能解释系统巩固与再巩固现象",
+          "audience": "计算神经科学研究者",
+          "why_keep": "提供记忆巩固机制的理论框架",
+          "reading_focus": "系统记忆巩固的计算模型"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T11:25:48.201875Z"
+    },
+    "arxiv:1808.05205v1": {
+      "paper": {
+        "id": "arxiv:1808.05205v1",
+        "title": "Building medical image classifiers with very limited data using segmentation networks",
+        "abstract": "Deep learning has shown promising results in medical image analysis, however, the lack of very large annotated datasets confines its full potential. Although transfer learning with ImageNet pre-trained classification models can alleviate the problem, constrained image sizes and model complexities can lead to unnecessary increase in computational cost and decrease in performance. As many common morphological features are usually shared by different classification tasks of an organ, it is greatly beneficial if we can extract such features to improve classification with limited samples. Therefore, inspired by the idea of curriculum learning, we propose a strategy for building medical image classifiers using features from segmentation networks. By using a segmentation network pre-trained on similar data as the classification task, the machine can first learn the simpler shape and structural concepts before tackling the actual classification problem which usually involves more complicated concepts. Using our proposed framework on a 3D three-class brain tumor type classification problem, we achieved 82% accuracy on 191 testing samples with 91 training samples. When applying to a 2D nine-class cardiac semantic level classification problem, we achieved 86% accuracy on 263 testing samples with 108 training samples. Comparisons with ImageNet pre-trained classifiers and classifiers trained from scratch are presented.",
+        "authors": [
+          {
+            "name": "Ken C. L. Wong"
+          },
+          {
+            "name": "Tanveer Syeda-Mahmood"
+          },
+          {
+            "name": "Mehdi Moradi"
+          }
+        ],
+        "year": 2018,
+        "publication_date": "2018-08-15",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/1808.05205v1",
+        "pdf_url": "https://arxiv.org/pdf/1808.05205v1",
+        "external_ids": {
+          "ArXiv": "1808.05205v1"
+        },
+        "match_score": 69,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "相关，有限数据分类",
+          "problem": "医学标注数据不足",
+          "novelty": "利用分割网络特征进行分类",
+          "method": "课程学习策略构建分类器",
+          "result": "小样本下达到高准确率",
+          "audience": "医学图像分析研究者",
+          "why_keep": "提供数据高效分类方法",
+          "reading_focus": "分割网络特征提取应用"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:38.702363Z"
+    },
+    "arxiv:1901.02270v3": {
+      "paper": {
+        "id": "arxiv:1901.02270v3",
+        "title": "Neural-network simulations of memory consolidation and reconsolidation",
+        "abstract": "In the mammalian brain newly acquired memories depend on the hippocampus for maintenance and recall, but over time these functions are taken over by the neocortex through a process called systems consolidation. However, reactivation of a consolidated memory can induce a brief period of temporary hippocampus-dependence, followed by return to hippocampus-independence. Here we present a computational model that uses simulation of recently described mechanisms of synaptic plasticity to account for findings from the systems consolidation/reconsolidation literature and to make predictions for future research.",
+        "authors": [
+          {
+            "name": "Peter Helfer"
+          },
+          {
+            "name": "Thomas R. Shultz"
+          }
+        ],
+        "year": 2019,
+        "publication_date": "2019-01-08",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "q-bio.NC"
+        ],
+        "url": "http://arxiv.org/abs/1901.02270v3",
+        "pdf_url": "https://arxiv.org/pdf/1901.02270v3",
+        "external_ids": {
+          "ArXiv": "1901.02270v3"
+        },
+        "match_score": 84,
+        "read_minutes": 6,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐",
+          "problem": "系统记忆巩固与再巩固机制不明",
+          "novelty": "使用突触可塑性机制模拟记忆过程",
+          "method": "计算模型模拟记忆巩固与再巩固",
+          "result": "模型能解释系统巩固/再巩固现象",
+          "audience": "计算神经科学研究者",
+          "why_keep": "提供记忆巩固机制的简化模型",
+          "reading_focus": "突触可塑性与记忆巩固关系"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T11:26:06.936819Z"
+    },
+    "arxiv:1910.00742v1": {
+      "paper": {
+        "id": "arxiv:1910.00742v1",
+        "title": "ChainSplitter: Towards Blockchain-based Industrial IoT Architecture for Supporting Hierarchical Storage",
+        "abstract": "The fast developing Industrial Internet of Things (IIoT) technologies provide a promising opportunity to build large-scale systems to connect numerous heterogeneous devices into the Internet. Most existing IIoT infrastructures are based on a centralized architecture, which is easier for management but cannot effectively support immutable and verifiable services among multiple parties. Blockchain technology provides many desired features for large-scale IIoT infrastructures, such as decentralization, trustworthiness, trackability, and immutability. This paper presents a blockchain-based IIoT architecture to support immutable and verifiable services. However, when applying blockchain technology to the IIoT infrastructure, the required storage space posts a grant challenge to resource-constrained IIoT infrastructures. To address the storage issue, this paper proposes a hierarchical blockchain storage structure, \\textit{ChainSplitter}. Specially, the proposed architecture features a hierarchical storage structure where the majority of the blockchain is stored in the clouds, while the most recent blocks are stored in the overlay network of the individual IIoT networks. The proposed architecture seamlessly binds local IIoT networks, the blockchain overlay network, and the cloud infrastructure together through two connectors, the \\textit{blockchain connector} and the \\textit{cloud connector}, to construct the hierarchical blockchain storage. The blockchain connector in the overlay network builds blocks in blockchain from data generated in IIoT networks, and the cloud connector resolves the blockchain synchronization issues between the overlay network and the clouds. We also provide a case study to show the efficiency of the proposed hierarchical blockchain storage in a practical Industrial IoT case.",
+        "authors": [
+          {
+            "name": "Gang Wang"
+          },
+          {
+            "name": "Zhijie Jerry Shi"
+          },
+          {
+            "name": "Mark Nixon"
+          },
+          {
+            "name": "Song Han"
+          }
+        ],
+        "year": 2019,
+        "publication_date": "2019-10-02",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CR",
+          "cs.DC"
+        ],
+        "url": "http://arxiv.org/abs/1910.00742v1",
+        "pdf_url": "https://arxiv.org/pdf/1910.00742v1",
+        "external_ids": {
+          "ArXiv": "1910.00742v1"
+        },
+        "match_score": 88,
+        "read_minutes": 11,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "高度相关，建议保留并优先核验",
+          "problem": "However, when applying blockchain technology to the IIoT infrastructure, the required storage space posts a grant challenge to resource-constrained I…",
+          "novelty": "Most existing IIoT infrastructures are based on a centralized architecture, which is easier for management but cannot effectively support immutable a…",
+          "method": "Most existing IIoT infrastructures are based on a centralized architecture, which is easier for management but cannot effectively support immutable a…",
+          "result": "We also provide a case study to show the efficiency of the proposed hierarchical blockchain storage in a practical Industrial IoT case.",
+          "audience": "适合关注「blockchain」的研究者，尤其是 cs.CR / cs.DC 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T05:32:27.054069Z"
+    },
+    "arxiv:2004.13438v2": {
+      "paper": {
+        "id": "arxiv:2004.13438v2",
+        "title": "BlockSim: An Extensible Simulation Tool for Blockchain Systems",
+        "abstract": "Both in the design and deployment of blockchain solutions many performance-impacting configuration choices need to be made. We introduce BlockSim, a framework and software tool to build and simulate discrete-event dynamic systems models for blockchain systems. BlockSim is designed to support the analysis of a large variety of blockchains and blockchain deployments as well as a wide set of analysis questions. At the core of BlockSim is a Base Model, which contains the main model constructs common across various blockchain systems organized in three abstraction layers (network, consensus and incentives layer). The Base Model is usable for a wide variety of blockchain systems and can be extended easily to include system or deployment particulars. The BlockSim software tool provides a simulator that implements the Base Model in Python. This paper describes the Base Model, the simulator implementation, and the application of BlockSim to Bitcoin, Ethereum and other consensus algorithms. We validate BlockSim simulation results by comparison with performance results from actual systems and from other studies in the literature. We close the paper by a BlockSim simulation study of the impact of uncle blocks rewards on mining decentralization, for a variety of blockchain configurations.",
+        "authors": [
+          {
+            "name": "Maher Alharby"
+          },
+          {
+            "name": "Aad van Moorsel"
+          }
+        ],
+        "year": 2020,
+        "publication_date": "2020-04-28",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CR",
+          "cs.PF"
+        ],
+        "url": "http://arxiv.org/abs/2004.13438v2",
+        "pdf_url": "https://arxiv.org/pdf/2004.13438v2",
+        "external_ids": {
+          "ArXiv": "2004.13438v2"
+        },
+        "match_score": 87,
+        "read_minutes": 9,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Both in the design and deployment of blockchain solutions many performance-impacting configuration choices need to be made.",
+          "novelty": "We introduce BlockSim, a framework and software tool to build and simulate discrete-event dynamic systems models for blockchain systems.",
+          "method": "We introduce BlockSim, a framework and software tool to build and simulate discrete-event dynamic systems models for blockchain systems.",
+          "result": "We validate BlockSim simulation results by comparison with performance results from actual systems and from other studies in the literature.",
+          "audience": "适合关注「blockchain」的研究者，尤其是 cs.CR / cs.PF 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T05:32:30.4028Z"
+    },
+    "arxiv:2005.08620v1": {
+      "paper": {
+        "id": "arxiv:2005.08620v1",
+        "title": "Assessment of Unconsciousness for Memory Consolidation Using EEG Signals",
+        "abstract": "The assessment of consciousness and unconsciousness is a challenging issue in modern neuroscience. Consciousness is closely related to memory consolidation in that memory is a critical component of conscious experience. So far, many studies have been reported on memory consolidation during consciousness, but there is little research on memory consolidation during unconsciousness. Therefore, we aim to assess the unconsciousness in terms of memory consolidation using electroencephalogram signals. In particular, we used unconscious state during a nap; because sleep is the only state in which consciousness disappears under normal physiological conditions. Seven participants performed two memory tasks (word-pairs and visuo-spatial) before and after the nap to assess the memory consolidation during unconsciousness. As a result, spindle power in central, parietal, occipital regions during unconsciousness was positively correlated with the performance of location memory. With the memory performance, there was also a negative correlation between delta connectivity and word-pairs memory, alpha connectivity and location memory, and spindle connectivity and word-pairs memory. We additionally observed the significant relationship between unconsciousness and brain changes during memory recall before and after the nap. These findings could help present new insights into the assessment of unconsciousness by exploring the relationship with memory consolidation.",
+        "authors": [
+          {
+            "name": "Gi-Hwan Shin"
+          },
+          {
+            "name": "Minji Lee"
+          },
+          {
+            "name": "Seong-Whan Lee"
+          }
+        ],
+        "year": 2020,
+        "publication_date": "2020-05-15",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "eess.SP",
+          "cs.NE"
+        ],
+        "url": "http://arxiv.org/abs/2005.08620v1",
+        "pdf_url": "https://arxiv.org/pdf/2005.08620v1",
+        "external_ids": {
+          "ArXiv": "2005.08620v1"
+        },
+        "match_score": 87,
+        "read_minutes": 9,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐",
+          "problem": "无意识状态下的记忆巩固评估困难",
+          "novelty": "首次研究睡眠无意识状态下的记忆巩固",
+          "method": "使用EEG信号分析睡眠前后的记忆任务",
+          "result": "纺锤波功率与位置记忆表现正相关",
+          "audience": "神经科学研究者",
+          "why_keep": "探索无意识与记忆巩固的关系",
+          "reading_focus": "睡眠中EEG信号与记忆巩固关联"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T11:25:42.465624Z"
+    },
+    "arxiv:2105.05338v1": {
+      "paper": {
+        "id": "arxiv:2105.05338v1",
+        "title": "SmartOil: Blockchain and smart contract-based oil supply chain management",
+        "abstract": "The traditional oil supply chain suffers from various shortcomings regarding crude oil extraction, processing, distribution, environmental pollution, and traceability. It offers an only a forward flow of products with almost no security and tracking process. In time, the system will lag behind due to the limitations in quality inspection, fraudulent information, and monopolistic behavior of supply chain entities. Inclusion of counterfeiting products and opaqueness of the system urge renovation in this sector. The recent evolution of Industry 4.0 leads to the alternation in the supply chain introducing the smart supply chain. Technological advancement can now reshape the infrastructure of the supply chain for the future. In this paper, we suggest a conceptual framework utilizing Blockchain and Smart Contract to monitor the overall oil supply chain. Blockchain is a groundbreaking technology to monitor and support the security building of a decentralized type supply chain over a peer-to-peer network. The use of the Internet of Things (IoT), especially sensors, opens broader window to track the global supply chain in real-time. We construct a methodology to support reverse traceability for each participant of the supply chain. The functions and characteristics of Blockchain and Smart Contract are defined. Implementation of Smart Contracts has also been shown with detailed analysis. We further describe the challenges of implementing such a system and validate our framework's adaptability in the real world. The paper concludes with future research scope to mitigate the restrictions of data management and maintenance with advanced working prototypes and agile systems achieving greater traceability and transparency.",
+        "authors": [
+          {
+            "name": "AKM Bahalul Haque"
+          },
+          {
+            "name": "Md. Rifat Hasan"
+          },
+          {
+            "name": "Md. Oahiduzzaman Mondol Zihad"
+          }
+        ],
+        "year": 2021,
+        "publication_date": "2021-05-11",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CR"
+        ],
+        "url": "http://arxiv.org/abs/2105.05338v1",
+        "pdf_url": "https://arxiv.org/pdf/2105.05338v1",
+        "external_ids": {
+          "ArXiv": "2105.05338v1"
+        },
+        "match_score": 86,
+        "read_minutes": 12,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "We further describe the challenges of implementing such a system and validate our framework's adaptability in the real world.",
+          "novelty": "It offers an only a forward flow of products with almost no security and tracking process.",
+          "method": "In this paper, we suggest a conceptual framework utilizing Blockchain and Smart Contract to monitor the overall oil supply chain.",
+          "result": "The paper concludes with future research scope to mitigate the restrictions of data management and maintenance with advanced working prototypes and a…",
+          "audience": "适合关注「blockchain」的研究者，尤其是 cs.CR 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T10:13:45.920818Z"
+    },
+    "arxiv:2203.02048v1": {
+      "paper": {
+        "id": "arxiv:2203.02048v1",
+        "title": "Anomaly Detection-Inspired Few-Shot Medical Image Segmentation Through Self-Supervision With Supervoxels",
+        "abstract": "Recent work has shown that label-efficient few-shot learning through self-supervision can achieve promising medical image segmentation results. However, few-shot segmentation models typically rely on prototype representations of the semantic classes, resulting in a loss of local information that can degrade performance. This is particularly problematic for the typically large and highly heterogeneous background class in medical image segmentation problems. Previous works have attempted to address this issue by learning additional prototypes for each class, but since the prototypes are based on a limited number of slices, we argue that this ad-hoc solution is insufficient to capture the background properties. Motivated by this, and the observation that the foreground class (e.g., one organ) is relatively homogeneous, we propose a novel anomaly detection-inspired approach to few-shot medical image segmentation in which we refrain from modeling the background explicitly. Instead, we rely solely on a single foreground prototype to compute anomaly scores for all query pixels. The segmentation is then performed by thresholding these anomaly scores using a learned threshold. Assisted by a novel self-supervision task that exploits the 3D structure of medical images through supervoxels, our proposed anomaly detection-inspired few-shot medical image segmentation model outperforms previous state-of-the-art approaches on two representative MRI datasets for the tasks of abdominal organ segmentation and cardiac segmentation.",
+        "authors": [
+          {
+            "name": "Stine Hansen"
+          },
+          {
+            "name": "Srishti Gautam"
+          },
+          {
+            "name": "Robert Jenssen"
+          },
+          {
+            "name": "Michael Kampffmeyer"
+          }
+        ],
+        "year": 2022,
+        "publication_date": "2022-03-03",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "eess.IV",
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2203.02048v1",
+        "pdf_url": "https://arxiv.org/pdf/2203.02048v1",
+        "external_ids": {
+          "ArXiv": "2203.02048v1"
+        },
+        "match_score": 73,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "相关性强，创新方法",
+          "problem": "少样本分割中背景信息丢失",
+          "novelty": "异常检测启发式方法",
+          "method": "单前景原型+自监督监督体素",
+          "result": "优于现有方法在MRI数据集",
+          "audience": "医学图像分割研究者",
+          "why_keep": "解决背景异质性挑战",
+          "reading_focus": "自监督监督体素应用"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:21.60719Z"
+    },
+    "arxiv:2307.15872v1": {
+      "paper": {
+        "id": "arxiv:2307.15872v1",
+        "title": "Cross-dimensional transfer learning in medical image segmentation with deep learning",
+        "abstract": "Over the last decade, convolutional neural networks have emerged and advanced the state-of-the-art in various image analysis and computer vision applications. The performance of 2D image classification networks is constantly improving and being trained on databases made of millions of natural images. However, progress in medical image analysis has been hindered by limited annotated data and acquisition constraints. These limitations are even more pronounced given the volumetry of medical imaging data. In this paper, we introduce an efficient way to transfer the efficiency of a 2D classification network trained on natural images to 2D, 3D uni- and multi-modal medical image segmentation applications. In this direction, we designed novel architectures based on two key principles: weight transfer by embedding a 2D pre-trained encoder into a higher dimensional U-Net, and dimensional transfer by expanding a 2D segmentation network into a higher dimension one. The proposed networks were tested on benchmarks comprising different modalities: MR, CT, and ultrasound images. Our 2D network ranked first on the CAMUS challenge dedicated to echo-cardiographic data segmentation and surpassed the state-of-the-art. Regarding 2D/3D MR and CT abdominal images from the CHAOS challenge, our approach largely outperformed the other 2D-based methods described in the challenge paper on Dice, RAVD, ASSD, and MSSD scores and ranked third on the online evaluation platform. Our 3D network applied to the BraTS 2022 competition also achieved promising results, reaching an average Dice score of 91.69% (91.22%) for the whole tumor, 83.23% (84.77%) for the tumor core, and 81.75% (83.88%) for enhanced tumor using the approach based on weight (dimensional) transfer. Experimental and qualitative results illustrate the effectiveness of our methods for multi-dimensional medical image segmentation.",
+        "authors": [
+          {
+            "name": "Hicham Messaoudi"
+          },
+          {
+            "name": "Ahror Belaid"
+          },
+          {
+            "name": "Douraied Ben Salem"
+          },
+          {
+            "name": "Pierre-Henri Conze"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-07-29",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "eess.IV",
+          "cs.CV",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2307.15872v1",
+        "pdf_url": "https://arxiv.org/pdf/2307.15872v1",
+        "external_ids": {
+          "ArXiv": "2307.15872v1"
+        },
+        "match_score": 69,
+        "read_minutes": 13,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "相关，跨维度迁移",
+          "problem": "医学数据有限制约进展",
+          "novelty": "2D到3D网络迁移方法",
+          "method": "嵌入预训练编码器到U-Net",
+          "result": "在多个挑战赛中表现优异",
+          "audience": "医学图像分析研究者",
+          "why_keep": "提供多模态迁移方案",
+          "reading_focus": "2D到3D网络迁移技术"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:35.062092Z"
+    },
+    "arxiv:2405.06097v1": {
+      "paper": {
+        "id": "arxiv:2405.06097v1",
+        "title": "A trustless society? A political look at the blockchain vision",
+        "abstract": "A lot of business and research effort currently deals with the so called decentralised ledger technology blockchain. Putting it to use carries the tempting promise to make the intermediaries of social interactions superfluous and furthermore keep secure track of all interactions. Currently intermediaries such as banks and notaries are necessary and must be trusted, which creates great dependencies, as the financial crisis of 2008 painfully demonstrated. Especially banks and notaries are said to become dispensable as a result of using the blockchain. But in real-world applications of the blockchain, the power of central actors does not dissolve, it only shifts to new, democratically illegitimate, uncontrolled or even uncontrollable power centers. As interesting as the blockchain technically is, it doesn't efficiently solve any real-world problem and is no substitute for traditional political processes or democratic regulation of power. Research efforts investigating the blockchain should be halted.",
+        "authors": [
+          {
+            "name": "Rainer Rehak"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-05-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CY",
+          "cs.DC",
+          "cs.ET"
+        ],
+        "url": "http://arxiv.org/abs/2405.06097v1",
+        "pdf_url": "https://arxiv.org/pdf/2405.06097v1",
+        "external_ids": {
+          "ArXiv": "2405.06097v1"
+        },
+        "match_score": 85,
+        "read_minutes": 7,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "As interesting as the blockchain technically is, it doesn't efficiently solve any real-world problem and is no substitute for traditional political p…",
+          "novelty": "But in real-world applications of the blockchain, the power of central actors does not dissolve, it only shifts to new, democratically illegitimate,…",
+          "method": "Putting it to use carries the tempting promise to make the intermediaries of social interactions superfluous and furthermore keep secure track of all…",
+          "result": "Currently intermediaries such as banks and notaries are necessary and must be trusted, which creates great dependencies, as the financial crisis of 2…",
+          "audience": "适合关注「blockchain」的研究者，尤其是 cs.CY / cs.DC 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T10:04:35.981439Z"
+    },
+    "arxiv:2406.17608v2": {
+      "paper": {
+        "id": "arxiv:2406.17608v2",
+        "title": "Test-time generative augmentation for medical image segmentation",
+        "abstract": "Medical image segmentation is critical for clinical diagnosis, treatment planning, and monitoring, yet segmentation models often struggle with uncertainties stemming from occlusions, ambiguous boundaries, and variations in imaging devices. Traditional test-time augmentation (TTA) techniques typically rely on predefined geometric and photometric transformations, limiting their adaptability and effectiveness in complex medical scenarios. In this study, we introduced Test-Time Generative Augmentation (TTGA), a novel augmentation strategy specifically tailored for medical image segmentation at inference time. Different from conventional augmentation strategies that suffer from excessive randomness or limited flexibility, TTGA leverages a domain-fine-tuned generative model to produce contextually relevant and diverse augmentations tailored to the characteristics of each test image. Built upon diffusion model inversion, a masked null-text inversion method is proposed to enable region-specific augmentations during sampling. Furthermore, a dual denoising pathway is designed to balance precise identity preservation with controlled variability. We demonstrate the efficacy of our TTGA through extensive experiments across three distinct segmentation tasks spanning nine datasets. Our results consistently demonstrate that TTGA not only improves segmentation accuracy (with DSC gains ranging from 0.1% to 2.3% over the baseline) but also offers pixel-wise error estimation (with DSC gains ranging from 1.1% to 29.0% over the baseline). The source code and demonstration are available at: https://github.com/maxiao0234/TTGA.",
+        "authors": [
+          {
+            "name": "Xiao Ma"
+          },
+          {
+            "name": "Yuhui Tao"
+          },
+          {
+            "name": "Zetian Zhang"
+          },
+          {
+            "name": "Yuhan Zhang"
+          },
+          {
+            "name": "Xi Wang"
+          },
+          {
+            "name": "Sheng Zhang"
+          },
+          {
+            "name": "Zexuan Ji"
+          },
+          {
+            "name": "Yizhe Zhang"
+          },
+          {
+            "name": "Qiang Chen"
+          },
+          {
+            "name": "Guang Yang"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-06-25",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2406.17608v2",
+        "pdf_url": "https://arxiv.org/pdf/2406.17608v2",
+        "external_ids": {
+          "ArXiv": "2406.17608v2"
+        },
+        "match_score": 64,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "相关，测试时增强",
+          "problem": "医学分割面临不确定性挑战",
+          "novelty": "测试时生成增强策略",
+          "method": "基于扩散模型反转的区域增强",
+          "result": "提升分割精度并提供误差估计",
+          "audience": "医学图像分割研究者",
+          "why_keep": "提供测试时增强新思路",
+          "reading_focus": "扩散模型在医学应用"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:41.680236Z"
+    },
+    "arxiv:2408.08058v1": {
+      "paper": {
+        "id": "arxiv:2408.08058v1",
+        "title": "Navigating Data Scarcity using Foundation Models: A Benchmark of Few-Shot and Zero-Shot Learning Approaches in Medical Imaging",
+        "abstract": "Data scarcity is a major limiting factor for applying modern machine learning techniques to clinical tasks. Although sufficient data exists for some well-studied medical tasks, there remains a long tail of clinically relevant tasks with poor data availability. Recently, numerous foundation models have demonstrated high suitability for few-shot learning (FSL) and zero-shot learning (ZSL), potentially making them more accessible to practitioners. However, it remains unclear which foundation model performs best on FSL medical image analysis tasks and what the optimal methods are for learning from limited data. We conducted a comprehensive benchmark study of ZSL and FSL using 16 pretrained foundation models on 19 diverse medical imaging datasets. Our results indicate that BiomedCLIP, a model pretrained exclusively on medical data, performs best on average for very small training set sizes, while very large CLIP models pretrained on LAION-2B perform best with slightly more training samples. However, simply fine-tuning a ResNet-18 pretrained on ImageNet performs similarly with more than five training examples per class. Our findings also highlight the need for further research on foundation models specifically tailored for medical applications and the collection of more datasets to train these models.",
+        "authors": [
+          {
+            "name": "Stefano Woerner"
+          },
+          {
+            "name": "Christian F. Baumgartner"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-08-15",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV",
+          "cs.AI",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2408.08058v1",
+        "pdf_url": "https://arxiv.org/pdf/2408.08058v1",
+        "external_ids": {
+          "ArXiv": "2408.08058v1"
+        },
+        "match_score": 73,
+        "read_minutes": 9,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "高度相关，基准研究",
+          "problem": "医学数据稀缺限制应用",
+          "novelty": "医学基础模型少样本评估",
+          "method": "16个预训练模型在19个数据集",
+          "result": "BiomedCLIP小数据集最佳",
+          "audience": "医学AI应用研究者",
+          "why_keep": "提供基础模型比较基准",
+          "reading_focus": "小数据集模型性能比较"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:23.205764Z"
+    },
+    "arxiv:2408.12957v3": {
+      "paper": {
+        "id": "arxiv:2408.12957v3",
+        "title": "Image Segmentation in Foundation Model Era: A Survey",
+        "abstract": "Image segmentation is a long-standing challenge in computer vision, studied continuously over several decades, as evidenced by seminal algorithms such as N-Cut, FCN, and MaskFormer. With the advent of foundation models (FMs), contemporary segmentation methodologies have embarked on a new epoch by either adapting FMs (e.g., CLIP, Stable Diffusion, DINO) for image segmentation or developing dedicated segmentation foundation models (e.g., SAM). These approaches not only deliver superior segmentation performance, but also herald newfound segmentation capabilities previously unseen in deep learning context. However, current research in image segmentation lacks a detailed analysis of distinct characteristics, challenges, and solutions associated with these advancements. This survey seeks to fill this gap by providing a thorough review of cutting-edge research centered around FM-driven image segmentation. We investigate two basic lines of research -- generic image segmentation (i.e., semantic segmentation, instance segmentation, panoptic segmentation), and promptable image segmentation (i.e., interactive segmentation, referring segmentation, few-shot segmentation) -- by delineating their respective task settings, background concepts, and key challenges. Furthermore, we provide insights into the emergence of segmentation knowledge from FMs like CLIP, Stable Diffusion, and DINO. An exhaustive overview of over 300 segmentation approaches is provided to encapsulate the breadth of current research efforts. Subsequently, we engage in a discussion of open issues and potential avenues for future research. We envisage that this fresh, comprehensive, and systematic survey catalyzes the evolution of advanced image segmentation systems. A public website is created to continuously track developments in this fast advancing field: \\url{https://github.com/stanley-313/ImageSegFM-Survey}.",
+        "authors": [
+          {
+            "name": "Tianfei Zhou"
+          },
+          {
+            "name": "Wang Xia"
+          },
+          {
+            "name": "Fei Zhang"
+          },
+          {
+            "name": "Boyu Chang"
+          },
+          {
+            "name": "Wenguan Wang"
+          },
+          {
+            "name": "Ye Yuan"
+          },
+          {
+            "name": "Ender Konukoglu"
+          },
+          {
+            "name": "Daniel Cremers"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-08-23",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2408.12957v3",
+        "pdf_url": "https://arxiv.org/pdf/2408.12957v3",
+        "external_ids": {
+          "ArXiv": "2408.12957v3"
+        },
+        "match_score": 70,
+        "read_minutes": 12,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "综述性，背景知识",
+          "problem": "分割基础模型缺乏系统分析",
+          "novelty": "首个分割基础模型综述",
+          "method": "分析300+分割方法",
+          "result": "系统梳理分割基础模型进展",
+          "audience": "计算机视觉研究者",
+          "why_keep": "提供领域全景视图",
+          "reading_focus": "基础模型分割能力分析"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:27.886203Z"
+    },
+    "arxiv:2409.03868v1": {
+      "paper": {
+        "id": "arxiv:2409.03868v1",
+        "title": "Few-shot Adaptation of Medical Vision-Language Models",
+        "abstract": "Integrating image and text data through multi-modal learning has emerged as a new approach in medical imaging research, following its successful deployment in computer vision. While considerable efforts have been dedicated to establishing medical foundation models and their zero-shot transfer to downstream tasks, the popular few-shot setting remains relatively unexplored. Following on from the currently strong emergence of this setting in computer vision, we introduce the first structured benchmark for adapting medical vision-language models (VLMs) in a strict few-shot regime and investigate various adaptation strategies commonly used in the context of natural images. Furthermore, we evaluate a simple generalization of the linear-probe adaptation baseline, which seeks an optimal blending of the visual prototypes and text embeddings via learnable class-wise multipliers. Surprisingly, such a text-informed linear probe yields competitive performances in comparison to convoluted prompt-learning and adapter-based strategies, while running considerably faster and accommodating the black-box setting. Our extensive experiments span three different medical modalities and specialized foundation models, nine downstream tasks, and several state-of-the-art few-shot adaptation methods. We made our benchmark and code publicly available to trigger further developments in this emergent subject: \\url{https://github.com/FereshteShakeri/few-shot-MedVLMs}.",
+        "authors": [
+          {
+            "name": "Fereshteh Shakeri"
+          },
+          {
+            "name": "Yunshi Huang"
+          },
+          {
+            "name": "Julio Silva-Rodríguez"
+          },
+          {
+            "name": "Houda Bahig"
+          },
+          {
+            "name": "An Tang"
+          },
+          {
+            "name": "Jose Dolz"
+          },
+          {
+            "name": "Ismail Ben Ayed"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-09-05",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2409.03868v1",
+        "pdf_url": "https://arxiv.org/pdf/2409.03868v1",
+        "external_ids": {
+          "ArXiv": "2409.03868v1"
+        },
+        "match_score": 63,
+        "read_minutes": 9,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "保留",
+          "problem": "医学视觉语言模型在少样本设置下研究不足",
+          "novelty": "首个医学视觉语言模型少样本适应基准",
+          "method": "评估多种适应策略和简单线性探针",
+          "result": "文本信息线性探针表现优异",
+          "audience": "医学多模态学习研究者",
+          "why_keep": "填补医学VLM少样本适应研究空白",
+          "reading_focus": "文本信息在少样本适应中的作用"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:33:53.646801Z"
+    },
+    "arxiv:2412.01496v2": {
+      "paper": {
+        "id": "arxiv:2412.01496v2",
+        "title": "Fréchet Radiomic Distance (FRD): A Versatile Metric for Comparing Medical Imaging Datasets",
+        "abstract": "Determining whether two sets of images belong to the same or different distributions or domains is a crucial task in modern medical image analysis and deep learning; for example, to evaluate the output quality of image generative models. Currently, metrics used for this task either rely on the (potentially biased) choice of some downstream task, such as segmentation, or adopt task-independent perceptual metrics (e.g., Fréchet Inception Distance/FID) from natural imaging, which we show insufficiently capture anatomical features. To this end, we introduce a new perceptual metric tailored for medical images, FRD (Fréchet Radiomic Distance), which utilizes standardized, clinically meaningful, and interpretable image features. We show that FRD is superior to other image distribution metrics for a range of medical imaging applications, including out-of-domain (OOD) detection, the evaluation of image-to-image translation (by correlating more with downstream task performance as well as anatomical consistency and realism), and the evaluation of unconditional image generation. Moreover, FRD offers additional benefits such as stability and computational efficiency at low sample sizes, sensitivity to image corruptions and adversarial attacks, feature interpretability, and correlation with radiologist-perceived image quality. Additionally, we address key gaps in the literature by presenting an extensive framework for the multifaceted evaluation of image similarity metrics in medical imaging -- including the first large-scale comparative study of generative models for medical image translation -- and release an accessible codebase to facilitate future research. Our results are supported by thorough experiments spanning a variety of datasets, modalities, and downstream tasks, highlighting the broad potential of FRD for medical image analysis.",
+        "authors": [
+          {
+            "name": "Nicholas Konz"
+          },
+          {
+            "name": "Richard Osuala"
+          },
+          {
+            "name": "Preeti Verma"
+          },
+          {
+            "name": "Yuwen Chen"
+          },
+          {
+            "name": "Hanxue Gu"
+          },
+          {
+            "name": "Haoyu Dong"
+          },
+          {
+            "name": "Yaqian Chen"
+          },
+          {
+            "name": "Andrew Marshall"
+          },
+          {
+            "name": "Lidia Garrucho"
+          },
+          {
+            "name": "Kaisar Kushibar"
+          },
+          {
+            "name": "Daniel M. Lang"
+          },
+          {
+            "name": "Gene S. Kim"
+          },
+          {
+            "name": "Lars J. Grimm"
+          },
+          {
+            "name": "John M. Lewin"
+          },
+          {
+            "name": "James S. Duncan"
+          },
+          {
+            "name": "Julia A. Schnabel"
+          },
+          {
+            "name": "Oliver Diaz"
+          },
+          {
+            "name": "Karim Lekadir"
+          },
+          {
+            "name": "Maciej A. Mazurowski"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-12-02",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV",
+          "cs.LG",
+          "eess.IV"
+        ],
+        "url": "http://arxiv.org/abs/2412.01496v2",
+        "pdf_url": "https://arxiv.org/pdf/2412.01496v2",
+        "external_ids": {
+          "ArXiv": "2412.01496v2"
+        },
+        "match_score": 64,
+        "read_minutes": 12,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "部分相关，新评估指标",
+          "problem": "医学图像分布比较缺乏合适指标",
+          "novelty": "FRD医学图像距离度量",
+          "method": "标准化临床特征提取",
+          "result": "优于现有分布比较方法",
+          "audience": "医学图像分析研究者",
+          "why_keep": "提供数据集比较新方法",
+          "reading_focus": "FRD医学图像特征提取"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T14:49:40.303551Z"
+    },
+    "arxiv:2601.01885v2": {
+      "paper": {
+        "id": "arxiv:2601.01885v2",
+        "title": "Agentic Memory: Learning Unified Long-Term and Short-Term Memory Management for Large Language Model Agents",
+        "abstract": "Large language model (LLM) agents face fundamental limitations in long-horizon reasoning due to finite context windows, making effective memory management critical. Existing methods typically handle long-term memory (LTM) and short-term memory (STM) as separate components, relying on heuristics or auxiliary controllers, which limits adaptability and end-to-end optimization. In this paper, we propose Agentic Memory (AgeMem), a unified framework that integrates LTM and STM management directly into the agent's policy. AgeMem exposes memory operations as tool-based actions, enabling the LLM agent to autonomously decide what and when to store, retrieve, update, summarize, or discard information. To train such unified behaviors, we propose a three-stage progressive reinforcement learning strategy and design a step-wise GRPO to address sparse and discontinuous rewards induced by memory operations. Experiments on five long-horizon benchmarks demonstrate that AgeMem consistently outperforms strong memory-augmented baselines across multiple LLM backbones, achieving improved task performance, higher-quality long-term memory, and more efficient context usage.",
+        "authors": [
+          {
+            "name": "Yi Yu"
+          },
+          {
+            "name": "Liuyi Yao"
+          },
+          {
+            "name": "Yuexiang Xie"
+          },
+          {
+            "name": "Qingquan Tan"
+          },
+          {
+            "name": "Jiaqi Feng"
+          },
+          {
+            "name": "Yaliang Li"
+          },
+          {
+            "name": "Libing Wu"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-01-05",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2601.01885v2",
+        "pdf_url": "https://arxiv.org/pdf/2601.01885v2",
+        "external_ids": {
+          "ArXiv": "2601.01885v2"
+        },
+        "match_score": 79,
+        "read_minutes": 7,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Large language model (LLM) agents face fundamental limitations in long-horizon reasoning due to finite context windows, making effective memory manag…",
+          "novelty": "Existing methods typically handle long-term memory (LTM) and short-term memory (STM) as separate components, relying on heuristics or auxiliary contr…",
+          "method": "Large language model (LLM) agents face fundamental limitations in long-horizon reasoning due to finite context windows, making effective memory manag…",
+          "result": "Experiments on five long-horizon benchmarks demonstrate that AgeMem consistently outperforms strong memory-augmented baselines across multiple LLM ba…",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 cs.CL 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T10:04:27.428104Z"
+    },
+    "arxiv:2605.27825v1": {
+      "paper": {
+        "id": "arxiv:2605.27825v1",
+        "title": "MRMMIA: Membership Inference Attacks on Memory in Chat Agents",
+        "abstract": "Membership inference attacks (MIAs) test whether a target data record belongs to a system's private data, and have become a standard tool to measure privacy leakage in machine learning systems. Prior work has primarily focused on training corpora or retrieval databases. However, MIAs against agent memory have received less attention, even though such memory can contain sensitive user-agent interactions, retrieved facts, and user preferences. Therefore, in this work, we focus on chat agent memory MIAs, where an adversary infers whether a candidate memory unit belongs to the chat agent's memory store. We propose Multi-Recall Memory MIA (MRMMIA), a unified attack that utilizes multiple recall probes to the agent to extract the membership signal across black-box, gray-box, and white-box settings. Our experiments demonstrate that MRMMIA consistently outperforms baselines. Our results expose the privacy risk in agents and provide an initial evaluation framework for membership leakage in chat-agent memory systems.",
+        "authors": [
+          {
+            "name": "Kai Chen"
+          },
+          {
+            "name": "Yan Pang"
+          },
+          {
+            "name": "Tianhao Wang"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-05-27",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CR",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2605.27825v1",
+        "pdf_url": "https://arxiv.org/pdf/2605.27825v1",
+        "external_ids": {
+          "ArXiv": "2605.27825v1"
+        },
+        "match_score": 84,
+        "read_minutes": 7,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Membership inference attacks (MIAs) test whether a target data record belongs to a system's private data, and have become a standard tool to measure…",
+          "novelty": "Prior work has primarily focused on training corpora or retrieval databases.",
+          "method": "We propose Multi-Recall Memory MIA (MRMMIA), a unified attack that utilizes multiple recall probes to the agent to extract the membership signal acro…",
+          "result": "Our experiments demonstrate that MRMMIA consistently outperforms baselines.",
+          "audience": "适合关注「AI agent memory」的研究者，尤其是 cs.CR / cs.LG 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T05:33:09.718559Z"
+    },
+    "arxiv:2606.24775v1": {
+      "paper": {
+        "id": "arxiv:2606.24775v1",
+        "title": "Are We Ready For An Agent-Native Memory System?",
+        "abstract": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that supports persistent information storage, retrieval, update, consolidation, and dynamic lifecycle governance throughout agent execution. Despite this evolution, existing evaluations still benchmark agent memory mainly through end-to-end task success metrics (e.g., F1, BLEU), while treating the underlying system as a monolithic black box. As a result, critical system-level concerns, including operational costs, architectural trade-offs across memory modules, and robustness under dynamic knowledge updates, remain insufficiently explored. In this paper, we present a systematic experimental study of agent memory from a data management perspective. We propose an analytical framework that decomposes agent memory into four core modules: memory representation and storage, extraction, retrieval and routing, and maintenance. Under this framework, we evaluate 12 representative memory systems and two reference baselines across five benchmark workloads spanning 11 datasets. Our extensive end-to-end evaluation shows that no single architecture dominates across all scenarios; instead, effectiveness depends heavily on how well the memory structure aligns with the workload bottleneck. Furthermore, through fine-grained ablation studies, we quantify their individual effects on representation fidelity, retrieval precision, update correctness, and long-horizon stability. Finally, we reveal cost-performance trade-offs under realistic workloads, showing localized maintenance is more cost-efficient than global reorganization. Based on these findings, we identify promising directions towards building truly agent-native memory systems. The code is publicly available at https://github.com/OpenDataBox/MemoryData.",
+        "authors": [
+          {
+            "name": "Wei Zhou"
+          },
+          {
+            "name": "Xuanhe Zhou"
+          },
+          {
+            "name": "Shaokun Han"
+          },
+          {
+            "name": "Hongming Xu"
+          },
+          {
+            "name": "Guoliang Li"
+          },
+          {
+            "name": "Zhiyu Li"
+          },
+          {
+            "name": "Feiyu Xiong"
+          },
+          {
+            "name": "Fan Wu"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-06-23",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.DB",
+          "cs.IR"
+        ],
+        "url": "http://arxiv.org/abs/2606.24775v1",
+        "pdf_url": "https://arxiv.org/pdf/2606.24775v1",
+        "external_ids": {
+          "ArXiv": "2606.24775v1"
+        },
+        "match_score": 78,
+        "read_minutes": 11,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that suppor…",
+          "novelty": "Despite this evolution, existing evaluations still benchmark agent memory mainly through end-to-end task success metrics (e.",
+          "method": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that suppor…",
+          "result": "Despite this evolution, existing evaluations still benchmark agent memory mainly through end-to-end task success metrics (e.",
+          "audience": "适合关注「AI agent memory」的研究者，尤其是 cs.CL / cs.DB 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T05:33:12.093263Z"
+    },
+    "arxiv:2607.13157v1": {
+      "paper": {
+        "id": "arxiv:2607.13157v1",
+        "title": "Oracle Agent Memory as an Enterprise Memory Substrate for Long-Horizon AI Agents",
+        "abstract": "Agent memory is a systems problem for long-horizon agents. Practical deployments require retention of task state across extended conversations, recovery of user-specific facts and preferences across sessions, and accumulation of procedural knowledge from prior outcomes. These requirements extend beyond document retrieval: a memory layer must determine which interactions become durable state, how that state is scoped, how it is retrieved under latency constraints, and how it is revised or removed over time. This report studies Oracle Agent Memory as a database-native memory substrate built on Oracle Database. Three themes organize the discussion: memory as a lifecycle spanning ingestion, extraction, consolidation, retrieval, summarization, and revision or removal; a layered architecture that separates an active memory core from a passive memory-store interface with explicit scope control across users, agents, and threads; and evaluation methodology in which downstream task accuracy is complemented by memory-centric measures such as evidence retrieval, recall, latency, and estimated token use. The report summarizes LongMemEval results, reaching 93.8% accuracy, compares Oracle Agent Memory against flat-history baselines, using about 10.7x fewer tokens, and published or reported external baselines where available, and closes with implementation-oriented appendix material covering setup, thread lifecycle, and search semantics.",
+        "authors": [
+          {
+            "name": "Richmond Alake"
+          },
+          {
+            "name": "Cesare Bernardis"
+          },
+          {
+            "name": "Paul Cayet"
+          },
+          {
+            "name": "Luca Engel"
+          },
+          {
+            "name": "Damien Hilloulin"
+          },
+          {
+            "name": "Sungpack Hong"
+          },
+          {
+            "name": "Allen Hosler"
+          },
+          {
+            "name": "Nickolas Kavantzas"
+          },
+          {
+            "name": "Ingo Kossyk"
+          },
+          {
+            "name": "Son Le"
+          },
+          {
+            "name": "Rhicheek Patra"
+          },
+          {
+            "name": "Kartik Talamadupula"
+          },
+          {
+            "name": "Valentin Venzin"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-07-14",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.AI",
+          "cs.DB"
+        ],
+        "url": "http://arxiv.org/abs/2607.13157v1",
+        "pdf_url": "https://arxiv.org/pdf/2607.13157v1",
+        "external_ids": {
+          "ArXiv": "2607.13157v1"
+        },
+        "match_score": 90,
+        "read_minutes": 9,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "高度相关，建议保留并优先核验",
+          "problem": "Agent memory is a systems problem for long-horizon agents.",
+          "novelty": "Practical deployments require retention of task state across extended conversations, recovery of user-specific facts and preferences across sessions,…",
+          "method": "Three themes organize the discussion: memory as a lifecycle spanning ingestion, extraction, consolidation, retrieval, summarization, and revision or…",
+          "result": "Three themes organize the discussion: memory as a lifecycle spanning ingestion, extraction, consolidation, retrieval, summarization, and revision or…",
+          "audience": "适合关注「AI agent memory」的研究者，尤其是 cs.AI / cs.DB 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-19T09:38:20.146809Z"
+    },
+    "c2bcc27f52790ebb2f8409edd10759679430b549": {
+      "paper": {
+        "id": "c2bcc27f52790ebb2f8409edd10759679430b549",
+        "title": "Uncertainty-aware probabilistic graph neural networks for road-level traffic crash prediction.",
+        "abstract": "Traffic crashes present substantial challenges to human safety and socio-economic development in urban areas. Developing a reliable and responsible traffic crash prediction model is crucial to address growing public safety concerns and improve the safety of urban mobility systems. Traditional methods face limitations at fine spatiotemporal scales due to the sporadic nature of high-risk crashes and the predominance of non-crash characteristics. Furthermore, while most current models show promising occurrence prediction, they overlook the uncertainties arising from the inherent nature of crashes, and then fail to adequately map the hierarchical ranking of crash risk values for more precise insights. To address these issues, we introduce the Spatiotemporal Zero-Inflated Tweedie Graph Neural Networks (STZITD-GNN), the first uncertainty-aware probabilistic graph deep learning model in road-level daily-basis traffic crash prediction for multi-steps. Our model combines the interpretability of the statistical Tweedie family with the predictive power of graph neural networks, excelling in predicting a comprehensive range of crash risks. The decoder employs a compound Tweedie model, handling the non-Gaussian distribution inherent in crash data, with a zero-inflated component for accurately identifying non-crash cases and low-risk roads. The model accurately predicts and differentiates between high-risk, low-risk, and no-risk scenarios, providing a holistic view of road safety that accounts for the full spectrum of probability and severity of crashes. Empirical tests using real-world traffic data from London, UK, demonstrate that the STZITD-GNN surpasses other baseline models across multiple benchmarks, including a reduction in regression error of up to 34.60% in point estimation metrics and an improvement of above 47% in interval-based uncertainty metrics.",
+        "authors": [
+          {
+            "name": "Xiaowei Gao"
+          },
+          {
+            "name": "Xinke Jiang"
+          },
+          {
+            "name": "Dingyi Zhuang"
+          },
+          {
+            "name": "Huanfa Chen"
+          },
+          {
+            "name": "Shenhao Wang"
+          },
+          {
+            "name": "Stephen Law"
+          },
+          {
+            "name": "James Haworth"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-09-10",
+        "venue": "Accident Analysis and Prevention",
+        "citation_count": 41,
+        "influential_citation_count": 2,
+        "fields": [
+          "Medicine",
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/c2bcc27f52790ebb2f8409edd10759679430b549",
+        "pdf_url": "https://doi.org/10.1016/j.aap.2024.107801",
+        "external_ids": {
+          "ArXiv": "2309.05072",
+          "CorpusId": "2.61681823e+08",
+          "DOI": "10.1016/j.aap.2024.107801",
+          "PubMed": "39362109"
+        },
+        "match_score": 72,
+        "read_minutes": 12,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "Traffic crashes present substantial challenges to human safety and socio-economic development in urban areas.",
+          "novelty": "To address these issues, we introduce the Spatiotemporal Zero-Inflated Tweedie Graph Neural Networks (STZITD-GNN), the first uncertainty-aware probab…",
+          "method": "Developing a reliable and responsible traffic crash prediction model is crucial to address growing public safety concerns and improve the safety of u…",
+          "result": "Empirical tests using real-world traffic data from London, UK, demonstrate that the STZITD-GNN surpasses other baseline models across multiple benchm…",
+          "audience": "适合关注「explainable graph neural networks…」的研究者，尤其是 Medicine / Computer Science 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-20T05:27:03.996521Z"
+    },
+    "demo:evidence-ranking": {
+      "paper": {
+        "id": "demo:evidence-ranking",
+        "title": "离线示例：用证据强度排序研究候选",
+        "abstract": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality. It presents a compact evidence score and shows how transparent ranking cues can reduce screening time. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Information Retrieval",
+          "Human-Computer Interaction"
+        ],
+        "match_score": 84,
+        "read_minutes": 7,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "problem": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality.",
+          "novelty": "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time.",
+          "method": "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "适合关注「AI agent memory」的研究者，尤其是 Information Retrieval / Human-Computer Interaction 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T02:36:33.667575Z"
+    },
+    "demo:memory-architecture": {
+      "paper": {
+        "id": "demo:memory-architecture",
+        "title": "离线示例：面向复杂任务的长期记忆架构",
+        "abstract": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent systems. It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Artificial Intelligence",
+          "Information Retrieval"
+        ],
+        "match_score": 91,
+        "read_minutes": 9,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "高度相关，建议保留并优先核验",
+          "problem": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent system…",
+          "novelty": "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity.",
+          "method": "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "适合关注「AI agent memory」的研究者，尤其是 Artificial Intelligence / Information Retrieval 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-17T02:36:26.213913Z"
+    }
+  },
+  "recent_searches": [
+    {
+      "query": "explainable graph neural networks climate prediction spatiotemporal modeling uncertainty estimation",
+      "created_at": "2026-07-20T05:26:20.806313Z"
+    },
+    {
+      "query": "vision foundation models few-shot medical image segmentation generalization data efficiency",
+      "created_at": "2026-07-19T14:49:15.714292Z"
+    },
+    {
+      "query": "memory consolidation",
+      "created_at": "2026-07-19T11:25:01.817733Z"
+    },
+    {
+      "query": "AI agent memory",
+      "created_at": "2026-07-19T09:38:30.287668Z"
+    },
+    {
+      "query": "protein folding diffusion model",
+      "created_at": "2026-07-19T09:15:27.095346Z"
+    },
+    {
+      "query": "blockchain",
+      "created_at": "2026-07-17T05:31:01.676886Z"
+    }
+  ]
+}
