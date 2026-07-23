@@ -8,6 +8,7 @@ type Author struct {
 
 type Digest struct {
 	Verdict      string `json:"verdict"`
+	TLDR         string `json:"tldr"`
 	Problem      string `json:"problem"`
 	Novelty      string `json:"novelty"`
 	Method       string `json:"method"`

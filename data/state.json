@@ -54,6 +54,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "主题有交集，但需要先确认任务设定",
+          "tldr": "",
           "problem": "Evaluations against prominent baselines show that BayesNF delivers improvements on prediction problems from climate and public health data containing…",
           "novelty": "As the scale of modern datasets increases, there is a growing need for statistical methods that are flexible enough to capture complex spatiotemporal…",
           "method": "As the scale of modern datasets increases, there is a growing need for statistical methods that are flexible enough to capture complex spatiotemporal…",
@@ -96,6 +97,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Traffic flow prediction remains a cornerstone of intelligent transportation systems (ITS), facilitating congestion mitigation, route optimization, an…",
           "novelty": "Recent years (2023–2025) have witnessed a surge in scientific innovation, with several novel approaches pushing the boundaries of traffic prediction…",
           "method": "Graph Neural Networks (GNNs) have revolutionized this domain by adeptly modeling the intricate graph-structured nature of traffic networks, where nod…",
@@ -155,6 +157,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "主题有交集，但需要先确认任务设定",
+          "tldr": "",
           "problem": "Childhood diarrheal disease remains a leading cause of morbidity and mortality among children under five years in sub-Saharan Africa, particularly in…",
           "novelty": "Conventional forecasting approaches are often constrained by sparse surveillance data, weak spatial representation, and limited incorporation of mech…",
           "method": "Conventional forecasting approaches are often constrained by sparse surveillance data, weak spatial representation, and limited incorporation of mech…",
@@ -203,6 +206,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "主题有交集，但需要先确认任务设定",
+          "tldr": "",
           "problem": "Global food security faces escalating threats from climate variability and resource constraints.",
           "novelty": "This paper presents HSE-GNN-CP, a novel framework integrating heterogeneous stacked ensembles, graph neural networks (GNNs), and conformal prediction…",
           "method": "Accurate crop yield forecasting is essential; however, existing methods frequently overlook complex spatial dependencies driven by climate teleconnec…",
@@ -244,6 +248,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Predicting the electronic properties of transition metal complexes (TMCs) from 2D molecular graphs remains challenging; organic-trained property mode…",
           "novelty": "tmGNN-XAI is designed as an explainable, first-tier screening tool for TMC electronic property estimation.",
           "method": "Predicting the electronic properties of transition metal complexes (TMCs) from 2D molecular graphs remains challenging; organic-trained property mode…",
@@ -289,6 +294,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "主题有交集，但需要先确认任务设定",
+          "tldr": "",
           "problem": "Gaining a deeper understanding of the thickness and variability of internal ice layers in Radar imagery is essential in monitoring the snow accumulat…",
           "novelty": "Radar sensors, capable of penetrating ice, capture detailed radargram images of internal ice layers.",
           "method": "Gaining a deeper understanding of the thickness and variability of internal ice layers in Radar imagery is essential in monitoring the snow accumulat…",
@@ -333,6 +339,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "This study introduces the Enhanced Bayesian Causal Graph Neural Network (EBC-GNN), a novel framework that integrates causal discovery via DYNOTEARS,…",
           "novelty": "This study introduces the Enhanced Bayesian Causal Graph Neural Network (EBC-GNN), a novel framework that integrates causal discovery via DYNOTEARS,…",
           "method": "However, predictive modeling is limited by the complexity of environmental systems and the opacity of conventional machine learning models.",
@@ -377,6 +384,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "主题有交集，但需要先确认任务设定",
+          "tldr": "",
           "problem": "This study aims to propose a deep learning (DL)-based framework for long-term Chl-a simulation, consisting of two separate blocks for processing mult…",
           "novelty": "Chlorophyll-a (Chl-a), commonly used as a proxy for estimating algal concentration, is influenced by a broad range of weather and physicochemical fac…",
           "method": "This study aims to propose a deep learning (DL)-based framework for long-term Chl-a simulation, consisting of two separate blocks for processing mult…",
@@ -435,6 +443,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Objectives: The rise in the frequency of mental health concerns (depression and suicide) expressed on social media calls for reliable, explainable, a…",
           "novelty": "The graph-based model enables improved learning of post and user representations by capturing relational dependencies.",
           "method": "Objectives: The rise in the frequency of mental health concerns (depression and suicide) expressed on social media calls for reliable, explainable, a…",
@@ -489,6 +498,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Driven by the dual-carbon goals, photovoltaic (PV) battery systems at renewable energy stations are increasingly clustered on the distribution side.",
           "novelty": "Driven by the dual-carbon goals, photovoltaic (PV) battery systems at renewable energy stations are increasingly clustered on the distribution side.",
           "method": "To address this, we propose a “spatio-temporal clustering–deep estimation” framework for short-term interval forecasting of PV clusters.",
@@ -532,6 +542,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐",
+          "tldr": "",
           "problem": "系统记忆巩固与再巩固机制不明",
           "novelty": "提出基于突触可塑性的计算模型",
           "method": "建立神经计算模型模拟记忆巩固过程",
@@ -578,6 +589,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "相关，有限数据分类",
+          "tldr": "",
           "problem": "医学标注数据不足",
           "novelty": "利用分割网络特征进行分类",
           "method": "课程学习策略构建分类器",
@@ -621,6 +633,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐",
+          "tldr": "",
           "problem": "系统记忆巩固与再巩固机制不明",
           "novelty": "使用突触可塑性机制模拟记忆过程",
           "method": "计算模型模拟记忆巩固与再巩固",
@@ -671,6 +684,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "高度相关，建议保留并优先核验",
+          "tldr": "",
           "problem": "However, when applying blockchain technology to the IIoT infrastructure, the required storage space posts a grant challenge to resource-constrained I…",
           "novelty": "Most existing IIoT infrastructures are based on a centralized architecture, which is easier for management but cannot effectively support immutable a…",
           "method": "Most existing IIoT infrastructures are based on a centralized architecture, which is easier for management but cannot effectively support immutable a…",
@@ -715,6 +729,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Both in the design and deployment of blockchain solutions many performance-impacting configuration choices need to be made.",
           "novelty": "We introduce BlockSim, a framework and software tool to build and simulate discrete-event dynamic systems models for blockchain systems.",
           "method": "We introduce BlockSim, a framework and software tool to build and simulate discrete-event dynamic systems models for blockchain systems.",
@@ -762,6 +777,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐",
+          "tldr": "",
           "problem": "无意识状态下的记忆巩固评估困难",
           "novelty": "首次研究睡眠无意识状态下的记忆巩固",
           "method": "使用EEG信号分析睡眠前后的记忆任务",
@@ -808,6 +824,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "We further describe the challenges of implementing such a system and validate our framework's adaptability in the real world.",
           "novelty": "It offers an only a forward flow of products with almost no security and tracking process.",
           "method": "In this paper, we suggest a conceptual framework utilizing Blockchain and Smart Contract to monitor the overall oil supply chain.",
@@ -858,6 +875,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "相关性强，创新方法",
+          "tldr": "",
           "problem": "少样本分割中背景信息丢失",
           "novelty": "异常检测启发式方法",
           "method": "单前景原型+自监督监督体素",
@@ -909,6 +927,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "相关，跨维度迁移",
+          "tldr": "",
           "problem": "医学数据有限制约进展",
           "novelty": "2D到3D网络迁移方法",
           "method": "嵌入预训练编码器到U-Net",
@@ -920,6 +939,59 @@
       },
       "action": "dismiss",
       "updated_at": "2026-07-19T14:49:35.062092Z"
+    },
+    "arxiv:2402.11651v2": {
+      "paper": {
+        "id": "arxiv:2402.11651v2",
+        "title": "Learning From Failure: Integrating Negative Examples when Fine-tuning Large Language Models as Agents",
+        "abstract": "Large language models (LLMs) have achieved success in acting as agents, which interact with environments through tools such as search engines. However, LLMs are optimized for language generation instead of tool use during training or alignment, limiting their effectiveness as agents. To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that successfully finished the task to fine-tune smaller models, making fine-tuning data scarce and acquiring it both difficult and costly. Discarding failed trajectories also leads to significant wastage of data and resources and limits the possible optimization paths during fine-tuning. In this paper, we argue that unsuccessful trajectories offer valuable insights, and LLMs can learn from these trajectories through appropriate quality control and fine-tuning strategies. By simply adding a prefix or suffix that tells the model whether to generate a successful trajectory during training, we improve model performance by a large margin on mathematical reasoning, multi-hop question answering, and strategic question answering tasks. We further analyze the inference results and find that our method provides a better trade-off between valuable information and errors in unsuccessful trajectories. To our knowledge, we are the first to demonstrate the value of negative trajectories and their application in agent-tunning scenarios. Our findings offer guidance for developing better agent-tuning methods and low-resource data usage techniques.",
+        "authors": [
+          {
+            "name": "Renxi Wang"
+          },
+          {
+            "name": "Haonan Li"
+          },
+          {
+            "name": "Xudong Han"
+          },
+          {
+            "name": "Yixuan Zhang"
+          },
+          {
+            "name": "Timothy Baldwin"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-18",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2402.11651v2",
+        "pdf_url": "https://arxiv.org/pdf/2402.11651v2",
+        "external_ids": {
+          "ArXiv": "2402.11651v2"
+        },
+        "match_score": 82,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "tldr": "Large language models (LLMs) have achieved success in…",
+          "problem": "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that succe…",
+          "novelty": "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that succe…",
+          "method": "Large language models (LLMs) have achieved success in acting as agents, which interact with environments through tools such as search engines.",
+          "result": "Large language models (LLMs) have achieved success in acting as agents, which interact with environments through tools such as search engines.",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 cs.CL 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-23T11:25:17.71015Z"
     },
     "arxiv:2405.06097v1": {
       "paper": {
@@ -951,6 +1023,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "As interesting as the blockchain technically is, it doesn't efficiently solve any real-world problem and is no substitute for traditional political p…",
           "novelty": "But in real-world applications of the blockchain, the power of central actors does not dissolve, it only shifts to new, democratically illegitimate,…",
           "method": "Putting it to use carries the tempting promise to make the intermediaries of social interactions superfluous and furthermore keep secure track of all…",
@@ -1018,6 +1091,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "相关，测试时增强",
+          "tldr": "",
           "problem": "医学分割面临不确定性挑战",
           "novelty": "测试时生成增强策略",
           "method": "基于扩散模型反转的区域增强",
@@ -1063,6 +1137,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "高度相关，基准研究",
+          "tldr": "",
           "problem": "医学数据稀缺限制应用",
           "novelty": "医学基础模型少样本评估",
           "method": "16个预训练模型在19个数据集",
@@ -1124,6 +1199,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "综述性，背景知识",
+          "tldr": "",
           "problem": "分割基础模型缺乏系统分析",
           "novelty": "首个分割基础模型综述",
           "method": "分析300+分割方法",
@@ -1182,6 +1258,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "保留",
+          "tldr": "",
           "problem": "医学视觉语言模型在少样本设置下研究不足",
           "novelty": "首个医学视觉语言模型少样本适应基准",
           "method": "评估多种适应策略和简单线性探针",
@@ -1278,6 +1355,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "部分相关，新评估指标",
+          "tldr": "",
           "problem": "医学图像分布比较缺乏合适指标",
           "novelty": "FRD医学图像距离度量",
           "method": "标准化临床特征提取",
@@ -1289,6 +1367,54 @@
       },
       "action": "dismiss",
       "updated_at": "2026-07-19T14:49:40.303551Z"
+    },
+    "arxiv:2510.08203v1": {
+      "paper": {
+        "id": "arxiv:2510.08203v1",
+        "title": "Memory Retrieval and Consolidation in Large Language Models through Function Tokens",
+        "abstract": "The remarkable success of large language models (LLMs) stems from their ability to consolidate vast amounts of knowledge into the memory during pre-training and to retrieve it from the memory during inference, enabling advanced capabilities such as knowledge memorization, instruction-following and reasoning. However, the mechanisms of memory retrieval and consolidation in LLMs remain poorly understood. In this paper, we propose the function token hypothesis to explain the workings of LLMs: During inference, function tokens activate the most predictive features from context and govern next token prediction (memory retrieval). During pre-training, predicting the next tokens (usually content tokens) that follow function tokens increases the number of learned features of LLMs and updates the model parameters (memory consolidation). Function tokens here roughly correspond to function words in linguistics, including punctuation marks, articles, prepositions, and conjunctions, in contrast to content tokens. We provide extensive experimental evidence supporting this hypothesis. Using bipartite graph analysis, we show that a small number of function tokens activate the majority of features. Case studies further reveal how function tokens activate the most predictive features from context to direct next token prediction. We also find that during pre-training, the training loss is dominated by predicting the next content tokens following function tokens, which forces the function tokens to select the most predictive features from context.",
+        "authors": [
+          {
+            "name": "Shaohua Zhang"
+          },
+          {
+            "name": "Yuan Lin"
+          },
+          {
+            "name": "Hang Li"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-10-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2510.08203v1",
+        "pdf_url": "https://arxiv.org/pdf/2510.08203v1",
+        "external_ids": {
+          "ArXiv": "2510.08203v1"
+        },
+        "match_score": 76,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "tldr": "The remarkable success of large language models (LLMs)…；Using bipartite graph analysis, w…",
+          "problem": "The remarkable success of large language models (LLMs) stems from their ability to consolidate vast amounts of knowledge into the memory during pre-t…",
+          "novelty": "However, the mechanisms of memory retrieval and consolidation in LLMs remain poorly understood.",
+          "method": "The remarkable success of large language models (LLMs) stems from their ability to consolidate vast amounts of knowledge into the memory during pre-t…",
+          "result": "Using bipartite graph analysis, we show that a small number of function tokens activate the majority of features.",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 cs.CL / cs.AI 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-23T05:37:34.726887Z"
     },
     "arxiv:2601.01885v2": {
       "paper": {
@@ -1336,6 +1462,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "Large language model (LLM) agents face fundamental lim…；Experiments on five long-horizon…",
           "problem": "Large language model (LLM) agents face fundamental limitations in long-horizon reasoning due to finite context windows, making effective memory manag…",
           "novelty": "Existing methods typically handle long-term memory (LTM) and short-term memory (STM) as separate components, relying on heuristics or auxiliary contr…",
           "method": "Large language model (LLM) agents face fundamental limitations in long-horizon reasoning due to finite context windows, making effective memory manag…",
@@ -1345,8 +1472,8 @@
           "reading_focus": "先看方法框架、主实验与局限性"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-19T10:04:27.428104Z"
+      "action": "priority",
+      "updated_at": "2026-07-23T05:28:35.668152Z"
     },
     "arxiv:2605.27825v1": {
       "paper": {
@@ -1383,6 +1510,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Membership inference attacks (MIAs) test whether a target data record belongs to a system's private data, and have become a standard tool to measure…",
           "novelty": "Prior work has primarily focused on training corpora or retrieval databases.",
           "method": "We propose Multi-Recall Memory MIA (MRMMIA), a unified attack that utilizes multiple recall probes to the agent to extract the membership signal acro…",
@@ -1446,6 +1574,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that suppor…",
           "novelty": "Despite this evolution, existing evaluations still benchmark agent memory mainly through end-to-end task success metrics (e.",
           "method": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that suppor…",
@@ -1523,6 +1652,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "高度相关，建议保留并优先核验",
+          "tldr": "",
           "problem": "Agent memory is a systems problem for long-horizon agents.",
           "novelty": "Practical deployments require retention of task state across extended conversations, recovery of user-specific facts and preferences across sessions,…",
           "method": "Three themes organize the discussion: memory as a lifecycle spanning ingestion, extraction, consolidation, retrieval, summarization, and revision or…",
@@ -1585,6 +1715,7 @@
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
           "problem": "Traffic crashes present substantial challenges to human safety and socio-economic development in urban areas.",
           "novelty": "To address these issues, we introduce the Spatiotemporal Zero-Inflated Tweedie Graph Neural Networks (STZITD-GNN), the first uncertainty-aware probab…",
           "method": "Developing a reliable and responsible traffic crash prediction model is crucial to address growing public safety concerns and improve the safety of u…",
@@ -1620,17 +1751,18 @@
         "source": "PaperSwipe Demo",
         "digest": {
           "verdict": "值得快速浏览方法与实验",
+          "tldr": "It presents a compact evidence score and shows how tra…；The demo contains no claim about…",
           "problem": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality.",
           "novelty": "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time.",
           "method": "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time.",
           "result": "The demo contains no claim about a real publication.",
-          "audience": "适合关注「AI agent memory」的研究者，尤其是 Information Retrieval / Human-Computer Interaction 方向",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 Information Retrieval / Human-Computer Interaction…",
           "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
           "reading_focus": "先看方法框架、主实验与局限性"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-17T02:36:33.667575Z"
+      "action": "priority",
+      "updated_at": "2026-07-23T11:11:32.584618Z"
     },
     "demo:memory-architecture": {
       "paper": {
@@ -1655,20 +1787,175 @@
         "source": "PaperSwipe Demo",
         "digest": {
           "verdict": "高度相关，建议保留并优先核验",
+          "tldr": "It proposes a layered retrieval workflow and evaluates…；The demo contains no claim about…",
           "problem": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent system…",
           "novelty": "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity.",
           "method": "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity.",
           "result": "The demo contains no claim about a real publication.",
-          "audience": "适合关注「AI agent memory」的研究者，尤其是 Artificial Intelligence / Information Retrieval 方向",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 Artificial Intelligence / Information Retrieval 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-23T11:11:16.997401Z"
+    },
+    "demo:research-interface": {
+      "paper": {
+        "id": "demo:research-interface",
+        "title": "离线示例：适合移动端的论文筛选交互",
+        "abstract": "This offline demo explores swipe-based triage for research discovery. It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Human-Computer Interaction"
+        ],
+        "match_score": 76,
+        "read_minutes": 6,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "tldr": "It compares rapid reject, save, and priority decisions…；The demo contains no claim about…",
+          "problem": "This offline demo explores swipe-based triage for research discovery.",
+          "novelty": "It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification.",
+          "method": "It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 Human-Computer Interaction 方向",
+          "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-23T11:11:20.013499Z"
+    },
+    "openalex:W4416895257": {
+      "paper": {
+        "id": "openalex:W4416895257",
+        "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+        "abstract": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues. We introduce Mem0, a scalable memory-centric architecture that addresses this issue by dynamically extracting, consolidating, and retrieving salient information from ongoing conversations. Building on this foundation, we further propose an enhanced variant that leverages graph-based memory representations to capture complex relational structures among conversational elements. Through comprehensive evaluations on LOCOMO benchmark, we systematically compare our approaches against six baseline categories: (i) established memory-augmented systems, (ii) retrieval-augmented generation (RAG) with varying chunk sizes and k-values, (iii) a full-context approach that processes the entire conversation history, (iv) an open-source memory solution, (v) a proprietary model system, and (vi) a dedicated memory management platform. Empirical results show that our methods consistently outperform all existing memory systems across four question categories: single-hop, temporal, multi-hop, and open-domain. Notably, Mem0 achieves 26% relative improvements in the LLM-as-a-Judge metric over OpenAI, while Mem0 with graph memory achieves around 2% higher overall score than the base configuration. Beyond accuracy gains, we also markedly reduce computational overhead compared to full-context method. In particular, Mem0 attains a 91% lower p95 latency and saves more than 90% token cost, offering a compelling balance between advanced reasoning capabilities and practical deployment constraints. Our findings highlight critical role of structured, persistent memory mechanisms for long-term conversational coherence, paving the way for more reliable and efficient LLM-driven AI agents.",
+        "authors": [
+          {
+            "name": "Prateek Chhikara"
+          },
+          {
+            "name": "Dev Khant"
+          },
+          {
+            "name": "Saket Aryan"
+          },
+          {
+            "name": "Taranjeet Singh"
+          },
+          {
+            "name": "Yadav, Deshraj"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-04-28",
+        "venue": "arXiv (Cornell University)",
+        "citation_count": 6,
+        "influential_citation_count": 0,
+        "fields": [
+          "Topic Modeling",
+          "Artificial Intelligence",
+          "Computer Science"
+        ],
+        "url": "http://arxiv.org/abs/2504.19413",
+        "pdf_url": "https://arxiv.org/pdf/2504.19413",
+        "external_ids": {
+          "DOI": "10.48550/arxiv.2504.19413",
+          "OpenAlex": "https://openalex.org/W4416895257"
+        },
+        "match_score": 81,
+        "read_minutes": 12,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
+          "problem": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose…",
+          "novelty": "We introduce Mem0, a scalable memory-centric architecture that addresses this issue by dynamically extracting, consolidating, and retrieving salient…",
+          "method": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose…",
+          "result": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose…",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 Topic Modeling / Artificial Intelligence 方向",
+          "why_keep": "与检索方向匹配度较高，且有开放全文，适合快速核验",
+          "reading_focus": "先看方法框架、主实验与局限性"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-23T03:44:22.266676Z"
+    },
+    "openalex:W7125158143": {
+      "paper": {
+        "id": "openalex:W7125158143",
+        "title": "AI Memory Architecture for Large Language Models",
+        "abstract": "This paper surveys memory architectures for large language models, arguing that memory is fundamentally an architectural challenge rather than a storage problem. We examine how biological memory systems---revealed through the layered degradation of Alzheimer's disease---provide conceptual grounding for understanding what AI memory systems lack: encoding, consolidation, selective forgetting, and integration with reasoning. The survey bridges classical information retrieval (inverted indexes, query understanding, learning-to-rank) with modern neural approaches, analyzing architectural paradigms including virtual context management (MemGPT), neural long-term memory (Titans), retrieval-augmented generation, and graph-based systems (HippoRAG). We trace the universal memory hierarchy from GPU registers through HBM to distributed storage, examining what is stored, how it is accessed, and where current systems fall short. Technical coverage includes KV cache optimization achieving 96\\%+ memory utilization through PagedAttention and FlashAttention, production systems like Mem0 demonstrating 26\\% accuracy improvements, and disaggregated serving architectures processing over 100 billion tokens daily. The analysis identifies critical gaps---learned memory controllers, online consolidation, intelligent forgetting, and unified multi-tier management---that separate current systems from the cognitive architectures required for truly capable AI agents.",
+        "authors": [
+          {
+            "name": "Anjan Goswami"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-01-16",
+        "venue": "Zenodo (CERN European Organization for Nuclear Research)",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Ferroelectric and Negative Capacitance Devices",
+          "Electrical and Electronic Engineering",
+          "Engineering"
+        ],
+        "url": "https://doi.org/10.5281/zenodo.18274600",
+        "external_ids": {
+          "DOI": "10.5281/zenodo.18274600",
+          "OpenAlex": "https://openalex.org/W7125158143"
+        },
+        "match_score": 80,
+        "read_minutes": 8,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "值得快速浏览方法与实验",
+          "tldr": "",
+          "problem": "This paper surveys memory architectures for large language models, arguing that memory is fundamentally an architectural challenge rather than a stor…",
+          "novelty": "We examine how biological memory systems---revealed through the layered degradation of Alzheimer's disease---provide conceptual grounding for underst…",
+          "method": "This paper surveys memory architectures for large language models, arguing that memory is fundamentally an architectural challenge rather than a stor…",
+          "result": "The analysis identifies critical gaps---learned memory controllers, online consolidation, intelligent forgetting, and unified multi-tier management--…",
+          "audience": "适合关注「large language model agents large…」的研究者，尤其是 Ferroelectric and Negative Capacitance Devices / E…",
           "why_keep": "与检索方向匹配度较高，建议先看方法图和实验表再决定是否精读",
           "reading_focus": "先看方法框架、主实验与局限性"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-17T02:36:26.213913Z"
+      "updated_at": "2026-07-23T03:44:26.109515Z"
     }
   },
   "recent_searches": [
+    {
+      "query": "large language model agents large language models long-term memory",
+      "created_at": "2026-07-23T12:31:02.39562Z"
+    },
+    {
+      "query": "large language model agents large language models long-term memory memory retrieval memory consolidation",
+      "created_at": "2026-07-23T11:25:27.679323Z"
+    },
+    {
+      "query": "graph neural networks climate prediction explainable AI spatiotemporal modeling uncertainty estimation",
+      "created_at": "2026-07-23T11:25:26.468211Z"
+    },
+    {
+      "query": "medical image segmentation few-shot learning data efficiency",
+      "created_at": "2026-07-23T11:25:26.131471Z"
+    },
+    {
+      "query": "agent memory",
+      "created_at": "2026-07-23T03:57:33.839679Z"
+    },
     {
       "query": "explainable graph neural networks climate prediction spatiotemporal modeling uncertainty estimation",
       "created_at": "2026-07-20T05:26:20.806313Z"
@@ -1680,18 +1967,6 @@
     {
       "query": "memory consolidation",
       "created_at": "2026-07-19T11:25:01.817733Z"
-    },
-    {
-      "query": "AI agent memory",
-      "created_at": "2026-07-19T09:38:30.287668Z"
-    },
-    {
-      "query": "protein folding diffusion model",
-      "created_at": "2026-07-19T09:15:27.095346Z"
-    },
-    {
-      "query": "blockchain",
-      "created_at": "2026-07-17T05:31:01.676886Z"
     }
   ]
 }

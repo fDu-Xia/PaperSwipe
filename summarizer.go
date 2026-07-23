@@ -234,6 +234,9 @@ func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper
 	applied := false
 	for i := range papers {
 		if digest, ok := digests[papers[i].ID]; ok && digest.Verdict != "" {
+			if digest.TLDR == "" {
+				digest.TLDR = papers[i].Digest.TLDR
+			}
 			papers[i].Digest = digest
 			applied = true
 		}
@@ -307,7 +310,7 @@ func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers 
 		input = append(input, compactPaper{ID: paper.ID, Title: paper.Title, Abstract: paper.Abstract})
 	}
 	inputJSON, _ := json.Marshal(input)
-	prompt := fmt.Sprintf(`你是严谨的论文筛选助手。用户研究方向是 %q。请只根据给出的标题和摘要，为每篇论文生成中文判断卡。不要编造摘要中没有的结果、数字或结论。每个字段最多 55 个汉字，reading_focus 最多 35 个汉字。返回 JSON 对象，格式为 {"papers":[{"id":"...","verdict":"...","problem":"...","novelty":"...","method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}。论文：%s`, query, inputJSON)
+	prompt := fmt.Sprintf(`你是严谨的论文筛选助手。用户研究方向是 %q。请只根据给出的标题和摘要，为每篇论文生成中文判断卡。不要编造摘要中没有的结果、数字或结论。tldr 字段必须是一句话（最多 45 个汉字），面向非专业读者，用最通俗的比喻或语言说清楚"这篇论文到底做了什么、为什么值得看"，要能吸引人点进来，同时忠于摘要证据、不要用"本文/我们"这样的学术腔。其他字段每个最多 55 个汉字，reading_focus 最多 35 个汉字。返回 JSON 对象，格式为 {"papers":[{"id":"...","verdict":"...","tldr":"...","problem":"...","novelty":"...","method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}。论文：%s`, query, inputJSON)
 
 	payload := map[string]any{
 		"model": s.model,
@@ -403,6 +406,7 @@ func heuristicDigest(query string, paper Paper) Digest {
 
 	return Digest{
 		Verdict:      verdict,
+		TLDR:         heuristicTLDR(query, paper, problem, method, result),
 		Problem:      shorten(problem, 150),
 		Novelty:      shorten(novelty, 150),
 		Method:       shorten(method, 150),
@@ -411,6 +415,26 @@ func heuristicDigest(query string, paper Paper) Digest {
 		WhyKeep:      shorten(whyKeep, 120),
 		ReadingFocus: "先看方法框架、主实验与局限性",
 	}
+}
+
+func heuristicTLDR(query string, paper Paper, problem, method, result string) string {
+	pieces := make([]string, 0, 3)
+	if method != "" {
+		pieces = append(pieces, shorten(method, 55))
+	} else if problem != "" {
+		pieces = append(pieces, shorten(problem, 55))
+	}
+	if result != "" && result != method {
+		pieces = append(pieces, shorten(result, 55))
+	}
+	joined := strings.TrimSpace(strings.Join(pieces, "；"))
+	if joined == "" {
+		if title := strings.TrimSpace(paper.Title); title != "" {
+			return shorten("围绕「"+title+"」展开的研究，摘要信息有限，需回到原文核验。", 90)
+		}
+		return "这篇论文与「" + shorten(query, 30) + "」相关，摘要信息不足，建议打开原文快速浏览。"
+	}
+	return shorten(joined, 90)
 }
 
 func splitSentences(text string) []string {

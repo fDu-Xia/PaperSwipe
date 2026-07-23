@@ -12,74 +12,76 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="is-onboarding">
-  <section id="onboarding" class="onboarding" aria-label="PaperSwipe 初始设置">
+  <section id="onboarding" class="onboarding" aria-label="PaperSwipe setup">
     <div class="onboarding-frame">
-      <div class="onboarding-progress" aria-label="设置进度">
+      <div class="onboarding-progress" aria-label="Setup progress">
         <span class="is-active"></span><span></span><span></span>
       </div>
 
       <section class="onboarding-step identity-step is-active" data-onboarding-step="0">
         <header class="onboarding-heading">
           <p class="onboarding-kicker">PAPERSWIPE</p>
-          <h1>Welcome to<br>PaperSwipe!</h1>
-          <p>先告诉我们你是谁，之后的论文推荐会更懂你。</p>
+          <h1>Welcome to<br><span class="wordmark-hero" aria-label="PaperSwipe"><span class="wordmark-letter accent">P</span><span class="wordmark-letter accent">a</span><span class="wordmark-letter accent">p</span><span class="wordmark-letter accent">e</span><span class="wordmark-letter accent">r</span><span class="wordmark-letter accent">S</span><span class="wordmark-letter accent">w</span><span class="wordmark-letter accent">i</span><span class="wordmark-letter accent">p</span><span class="wordmark-letter accent">e</span><span class="wordmark-punct accent">!</span></span><button class="confetti-popper" type="button" data-confetti-trigger aria-label="Celebrate">🎉</button></h1>
+          <p>Tell us who you are, and we'll tune paper recommendations to your work.</p>
         </header>
 
-        <div class="identity-picker" role="radiogroup" aria-label="选择你的身份">
+        <div class="identity-picker" role="radiogroup" aria-label="Choose your role">
           <button class="identity-card is-selected" type="button" role="radio" aria-checked="true" data-identity="graduate">
-            <span class="identity-visual student"><i data-lucide="graduation-cap"></i></span>
-            <strong>研究生</strong>
-            <small>正在完成论文</small>
+            <span class="identity-visual student" aria-hidden="true">🧑‍🎓</span>
+            <div class="identity-copy">
+              <strong>Graduate / PhD</strong>
+              <small>Writing my thesis</small>
+            </div>
+            <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
           </button>
           <button class="identity-card" type="button" role="radio" aria-checked="false" data-identity="researcher">
-            <span class="identity-visual professor"><i data-lucide="presentation"></i></span>
-            <strong>教授 / 研究员</strong>
-            <small>探索新的领域</small>
+            <span class="identity-visual professor" aria-hidden="true">🧑‍🏫</span>
+            <div class="identity-copy">
+              <strong>Professor / Researcher</strong>
+              <small>Exploring new territory</small>
+            </div>
+            <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
           </button>
           <button class="identity-card" type="button" role="radio" aria-checked="false" data-identity="enthusiast">
-            <span class="identity-visual enthusiast"><i data-lucide="bot"></i></span>
-            <strong>AI 探索者</strong>
-            <small>追踪前沿技术</small>
+            <span class="identity-visual enthusiast" aria-hidden="true">🧑‍🚀</span>
+            <div class="identity-copy">
+              <strong>Explorer</strong>
+              <small>Tracking the frontier</small>
+            </div>
+            <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
           </button>
-        </div>
-
-        <div class="identity-control">
-          <span>我的身份</span>
-          <div class="identity-segments" aria-hidden="true">
-            <b class="is-active" data-identity-label="graduate">研究生</b>
-            <b data-identity-label="researcher">研究员</b>
-            <b data-identity-label="enthusiast">探索者</b>
-          </div>
         </div>
 
         <button class="onboarding-primary" type="button" data-onboarding-next>
           <span>Next</span><i data-lucide="arrow-right"></i>
         </button>
+        <canvas class="confetti-canvas" data-confetti-canvas aria-hidden="true"></canvas>
       </section>
 
       <section class="onboarding-step topics-step" data-onboarding-step="1" hidden>
+        <button class="onboarding-back" type="button" data-onboarding-back aria-label="Back"><i data-lucide="arrow-left"></i></button>
         <header class="onboarding-heading">
           <p class="onboarding-kicker">YOUR RESEARCH INTENT</p>
           <h1>What inspires<br>you today?</h1>
-          <p>用自然语言描述你真正想研究的问题，AI 会把它拆成适合论文检索的关键词。</p>
+          <p>AI will turn your intentions into keywords for paper search.</p>
         </header>
 
         <label class="topic-composer" for="onboarding-topic-input">
           <span class="topic-composer-icon"><i data-lucide="sparkles"></i></span>
-          <textarea id="onboarding-topic-input" rows="4" placeholder="例如：我想了解 LLM Agent 如何形成、检索并更新长期记忆，以及这些方法怎样影响复杂任务表现。" maxlength="360" autocomplete="off"></textarea>
-          <small><i data-lucide="wand-sparkles"></i> AI 将保留关键对象、方法和应用场景</small>
+          <textarea id="onboarding-topic-input" rows="4" placeholder="Tell us about your goals, interests and research plan." maxlength="360" autocomplete="off"></textarea>
+          <small><i data-lucide="wand-sparkles"></i> AI keeps the key objects, methods, and use cases</small>
         </label>
 
-        <div class="topic-inspiration" aria-label="研究主题示例">
-          <div class="topic-inspiration-heading"><span>不知道怎么写？试试这些灵感</span><small>点击后仍可自由修改</small></div>
-          <button type="button" data-topic-suggestion="我想研究 LLM Agent 如何形成、检索并更新长期记忆，以及这些机制对复杂任务表现的影响。">
-            <i data-lucide="brain-circuit"></i><span>Agent 的长期记忆如何工作？</span><i data-lucide="arrow-up-right"></i>
+        <div class="topic-inspiration" aria-label="Research topic examples">
+          <div class="topic-inspiration-heading"><span>Not sure what to write? Try these prompts 🤓</span></div>
+          <button type="button" data-topic-suggestion="I want to study how LLM agents form, retrieve, and update long-term memory, and how these mechanisms affect performance on complex tasks.">
+            <i data-lucide="brain-circuit"></i><span>How does an agent's long-term memory work?</span><i data-lucide="arrow-up-right"></i>
           </button>
-          <button type="button" data-topic-suggestion="寻找视觉基础模型在医学影像小样本分割中的应用，尤其关注泛化能力和数据效率。">
-            <i data-lucide="scan-eye"></i><span>医学影像中的小样本视觉模型</span><i data-lucide="arrow-up-right"></i>
+          <button type="button" data-topic-suggestion="Looking for applications of visual foundation models in few-shot medical image segmentation, with a focus on generalization and data efficiency.">
+            <i data-lucide="scan-eye"></i><span>Few-shot vision models in medical imaging</span><i data-lucide="arrow-up-right"></i>
           </button>
-          <button type="button" data-topic-suggestion="关注气候变化预测中可解释的图神经网络方法，希望了解时空建模和不确定性估计。">
-            <i data-lucide="network"></i><span>可解释图网络与气候预测</span><i data-lucide="arrow-up-right"></i>
+          <button type="button" data-topic-suggestion="Interested in explainable graph neural network methods for climate change forecasting, especially spatio-temporal modeling and uncertainty estimation.">
+            <i data-lucide="network"></i><span>Explainable graph networks &amp; climate forecasting</span><i data-lucide="arrow-up-right"></i>
           </button>
         </div>
 
@@ -89,38 +91,47 @@
       </section>
 
       <section class="onboarding-step style-step" data-onboarding-step="2" hidden>
+        <button class="onboarding-back" type="button" data-onboarding-back aria-label="Back"><i data-lucide="arrow-left"></i></button>
         <header class="onboarding-heading">
           <p class="onboarding-kicker">TUNE YOUR FEED</p>
           <h1>Your Discovery<br>Style?</h1>
+          <p>How do you discover research? Pick how bold the feed should be.</p>
         </header>
 
-        <div class="topic-plan-summary">
+        <div class="topic-plan-summary" hidden>
           <span><i data-lucide="sparkles"></i></span>
           <div><small id="topic-plan-method">AI SEARCH PLAN</small><p id="topic-plan-query">Your search keywords will appear here.</p></div>
           <button id="edit-research-intent" type="button">Edit</button>
         </div>
 
-        <div class="discovery-styles" role="radiogroup" aria-label="选择发现风格">
+      <div class="discovery-styles" role="radiogroup" aria-label="Choose discovery style">
           <button class="discovery-style is-selected" type="button" role="radio" aria-checked="true" data-style="focus">
             <span class="style-letter blue">A</span>
             <span class="style-icon"><i data-lucide="compass"></i></span>
-            <strong>Focus on<br>My Domain</strong>
-            <small>专注我的领域</small>
+            <strong>Stay Focused</strong>
+            <small>Relevant paper only</small>
           </button>
           <button class="discovery-style" type="button" role="radio" aria-checked="false" data-style="broaden">
             <span class="style-letter pink">B</span>
             <span class="style-icon"><i data-lucide="rocket"></i></span>
-            <strong>Broaden My<br>Horizons</strong>
-            <small>拓宽研究视野</small>
+            <strong>Explore More</strong>
+            <small>Discover new topics</small>
           </button>
         </div>
 
         <div class="style-pager" aria-hidden="true"><span class="is-active"></span><span></span></div>
 
-        <div class="complexity-control">
-          <div class="complexity-title"><span>Read Complexity</span><strong id="complexity-value">Balanced</strong></div>
-          <input id="complexity-slider" type="range" min="1" max="5" value="3" aria-label="阅读复杂度">
-          <div class="complexity-labels"><span>Novice / 通俗</span><span>Expert / 专业</span></div>
+        <div class="complexity-control" data-style-panel="focus">
+          <div class="complexity-title"><span>Reading Level</span><strong id="complexity-value">Balanced</strong></div>
+        <input id="complexity-slider" type="range" min="1" max="5" value="3" aria-label="Reading Level">
+          <div class="complexity-labels"><span>Beginner</span><span>Expert</span></div>
+        </div>
+
+        <div class="explore-topics" data-style-panel="broaden" hidden>
+          <div class="explore-topics-heading">
+            <span>Pick topics you're curious about</span><small><b id="explore-count">0</b>/10</small>
+          </div>
+          <div class="explore-topics-cloud" id="explore-topics-cloud" role="group" aria-label="Curiosity topics"></div>
         </div>
 
         <button id="onboarding-finish" class="onboarding-primary" type="button">
@@ -135,10 +146,10 @@
       <section id="discover-view" class="view discover-view is-active" aria-labelledby="discover-title">
         <header class="app-topbar">
           <button id="search-toggle" class="topbar-button" type="button" aria-label="搜索研究方向" title="搜索"><i data-lucide="search"></i></button>
-          <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe 发现页">
+          <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
             <span><i data-lucide="layers-3"></i></span><strong>PaperSwipe</strong>
           </button>
-          <button class="topbar-button profile-button" type="button" data-view="settings" aria-label="打开个人设置" title="个人设置"><i data-lucide="circle-user-round"></i></button>
+          <button class="topbar-button profile-button" type="button" data-view="profile" aria-label="打开个人主页" title="个人主页"><i data-lucide="circle-user-round"></i></button>
         </header>
 
         <div id="search-panel" class="search-panel" hidden>
@@ -178,9 +189,11 @@
 
       <section id="library-view" class="view library-view" aria-labelledby="library-title" hidden>
         <header class="page-topbar">
-          <span class="topbar-spacer"></span>
+          <button id="library-export-toggle" class="topbar-button" type="button" aria-label="导出到 BibTeX / Zotero" title="导出"><i data-lucide="download"></i></button>
           <h1 id="library-title">Library</h1>
-          <button id="library-filter-button" class="topbar-button" type="button" aria-label="智能筛选清单" title="筛选"><i data-lucide="list-filter"></i></button>
+          <div class="topbar-actions">
+            <button id="ai-bot-button" class="topbar-button ai-bot-topbar-button" type="button" aria-label="打开 AI 助手对话" title="AI 助手"><i data-lucide="bot"></i></button>
+          </div>
         </header>
 
         <div class="library-tabs" role="tablist" aria-label="阅读清单分类">
@@ -189,9 +202,23 @@
           <button type="button" data-filter="read" role="tab"><i data-lucide="check"></i><span>Read</span><b id="read-count">0</b></button>
         </div>
 
-        <div id="library-summary" class="library-summary">
-          <i data-lucide="sparkles"></i>
-          <div><strong>你的阅读队列很轻盈</strong><span>继续只保留真正值得读的论文。</span></div>
+        <div id="library-export-bar" class="library-export-bar" hidden>
+          <span class="library-export-count"><b id="library-export-n">0</b> selected</span>
+          <div class="library-export-actions">
+            <button type="button" data-library-export-action="all">All</button>
+            <span class="library-export-sep" aria-hidden="true">·</span>
+            <button type="button" data-library-export-action="clear">Clear</button>
+            <button type="button" class="is-secondary" data-library-export-action="bibtex" aria-label="导出为 BibTeX">
+              <i data-lucide="download"></i><span>BibTeX</span>
+            </button>
+            <button type="button" class="is-primary" data-library-export-action="zotero" aria-label="导入到 Zotero">
+              <i data-lucide="library-big"></i><span>Zotero</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="library-tags-bar" class="library-tags-bar">
+          <div id="library-tags" class="library-tags" aria-label="按主题筛选"></div>
         </div>
         <div id="library-list" class="library-list"></div>
       </section>
@@ -234,28 +261,54 @@
         </section>
       </section>
 
-      <section id="settings-view" class="view settings-view" aria-labelledby="settings-title" hidden>
+      <section id="profile-view" class="view profile-view" aria-labelledby="profile-title" hidden>
         <header class="page-topbar">
           <span class="topbar-spacer"></span>
+          <h1 id="profile-title">Profile</h1>
+          <button id="profile-settings-button" class="topbar-button" type="button" aria-label="打开设置" title="设置"><i data-lucide="settings"></i></button>
+        </header>
+
+        <div class="profile-scroll">
+          <section class="profile-summary">
+            <span class="profile-avatar"><i data-lucide="circle-user-round"></i></span>
+            <div><strong>PaperSwipe Researcher</strong><small id="profile-identity">Graduate / PhD · Focused discovery</small></div>
+          </section>
+
+          <section class="todo-section" aria-labelledby="todo-title">
+            <div class="todo-head">
+              <h2 id="todo-title">Reading To-Do</h2>
+              <div class="todo-segments" role="radiogroup" aria-label="时间视角">
+                <button type="button" data-todo-scope="day" role="radio" class="is-active">日</button>
+                <button type="button" data-todo-scope="week" role="radio">周</button>
+                <button type="button" data-todo-scope="month" role="radio">月</button>
+              </div>
+            </div>
+            <ul id="todo-list" class="todo-list"></ul>
+            <form id="todo-form" class="todo-form">
+              <input id="todo-input" type="text" placeholder="添加一项阅读任务…" maxlength="120" aria-label="添加阅读任务">
+              <button type="submit" aria-label="添加任务" title="添加"><i data-lucide="plus"></i></button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section id="settings-page" class="settings-page" aria-labelledby="settings-title" hidden>
+        <header class="page-topbar">
+          <button id="settings-close" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
           <h1 id="settings-title">Settings</h1>
           <span class="topbar-spacer"></span>
         </header>
 
         <div class="settings-scroll">
-          <section class="profile-summary">
-            <span class="profile-avatar"><i data-lucide="circle-user-round"></i></span>
-            <div><strong>PaperSwipe Researcher</strong><small id="settings-identity">研究生 · Focused discovery</small></div>
-          </section>
-
           <section class="setting-section" aria-labelledby="research-theme-title">
-            <div class="setting-heading"><div><h2 id="research-theme-title">Research themes</h2><p>调整后会刷新你的论文发现页。</p></div><i data-lucide="brain-circuit"></i></div>
+            <div class="setting-heading"><div><h2 id="research-theme-title">Research themes</h2><p>Changes refresh your paper discovery feed.</p></div><i data-lucide="brain-circuit"></i></div>
             <div id="settings-topic-chips" class="settings-topic-chips"></div>
-            <label class="settings-input"><i data-lucide="search"></i><input id="settings-topic-input" type="text" placeholder="添加新的研究主题" maxlength="120"></label>
-            <button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="refresh-cw"></i><span>更新发现主题</span></button>
+            <label class="settings-input"><i data-lucide="search"></i><input id="settings-topic-input" type="text" placeholder="Add a new research theme" maxlength="120"></label>
+            <button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="refresh-cw"></i><span>Update themes</span></button>
           </section>
 
           <section class="setting-section" aria-labelledby="appearance-title">
-            <div class="setting-heading"><div><h2 id="appearance-title">Appearance</h2><p>选择主界面的显示主题。</p></div><i data-lucide="palette"></i></div>
+            <div class="setting-heading"><div><h2 id="appearance-title">Appearance</h2><p>Choose the display theme of the main interface.</p></div><i data-lucide="palette"></i></div>
             <div class="appearance-options" role="radiogroup" aria-label="显示主题">
               <button type="button" data-appearance="light" role="radio"><i data-lucide="sun"></i><span>Light</span></button>
               <button type="button" data-appearance="system" role="radio"><i data-lucide="monitor"></i><span>System</span></button>
@@ -264,29 +317,58 @@
           </section>
 
           <section class="setting-section" aria-labelledby="feed-settings-title">
-            <div class="setting-heading"><div><h2 id="feed-settings-title">Discovery style</h2><p>控制推荐是更专注还是更发散。</p></div><i data-lucide="compass"></i></div>
+            <div class="setting-heading"><div><h2 id="feed-settings-title">Discovery style</h2><p>Control whether recommendations stay focused or diverge.</p></div><i data-lucide="compass"></i></div>
             <div class="settings-segments" role="radiogroup" aria-label="发现风格">
               <button type="button" data-settings-style="focus" role="radio">Focus</button>
               <button type="button" data-settings-style="broaden" role="radio">Broaden</button>
             </div>
             <div class="settings-range">
-              <label for="settings-complexity">Read complexity <strong id="settings-complexity-label">Balanced</strong></label>
+              <label for="settings-complexity">Reading Level <strong id="settings-complexity-label">Balanced</strong></label>
               <input id="settings-complexity" type="range" min="1" max="5" value="3">
               <div><span>Accessible</span><span>Expert</span></div>
             </div>
           </section>
 
-          <button id="restart-onboarding" class="restart-onboarding" type="button"><i data-lucide="rotate-ccw"></i><span>重新完成初始设置</span></button>
-          <p class="settings-footnote">论文元数据来自 Semantic Scholar、arXiv 与 OpenAlex。AI 结论请回到原文核验。</p>
+          <section class="setting-section" aria-labelledby="zotero-title">
+            <div class="setting-heading"><div><h2 id="zotero-title">Zotero</h2><p>Once connected, send papers from Library to Zotero in one tap.</p></div><i data-lucide="link"></i></div>
+            <label class="settings-input"><i data-lucide="key-round"></i><input id="zotero-api-key" type="password" placeholder="API Key (zotero.org/settings/keys)" autocomplete="off"></label>
+            <label class="settings-input"><i data-lucide="user-round"></i><input id="zotero-user-id" type="text" placeholder="userID (numbers, see top of keys page)" autocomplete="off" inputmode="numeric"></label>
+            <div class="zotero-actions">
+              <button id="zotero-test-button" class="settings-primary" type="button"><i data-lucide="plug-zap"></i><span>Test connection</span></button>
+              <button id="zotero-clear-button" class="settings-secondary" type="button">Clear</button>
+            </div>
+            <p id="zotero-status" class="zotero-status" hidden></p>
+          </section>
+
+          <button id="restart-onboarding" class="restart-onboarding" type="button"><i data-lucide="rotate-ccw"></i><span>Restart setup</span></button>
+          <p class="settings-footnote">Paper metadata from Semantic Scholar, arXiv and OpenAlex. Verify AI conclusions against the original source.</p>
         </div>
       </section>
     </main>
+
+    <section id="ai-bot-page" class="ai-bot-page" aria-labelledby="ai-bot-title" hidden>
+      <header class="ai-bot-page-header">
+        <button id="ai-bot-close" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+        <div class="ai-bot-page-id">
+          <span class="ai-bot-avatar"><i data-lucide="sparkles"></i></span>
+          <strong id="ai-bot-title">PaperSwipe AI</strong>
+        </div>
+        <button id="ai-bot-reset" class="topbar-button" type="button" aria-label="清空对话" title="清空对话"><i data-lucide="rotate-ccw"></i></button>
+      </header>
+      <div id="ai-bot-messages" class="ai-bot-messages" aria-live="polite"></div>
+      <form id="ai-bot-form" class="ai-bot-form">
+        <div class="ai-bot-form-inner">
+          <textarea id="ai-bot-input" rows="1" placeholder="告诉我你的目标，或问我今天读什么…" aria-label="向 AI 助手提问" maxlength="600"></textarea>
+          <button id="ai-bot-send" type="submit" class="ai-bot-send" aria-label="发送" title="发送"><i data-lucide="arrow-up"></i></button>
+        </div>
+      </form>
+    </section>
 
     <nav class="bottom-nav" aria-label="主导航">
       <button class="is-active" type="button" data-view="discover"><i data-lucide="compass"></i><span>Explore</span></button>
       <button type="button" data-view="library"><i data-lucide="library"></i><span>Library</span><b id="bottom-library-count">0</b></button>
       <button type="button" data-view="network"><i data-lucide="users-round"></i><span>Network</span></button>
-      <button type="button" data-view="settings"><i data-lucide="settings"></i><span>Settings</span></button>
+      <button type="button" data-view="profile"><i data-lucide="user"></i><span>Profile</span></button>
     </nav>
   </div>
 
@@ -295,13 +377,8 @@
     <div id="dialog-content" class="dialog-content"></div>
   </dialog>
 
-  <dialog id="filter-dialog" class="app-dialog compact-dialog">
-    <div class="dialog-header"><strong>Intelligent filter</strong><button class="icon-button" type="button" data-close-dialog="filter-dialog" aria-label="关闭筛选" title="关闭"><i data-lucide="x"></i></button></div>
-    <div class="dialog-options" role="radiogroup" aria-label="清单排序">
-      <button class="is-active" type="button" data-sort="recent" role="radio"><i data-lucide="clock-3"></i><span>Recently added</span><b>最新加入</b></button>
-      <button type="button" data-sort="citations" role="radio"><i data-lucide="quote"></i><span>Highly cited</span><b>高引用优先</b></button>
-      <button type="button" data-sort="easy" role="radio"><i data-lucide="book-open"></i><span>Quick reads</span><b>阅读时间更短</b></button>
-    </div>
+  <dialog id="library-card-dialog" class="library-card-dialog">
+    <div id="library-card-dialog-content"></div>
   </dialog>
 
   <dialog id="forum-dialog" class="app-dialog compact-dialog">
@@ -316,6 +393,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="/vendor/lucide.min.js"></script>
+  <script src="/mockdata/roadmap.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

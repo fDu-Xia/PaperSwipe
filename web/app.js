@@ -6,6 +6,7 @@ const DEFAULT_PROFILE = {
   topicPlanAI: false,
   discoveryStyle: "focus",
   complexity: 3,
+  exploreTopics: [],
 };
 
 const state = {
@@ -18,6 +19,8 @@ const state = {
   activeView: "discover",
   library: [],
   libraryFilter: "save",
+  libraryTags: [],
+  libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
   networkTab: "heatmap",
@@ -29,6 +32,10 @@ const state = {
   connectedPeople: new Set(),
   stats: { saved: 0, priority: 0, read: 0, dismissed: 0 },
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
+  todos: [],
+  todoScope: "day",
+  librarySelectMode: false,
+  librarySelected: new Set(),
 };
 
 const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1";
@@ -40,6 +47,7 @@ let onboardingProfile = { ...DEFAULT_PROFILE, topics: [...DEFAULT_PROFILE.topics
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
+  state.todos = loadTodos() || defaultTodos();
   state.appearance = loadAppearance();
   applyAppearance(state.appearance);
   bindEvents();
@@ -52,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     startApp(savedProfile);
   } else {
     showOnboardingStep(0);
+    const autoPopper = document.querySelector("[data-confetti-trigger]");
+    if (autoPopper) setTimeout(() => fireConfetti(autoPopper), 550);
   }
 });
 
@@ -67,7 +77,14 @@ function cacheElements() {
     discoverView: document.querySelector("#discover-view"),
     libraryView: document.querySelector("#library-view"),
     networkView: document.querySelector("#network-view"),
-    settingsView: document.querySelector("#settings-view"),
+    profileView: document.querySelector("#profile-view"),
+    profileSettingsButton: document.querySelector("#profile-settings-button"),
+    profileIdentity: document.querySelector("#profile-identity"),
+    settingsPage: document.querySelector("#settings-page"),
+    settingsClose: document.querySelector("#settings-close"),
+    todoList: document.querySelector("#todo-list"),
+    todoForm: document.querySelector("#todo-form"),
+    todoInput: document.querySelector("#todo-input"),
     searchToggle: document.querySelector("#search-toggle"),
     searchPanel: document.querySelector("#search-panel"),
     searchForm: document.querySelector("#search-form"),
@@ -84,11 +101,23 @@ function cacheElements() {
     saveButton: document.querySelector("#save-button"),
     aiStatus: document.querySelector("#ai-status"),
     libraryList: document.querySelector("#library-list"),
-    librarySummary: document.querySelector("#library-summary"),
+    libraryTags: document.querySelector("#library-tags"),
+    libraryExportToggle: document.querySelector("#library-export-toggle"),
+    libraryExportBar: document.querySelector("#library-export-bar"),
+    libraryExportCount: document.querySelector("#library-export-n"),
     dialog: document.querySelector("#paper-dialog"),
     dialogContent: document.querySelector("#dialog-content"),
-    filterDialog: document.querySelector("#filter-dialog"),
+    libraryCardDialog: document.querySelector("#library-card-dialog"),
+    libraryCardDialogContent: document.querySelector("#library-card-dialog-content"),
+    filterDialog: null,
     forumDialog: document.querySelector("#forum-dialog"),
+    aiBotPage: document.querySelector("#ai-bot-page"),
+    aiBotMessages: document.querySelector("#ai-bot-messages"),
+    aiBotForm: document.querySelector("#ai-bot-form"),
+    aiBotInput: document.querySelector("#ai-bot-input"),
+    aiBotSend: document.querySelector("#ai-bot-send"),
+    aiBotClose: document.querySelector("#ai-bot-close"),
+    aiBotReset: document.querySelector("#ai-bot-reset"),
     toast: document.querySelector("#toast"),
     recentSearches: document.querySelector("#recent-searches"),
     peopleList: document.querySelector("#people-list"),
@@ -103,6 +132,11 @@ function bindEvents() {
   document.querySelectorAll("[data-onboarding-next]").forEach((button) => {
     button.addEventListener("click", () => showOnboardingStep(onboardingStep + 1));
   });
+  document.querySelectorAll("[data-onboarding-back]").forEach((button) => {
+    button.addEventListener("click", () => showOnboardingStep(onboardingStep - 1));
+  });
+  const confettiBtn = document.querySelector("[data-confetti-trigger]");
+  if (confettiBtn) confettiBtn.addEventListener("click", () => fireConfetti(confettiBtn));
   document.querySelectorAll("[data-identity]").forEach((button) => {
     button.addEventListener("click", () => selectIdentity(button.dataset.identity));
   });
@@ -148,6 +182,33 @@ function bindEvents() {
       switchView(viewButton.dataset.view);
       return;
     }
+    const weekplanExport = event.target.closest("[data-weekplan-export]");
+    if (weekplanExport) {
+      exportWeekPlanIcs(weekplanExport.dataset.weekplanExport);
+      return;
+    }
+    const toppickFlipBtn = event.target.closest("[data-bot-flip-btn]");
+    if (toppickFlipBtn) {
+      event.stopPropagation();
+      const card = toppickFlipBtn.closest("[data-bot-flip]");
+      if (card) card.classList.toggle("is-flipped");
+      return;
+    }
+    const toppickFlip = event.target.closest("[data-bot-flip]");
+    if (toppickFlip) {
+      toppickFlip.classList.toggle("is-flipped");
+      return;
+    }
+    const exploreBubble = event.target.closest("[data-explore-topic]");
+    if (exploreBubble) {
+      toggleExploreTopic(exploreBubble.dataset.exploreTopic);
+      return;
+    }
+    const exploreAdd = event.target.closest("[data-explore-add]");
+    if (exploreAdd) {
+      promptExploreCustomTopic();
+      return;
+    }
     const imageButton = event.target.closest("[data-generate-image-id]");
     if (imageButton) {
       generatePaperVisual(imageButton.dataset.generateImageId);
@@ -156,6 +217,12 @@ function bindEvents() {
     const cardAction = event.target.closest("[data-card-action]");
     if (cardAction) {
       decide(cardAction.dataset.cardAction);
+      return;
+    }
+    const flipToggle = event.target.closest("[data-flip-card]");
+    if (flipToggle) {
+      event.stopPropagation();
+      toggleCardFlip();
       return;
     }
     const queryButton = event.target.closest("[data-query]");
@@ -168,11 +235,31 @@ function bindEvents() {
     }
     const detailButton = event.target.closest("[data-detail-id]");
     if (detailButton) {
+      elements.libraryCardDialog.close();
       openDetails(detailButton.dataset.detailId);
+      return;
+    }
+    const libraryTag = event.target.closest("[data-library-tag]");
+    if (libraryTag) {
+      const tag = libraryTag.dataset.libraryTag;
+      const index = state.libraryTags.indexOf(tag);
+      if (index === -1) state.libraryTags.push(tag);
+      else state.libraryTags.splice(index, 1);
+      renderLibrary();
+      return;
+    }
+    const libraryCard = event.target.closest("[data-library-card]");
+    if (libraryCard && !event.target.closest("button")) {
+      if (state.librarySelectMode) {
+        toggleLibrarySelection(libraryCard.dataset.id);
+      } else {
+        openLibraryCard(libraryCard.dataset.id);
+      }
       return;
     }
     const removeButton = event.target.closest("[data-remove-id]");
     if (removeButton) {
+      elements.libraryCardDialog.close();
       removeFromLibrary(removeButton.dataset.removeId);
       return;
     }
@@ -204,6 +291,81 @@ function bindEvents() {
   });
 
   document.querySelector("#dialog-close").addEventListener("click", () => elements.dialog.close());
+
+  const aiBotButton = document.querySelector("#ai-bot-button");
+  if (aiBotButton) {
+    aiBotButton.addEventListener("click", () => {
+      openAiBotPage();
+    });
+  }
+
+  if (elements.libraryExportToggle) {
+    elements.libraryExportToggle.addEventListener("click", () => toggleLibrarySelectMode());
+  }
+  if (elements.libraryExportBar) {
+    elements.libraryExportBar.addEventListener("click", (event) => {
+      const action = event.target.closest("[data-library-export-action]")?.dataset.libraryExportAction;
+      if (!action) return;
+      if (action === "all") selectAllLibraryVisible();
+      else if (action === "clear") clearLibrarySelection();
+      else if (action === "cancel") toggleLibrarySelectMode(false);
+      else if (action === "bibtex") exportSelectedBibTeX();
+      else if (action === "zotero") exportSelectedToZotero();
+    });
+  }
+  if (elements.aiBotClose) {
+    elements.aiBotClose.addEventListener("click", closeAiBotPage);
+  }
+  if (elements.aiBotReset) {
+    elements.aiBotReset.addEventListener("click", () => {
+      renderBotGreeting();
+      elements.aiBotInput.value = "";
+      elements.aiBotInput.style.height = "auto";
+      elements.aiBotInput.focus();
+    });
+  }
+  if (elements.aiBotMessages) {
+    elements.aiBotMessages.addEventListener("click", (event) => {
+      const suggestion = event.target.closest("[data-bot-prompt]");
+      if (!suggestion) return;
+      const prompt = AI_BOT_PROMPTS.find((item) => item.id === suggestion.dataset.botPrompt);
+      if (!prompt) return;
+      if (prompt.autoSend) {
+        elements.aiBotInput.value = prompt.prefill;
+        sendBotMessage();
+        return;
+      }
+      elements.aiBotInput.value = prompt.prefill;
+      elements.aiBotInput.focus();
+      elements.aiBotInput.dispatchEvent(new Event("input"));
+      const cursor = elements.aiBotInput.value.indexOf("……");
+      if (cursor >= 0) elements.aiBotInput.setSelectionRange(cursor, cursor + 2);
+    });
+  }
+  if (elements.aiBotSend) {
+    elements.aiBotSend.addEventListener("click", (event) => {
+      event.preventDefault();
+      sendBotMessage();
+    });
+  }
+  if (elements.aiBotForm) {
+    elements.aiBotForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      sendBotMessage();
+    });
+  }
+  if (elements.aiBotInput) {
+    elements.aiBotInput.addEventListener("input", () => {
+      elements.aiBotInput.style.height = "auto";
+      elements.aiBotInput.style.height = Math.min(elements.aiBotInput.scrollHeight, 120) + "px";
+    });
+    elements.aiBotInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendBotMessage();
+      }
+    });
+  }
   document.querySelectorAll("dialog").forEach((dialog) => {
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) dialog.close();
@@ -218,16 +380,6 @@ function bindEvents() {
         item.classList.toggle("is-active", active);
         item.setAttribute("aria-selected", String(active));
       });
-      renderLibrary();
-    });
-  });
-
-  document.querySelector("#library-filter-button").addEventListener("click", () => elements.filterDialog.showModal());
-  document.querySelectorAll("[data-sort]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.librarySort = button.dataset.sort;
-      document.querySelectorAll("[data-sort]").forEach((item) => item.classList.toggle("is-active", item === button));
-      elements.filterDialog.close();
       renderLibrary();
     });
   });
@@ -256,6 +408,37 @@ function bindEvents() {
   document.querySelector("#restart-onboarding").addEventListener("click", () => {
     window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     window.location.assign("/?onboarding=1");
+  });
+
+  const zoteroApiKeyInput = document.querySelector("#zotero-api-key");
+  const zoteroUserIdInput = document.querySelector("#zotero-user-id");
+  const zoteroTestBtn = document.querySelector("#zotero-test-button");
+  const zoteroClearBtn = document.querySelector("#zotero-clear-button");
+  const saved = loadZoteroCredentials();
+  if (zoteroApiKeyInput && saved.apiKey) zoteroApiKeyInput.value = saved.apiKey;
+  if (zoteroUserIdInput && saved.userId) zoteroUserIdInput.value = saved.userId;
+  if (zoteroApiKeyInput) zoteroApiKeyInput.addEventListener("change", persistZoteroCredentials);
+  if (zoteroUserIdInput) zoteroUserIdInput.addEventListener("change", persistZoteroCredentials);
+  if (zoteroTestBtn) zoteroTestBtn.addEventListener("click", testZoteroConnection);
+  if (zoteroClearBtn) zoteroClearBtn.addEventListener("click", clearZoteroCredentials);
+
+  if (elements.profileSettingsButton) elements.profileSettingsButton.addEventListener("click", openSettingsPage);
+  if (elements.settingsClose) elements.settingsClose.addEventListener("click", closeSettingsPage);
+  if (elements.todoForm) elements.todoForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = elements.todoInput.value.trim();
+    if (!text) return;
+    addTodo(text);
+    elements.todoInput.value = "";
+  });
+  document.querySelectorAll("[data-todo-scope]").forEach((button) => {
+    button.addEventListener("click", () => switchTodoScope(button.dataset.todoScope));
+  });
+  if (elements.todoList) elements.todoList.addEventListener("click", (event) => {
+    const toggle = event.target.closest("[data-todo-toggle]");
+    if (toggle) { toggleTodo(toggle.dataset.todoToggle); return; }
+    const remove = event.target.closest("[data-todo-remove]");
+    if (remove) { removeTodo(remove.dataset.todoRemove); return; }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -293,6 +476,83 @@ function loadAppearance() {
   return ["light", "system", "dark"].includes(saved) ? saved : "system";
 }
 
+function fireConfetti(popperBtn) {
+  const step = popperBtn.closest(".onboarding-step");
+  const canvas = step && step.querySelector("[data-confetti-canvas]");
+  if (!canvas) return;
+  if (popperBtn.classList.contains("is-firing")) return;
+  popperBtn.classList.add("is-firing");
+  setTimeout(() => popperBtn.classList.remove("is-firing"), 520);
+
+  const rect = step.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + "px";
+  canvas.style.height = rect.height + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const btnRect = popperBtn.getBoundingClientRect();
+  const originX = btnRect.left - rect.left + btnRect.width / 2;
+  const originY = btnRect.top - rect.top + btnRect.height / 2;
+  const colors = ["#7655e8", "#a688ff", "#ff8f6b", "#26c5b5", "#ffb37a", "#f0b734", "#e85bba"];
+  const particles = [];
+  const count = 90;
+  for (let i = 0; i < count; i++) {
+    const angle = (-Math.PI / 2) + (Math.random() - 0.5) * (Math.PI * 0.72);
+    const speed = 6 + Math.random() * 9;
+    particles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed + 2.5,
+      vy: Math.sin(angle) * speed,
+      w: 5 + Math.random() * 6,
+      h: 8 + Math.random() * 10,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.35,
+      color: colors[i % colors.length],
+      shape: Math.random() < 0.35 ? "circle" : "rect",
+      life: 0,
+      maxLife: 90 + Math.random() * 40,
+    });
+  }
+
+  let raf = 0;
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    let alive = 0;
+    for (const p of particles) {
+      p.life++;
+      if (p.life > p.maxLife) continue;
+      alive++;
+      p.vy += 0.28;
+      p.vx *= 0.995;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      const fade = Math.max(0, 1 - (p.life - p.maxLife * 0.65) / (p.maxLife * 0.35));
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, fade);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if (p.shape === "circle") {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.w * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+    }
+    if (alive > 0) raf = requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+  }
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
+}
+
 function showOnboardingStep(step) {
   onboardingStep = Math.max(0, Math.min(2, step));
   document.querySelectorAll("[data-onboarding-step]").forEach((panel) => {
@@ -304,6 +564,7 @@ function showOnboardingStep(step) {
     dot.classList.toggle("is-active", index === onboardingStep);
     dot.classList.toggle("is-complete", index < onboardingStep);
   });
+  if (onboardingStep === 2) selectDiscoveryStyle(onboardingProfile.discoveryStyle || "focus");
   elements.onboarding.scrollTop = 0;
 }
 
@@ -313,9 +574,6 @@ function selectIdentity(identity) {
     const selected = button.dataset.identity === identity;
     button.classList.toggle("is-selected", selected);
     button.setAttribute("aria-checked", String(selected));
-  });
-  document.querySelectorAll("[data-identity-label]").forEach((label) => {
-    label.classList.toggle("is-active", label.dataset.identityLabel === identity);
   });
 }
 
@@ -329,6 +587,88 @@ function selectDiscoveryStyle(style) {
   document.querySelectorAll(".style-pager span").forEach((dot, index) => {
     dot.classList.toggle("is-active", index === (style === "focus" ? 0 : 1));
   });
+  document.querySelectorAll("[data-style-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.stylePanel !== style;
+  });
+  if (style === "broaden") renderExploreTopics();
+}
+
+const EXPLORE_TOPIC_POOL = [
+  "Biology", "Medicine", "Space", "Neuroscience",
+  "Philosophy", "Climate", "Economics", "Psychology",
+  "Music", "History", "Robotics", "Genetics",
+];
+const EXPLORE_MAX = 10;
+
+function renderExploreTopics() {
+  const cloud = document.querySelector("#explore-topics-cloud");
+  if (!cloud) return;
+  if (!Array.isArray(onboardingProfile.exploreTopics)) onboardingProfile.exploreTopics = [];
+  const chosen = onboardingProfile.exploreTopics;
+  const chosenSet = new Set(chosen);
+  const customs = chosen.filter((t) => !EXPLORE_TOPIC_POOL.includes(t));
+  const merged = EXPLORE_TOPIC_POOL.concat(customs);
+  const reachedCap = chosen.length >= EXPLORE_MAX;
+  const bubbles = merged.map((topic, i) => {
+    const active = chosenSet.has(topic);
+    const size = ["md", "lg", "sm", "md", "lg", "sm"][i % 6];
+    const drift = (i * 137) % 12 - 6;
+    const disabled = !active && reachedCap;
+    return `<button type="button" class="explore-bubble is-${size}${active ? " is-active" : ""}${disabled ? " is-disabled" : ""}" data-explore-topic="${escapeAttribute(topic)}"${disabled ? " disabled" : ""} style="--bubble-index: ${i}; --bubble-drift: ${drift}px;">${escapeHTML(topic)}</button>`;
+  });
+  const addIndex = merged.length;
+  const addDrift = (addIndex * 137) % 12 - 6;
+  bubbles.push(`<button type="button" class="explore-bubble explore-bubble-add is-md${reachedCap ? " is-disabled" : ""}" data-explore-add${reachedCap ? " disabled" : ""} style="--bubble-index: ${addIndex}; --bubble-drift: ${addDrift}px;">＋ Add your own</button>`);
+  cloud.innerHTML = bubbles.join("");
+  const counter = document.querySelector("#explore-count");
+  if (counter) counter.textContent = String(chosen.length);
+}
+
+function toggleExploreTopic(topic) {
+  if (!Array.isArray(onboardingProfile.exploreTopics)) onboardingProfile.exploreTopics = [];
+  const idx = onboardingProfile.exploreTopics.indexOf(topic);
+  if (idx === -1) {
+    if (onboardingProfile.exploreTopics.length >= EXPLORE_MAX) {
+      showToast(`最多选择 ${EXPLORE_MAX} 个感兴趣领域`);
+      return;
+    }
+    onboardingProfile.exploreTopics.push(topic);
+  } else {
+    onboardingProfile.exploreTopics.splice(idx, 1);
+  }
+  renderExploreTopics();
+}
+
+function promptExploreCustomTopic() {
+  if (!Array.isArray(onboardingProfile.exploreTopics)) onboardingProfile.exploreTopics = [];
+  if (onboardingProfile.exploreTopics.length >= EXPLORE_MAX) {
+    showToast(`最多选择 ${EXPLORE_MAX} 个感兴趣领域`);
+    return;
+  }
+  const cloud = document.querySelector("#explore-topics-cloud");
+  if (!cloud || cloud.querySelector(".explore-bubble-input")) return;
+  const addBtn = cloud.querySelector("[data-explore-add]");
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "explore-bubble explore-bubble-input is-md";
+  input.placeholder = "e.g. Design";
+  input.maxLength = 30;
+  const commit = (ok) => {
+    const val = input.value.trim();
+    input.remove();
+    if (ok && val && !onboardingProfile.exploreTopics.includes(val)) {
+      onboardingProfile.exploreTopics.push(val);
+    }
+    renderExploreTopics();
+  };
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commit(true); }
+    else if (e.key === "Escape") commit(false);
+  });
+  input.addEventListener("blur", () => commit(true));
+  if (addBtn) cloud.insertBefore(input, addBtn);
+  else cloud.appendChild(input);
+  input.focus();
 }
 
 async function prepareResearchIntent() {
@@ -520,53 +860,66 @@ function renderCard() {
     <span class="swipe-stamp save">INTERESTED</span>
     <span class="swipe-stamp priority">KEY</span>
     <span class="swipe-stamp read">READ</span>
-    <div class="card-scroll">
-      <header class="${heroClass}"${heroStyle}>
-        <div class="knowledge-topline">
-          <span>Knowledge Card · ${escapeHTML(paper.source || state.source)}</span>
-          <div class="knowledge-tools">
-            ${imageButton}
-            <button type="button" data-card-action="priority" aria-label="标为重点论文" title="重点论文"><i data-lucide="star"></i></button>
+    <div class="card-flip">
+      <div class="card-face card-front">
+        <header class="${heroClass} card-front-hero"${heroStyle}>
+          <div class="knowledge-topline">
+            <span>Knowledge Card · ${escapeHTML(paper.source || state.source)}</span>
+            <div class="knowledge-tools">
+              ${imageButton}
+              <button type="button" data-card-action="priority" aria-label="标为重点论文" title="重点论文"><i data-lucide="star"></i></button>
+            </div>
+          </div>
+          <div class="front-main">
+            <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
+            <p class="front-tldr">${escapeHTML(paper.digest?.tldr || paper.digest?.verdict || "点击卡片查看详细分析")}</p>
+          </div>
+          <div class="knowledge-byline">
+            <span class="author-avatar">${escapeHTML(authorInitials)}</span>
+            <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
+          </div>
+          <span class="match-pill">${numberOrZero(paper.match_score)}</span>
+          <button class="flip-hint" type="button" data-flip-card aria-label="翻到详情"><i data-lucide="repeat"></i><span>轻点卡片查看要点</span></button>
+        </header>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-scroll">
+          <div class="back-topbar">
+            <button class="flip-back-button" type="button" data-flip-card aria-label="返回一句话总结"><i data-lucide="arrow-left"></i><span>返回</span></button>
+            <strong>${escapeHTML(paper.title)}</strong>
+          </div>
+          <div class="knowledge-body">
+            <section class="knowledge-section">
+              <h3>Highlights</h3>
+              <div class="core-idea" aria-label="AI 提取的论文要点">
+                ${highlights.map((item) => `
+                  <div class="highlight-item">
+                    <span class="core-node"><i data-lucide="${item.icon}"></i></span>
+                    <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
+                  </div>`).join("")}
+              </div>
+            </section>
+            <section class="knowledge-section">
+              <h3>Key Contributions</h3>
+              <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
+            </section>
+            <section class="knowledge-section">
+              <h3>Why it matters?</h3>
+              <p class="insight-copy">${escapeHTML(paper.digest?.why_keep || paper.digest?.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
+            </section>
+            <section class="knowledge-section">
+              <h3>Application</h3>
+              <div class="application-copy"><i data-lucide="briefcase-business"></i><span>${escapeHTML(paper.digest?.audience || paper.digest?.reading_focus || "适合关注该方向的方法研究者")}</span></div>
+            </section>
+            <div class="paper-meta">
+              <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
+              <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
+              <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
+              ${paperLink}${pdfLink}
+            </div>
+            <button class="detail-trigger" type="button" data-detail-id="${escapeAttribute(paper.id)}"><i data-lucide="panel-right-open"></i><span>查看判断依据与原始摘要</span></button>
           </div>
         </div>
-        <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
-        <p class="knowledge-verdict">${escapeHTML(paper.digest?.verdict || "值得快速核验方法和结果")}</p>
-        <div class="knowledge-byline">
-          <span class="author-avatar">${escapeHTML(authorInitials)}</span>
-          <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
-        </div>
-        <span class="match-pill">${numberOrZero(paper.match_score)}</span>
-      </header>
-      <div class="knowledge-body">
-        <section class="knowledge-section">
-          <h3>Highlights</h3>
-          <div class="core-idea" aria-label="AI 提取的论文要点">
-            ${highlights.map((item) => `
-              <div class="highlight-item">
-                <span class="core-node"><i data-lucide="${item.icon}"></i></span>
-                <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
-              </div>`).join("")}
-          </div>
-        </section>
-        <section class="knowledge-section">
-          <h3>Key Contributions</h3>
-          <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
-        </section>
-        <section class="knowledge-section">
-          <h3>Why it matters?</h3>
-          <p class="insight-copy">${escapeHTML(paper.digest?.why_keep || paper.digest?.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
-        </section>
-        <section class="knowledge-section">
-          <h3>Application</h3>
-          <div class="application-copy"><i data-lucide="briefcase-business"></i><span>${escapeHTML(paper.digest?.audience || paper.digest?.reading_focus || "适合关注该方向的方法研究者")}</span></div>
-        </section>
-        <div class="paper-meta">
-          <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
-          <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
-          <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
-          ${paperLink}${pdfLink}
-        </div>
-        <button class="detail-trigger" type="button" data-detail-id="${escapeAttribute(paper.id)}"><i data-lucide="panel-right-open"></i><span>查看判断依据与原始摘要</span></button>
       </div>
     </div>`;
   setActionEnabled(true);
@@ -617,16 +970,19 @@ function deriveTags(paper) {
 }
 
 function enableGestures(card) {
-  const zone = card.querySelector(".knowledge-hero");
+  const zone = card.querySelector(".card-front-hero");
   if (!zone) return;
   let startX = 0;
   let startY = 0;
   let dx = 0;
   let dy = 0;
   let dragging = false;
+  let pressedInteractive = false;
 
   zone.addEventListener("pointerdown", (event) => {
-    if (state.loading || event.target.closest("button, a")) return;
+    if (state.loading) return;
+    pressedInteractive = Boolean(event.target.closest("button, a"));
+    if (pressedInteractive) return;
     dragging = true;
     dx = 0;
     dy = 0;
@@ -647,15 +1003,22 @@ function enableGestures(card) {
     if (!dragging) return;
     dragging = false;
     card.classList.remove("is-dragging");
+    const moved = Math.hypot(dx, dy);
     if (dx < -95 && Math.abs(dx) > Math.abs(dy)) return decide("dismiss");
     if (dx > 95 && Math.abs(dx) > Math.abs(dy)) return decide("save");
     if (dy < -85 && Math.abs(dy) > Math.abs(dx) * .8) return decide("priority");
     if (dy > 85 && Math.abs(dy) > Math.abs(dx) * .8) return decide("read");
     card.style.transform = "";
     setStampOpacity(card, 0, 0, 0);
+    if (moved < 8) toggleCardFlip();
   };
   zone.addEventListener("pointerup", finish);
   zone.addEventListener("pointercancel", finish);
+}
+
+function toggleCardFlip() {
+  if (!elements.paperCard || elements.paperCard.classList.contains("is-leaving")) return;
+  elements.paperCard.classList.toggle("is-flipped");
 }
 
 function setStampOpacity(card, dx, dy, strength) {
@@ -675,6 +1038,7 @@ function setStampOpacity(card, dx, dy, strength) {
 async function decide(action) {
   const paper = currentPaper();
   if (!paper || state.loading || elements.paperCard.classList.contains("is-leaving")) return;
+  elements.paperCard.classList.remove("is-flipped");
   elements.paperCard.classList.add("is-leaving", `fly-${action}`);
   state.session[action] += 1;
   const labels = { dismiss: "已跳过", save: "已加入 Interested", priority: "已标为 Key", read: "已标为 Read" };
@@ -718,6 +1082,560 @@ function setEngineStatus(aiEnabled) {
   elements.aiStatus.parentElement.classList.toggle("is-ai", aiEnabled);
 }
 
+const AI_BOT_PROMPTS = [
+  {
+    id: "daily",
+    icon: "calendar-check-2",
+    theme: "violet",
+    title: "帮我安排每日任务",
+    subtitle: "结合 DDL 和空闲时间，从 Library 派发今日阅读",
+    prefill: "我最近的目标是……（DDL：___；每天可读 ___ 分钟）。请从 Library 里帮我安排今日阅读任务，尽量按重要性和阅读时长排。",
+  },
+  {
+    id: "today",
+    icon: "sparkles",
+    theme: "coral",
+    title: "今天最该读哪一篇？",
+    subtitle: "描述你的当前目标，让 AI 挑最相关的一篇",
+    prefill: "我目前在做……。请从 Library 里推荐今天最应该读的那一篇论文，并告诉我为什么。",
+  },
+  {
+    id: "roadmap",
+    icon: "route",
+    theme: "teal",
+    title: "论文太多，给我一条 Roadmap",
+    subtitle: "按主题聚类并生成分阶段学习路径",
+    prefill: "Library 里论文太多了，请给我一条从综述到经典再到最新的学习 roadmap。",
+    autoSend: true,
+  },
+];
+
+function renderBotGreeting() {
+  elements.aiBotMessages.innerHTML = "";
+  const count = state.library.length;
+  const intent = onboardingProfile.researchIntent || onboardingProfile.searchQuery || "";
+  const hero = document.createElement("div");
+  hero.className = "ai-bot-hero";
+  hero.innerHTML = `
+    <span class="ai-bot-hero-avatar"><i data-lucide="sparkles"></i></span>
+    <p class="ai-bot-hero-title">Hi，我是你的论文助手</p>
+    <p class="ai-bot-hero-sub">${count
+      ? `你的 Library 里已经有 <b>${count}</b> 篇论文${intent ? `，围绕「${escapeHTML(shorten(intent, 24))}」` : ""}。告诉我你的目标，我来帮你规划。`
+      : "先去 Explore 划几篇论文到 Library，我就能帮你做阅读规划。"}</p>
+  `;
+  elements.aiBotMessages.appendChild(hero);
+
+  const suggestions = document.createElement("div");
+  suggestions.className = "ai-bot-suggestions";
+  suggestions.setAttribute("aria-label", "推荐提问");
+  suggestions.innerHTML = AI_BOT_PROMPTS.map((prompt) => `
+    <button type="button" class="ai-bot-suggestion theme-${prompt.theme}" data-bot-prompt="${prompt.id}">
+      <span class="ai-bot-suggestion-icon"><i data-lucide="${prompt.icon}"></i></span>
+      <div class="ai-bot-suggestion-copy">
+        <strong>${escapeHTML(prompt.title)}</strong>
+        <small>${escapeHTML(prompt.subtitle)}</small>
+      </div>
+      <i data-lucide="arrow-up-right" class="ai-bot-suggestion-arrow"></i>
+    </button>
+  `).join("");
+  elements.aiBotMessages.appendChild(suggestions);
+  refreshIcons();
+}
+
+function shorten(text, maxRunes) {
+  const runes = Array.from(String(text || "").trim());
+  if (runes.length <= maxRunes) return runes.join("");
+  return runes.slice(0, maxRunes - 1).join("") + "…";
+}
+
+function appendBotMessage(text, role = "bot") {
+  const el = document.createElement("div");
+  el.className = `ai-bot-msg ${role}`;
+  el.textContent = text;
+  elements.aiBotMessages.appendChild(el);
+  elements.aiBotMessages.scrollTop = elements.aiBotMessages.scrollHeight;
+  return el;
+}
+
+function showBotTyping() {
+  const el = document.createElement("div");
+  el.className = "ai-bot-typing";
+  el.innerHTML = "<span></span><span></span><span></span>";
+  elements.aiBotMessages.appendChild(el);
+  elements.aiBotMessages.scrollTop = elements.aiBotMessages.scrollHeight;
+  return el;
+}
+
+function libraryPapersForBot() {
+  return state.library.map((entry) => entry.paper).filter(Boolean);
+}
+
+function buildBotReply(query) {
+  const q = query.toLowerCase();
+  const papers = libraryPapersForBot();
+  if (!papers.length) {
+    return "你的 Library 还是空的。先回到 Explore 划几篇感兴趣的论文，再回来让我帮你规划。";
+  }
+  if (/(每周|一周|按周|week|周计划|排一周|一周内)/i.test(query) ||
+      (/(ddl|deadline|截止)/i.test(query) && /(每天.*分钟|每日.*分钟|min\/day|分钟\/?天)/i.test(query))) {
+    return buildWeekPlanReply(papers, query);
+  }
+  if (/(每日|每天|今日安排|任务|schedule|daily|ddl|deadline|空闲|计划)/i.test(query)) {
+    return buildDailyPlanReply(papers, query);
+  }
+  if (/(今天.*读|该读|最应该读|优先读|priority|top pick|哪一篇)/i.test(query)) {
+    return buildTopPickReply(papers, query);
+  }
+  if (/(roadmap|路线|路径|学习顺序|入门到进阶|阶段|分阶段|太多|从综述|综述.*经典|经典.*最新)/i.test(query)) {
+    return { type: "roadmap", data: window.__PAPERSWIPE_ROADMAP__ };
+  }
+  if (/(主题|方向|topic|领域)/i.test(query)) {
+    const tags = {};
+    papers.forEach((p) => deriveTags(p).forEach((t) => { if (t) tags[t] = (tags[t] || 0) + 1; }));
+    const top = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (!top.length) return "我暂时没能从你的论文里总结出明确主题，先多收藏几篇吧。";
+    return "你 Library 里的主要主题：\n" + top.map(([t, n]) => `• ${t}（${n} 篇）`).join("\n");
+  }
+  if (/(排序|顺序|order)/i.test(query)) {
+    const sorted = [...papers].sort((a, b) => (a.read_minutes || 99) - (b.read_minutes || 99));
+    return "按阅读时长从短到长的顺序：\n" + sorted.slice(0, 8).map((p, i) => `${i + 1}. ${p.title}（约 ${p.read_minutes || "?"} 分钟）`).join("\n");
+  }
+  const cleaned = q.replace(/[?？。.,、\s]/g, "");
+  if (cleaned.length >= 2) {
+    const matched = papers.filter((p) =>
+      (p.title || "").toLowerCase().includes(cleaned) ||
+      (p.abstract || "").toLowerCase().includes(cleaned)
+    );
+    if (matched.length) {
+      const p = matched[0];
+      const tldr = p.digest?.tldr || p.abstract || "（暂无摘要）";
+      const authors = (p.authors || []).slice(0, 3).map((a) => a.name || a).join("、") || "未知";
+      return `找到《${p.title}》：\n${tldr}\n\n作者：${authors}`;
+    }
+  }
+  return "我可以帮你：\n• 结合 DDL / 空闲时间安排每日任务\n• 挑出今天最该读的那一篇\n• 生成一条学习 roadmap\n\n把你的目标告诉我就行。";
+}
+
+function pickBestForToday(papers) {
+  return [...papers].sort((a, b) => {
+    const score = (p) => (p.match_score || 0) * 4 + Math.log1p(p.citation_count || 0) * 6 - (p.read_minutes || 30);
+    return score(b) - score(a);
+  })[0];
+}
+
+function buildDailyPlanReply(papers, query) {
+  const minutesMatch = query.match(/(\d{1,3})\s*(?:min|分钟|min\/day)/i);
+  const budget = minutesMatch ? Math.max(15, Math.min(240, Number(minutesMatch[1]))) : 60;
+  const ordered = [...papers].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+  const plan = [];
+  let used = 0;
+  for (const p of ordered) {
+    const need = p.read_minutes || 20;
+    if (used + need > budget && plan.length) break;
+    plan.push(p);
+    used += need;
+    if (plan.length >= 4) break;
+  }
+  if (!plan.length) plan.push(ordered[0]);
+  const header = `按你 ~${budget} 分钟的时间预算，今天可以安排：`;
+  const body = plan.map((p, i) => `${i + 1}. ${p.title}（约 ${p.read_minutes || 20} 分钟｜相关度 ${p.match_score || "?"}）`).join("\n");
+  return `${header}\n${body}\n\n建议先看方法框架和主实验，把它当作 30 分钟一段的番茄工作。如果告诉我 DDL 我可以给你分到未来几天。`;
+}
+
+function parseDailyMinutes(query) {
+  const m = query.match(/(?:每天|每日|daily|一天)[^0-9]{0,10}(\d{2,3})\s*(?:min|分钟)?/i)
+    || query.match(/(\d{2,3})\s*(?:min|分钟)\s*\/?\s*(?:天|day)/i)
+    || query.match(/(\d{2,3})\s*(?:min|分钟)/i);
+  if (!m) return 45;
+  return Math.max(15, Math.min(240, Number(m[1])));
+}
+
+function parseDDL(query) {
+  const iso = query.match(/(20\d{2})[-\/年](\d{1,2})[-\/月](\d{1,2})/);
+  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+  const md = query.match(/(\d{1,2})[-\/月](\d{1,2})\s*日?/);
+  if (md) {
+    const now = new Date();
+    const d = new Date(now.getFullYear(), Number(md[1]) - 1, Number(md[2]));
+    if (d < now) d.setFullYear(now.getFullYear() + 1);
+    return d;
+  }
+  return null;
+}
+
+function stagePriorityFor(paper) {
+  const roadmap = window.__PAPERSWIPE_ROADMAP__;
+  if (roadmap && Array.isArray(roadmap.stages)) {
+    for (let i = 0; i < roadmap.stages.length; i++) {
+      const stage = roadmap.stages[i];
+      const hit = (stage.papers || []).some((rp) => (rp.title || "").toLowerCase() === (paper.title || "").toLowerCase());
+      if (hit) return { order: i, tag: stage.tag || "", accent: stage.accent || "violet" };
+    }
+  }
+  const abstract = (paper.abstract || "").toLowerCase();
+  const title = (paper.title || "").toLowerCase();
+  if (/survey|综述|review/.test(title) || /survey|comprehensive review/.test(abstract)) {
+    return { order: 0, tag: "综述", accent: "violet" };
+  }
+  const year = Number(paper.year || paper.published_year || 0);
+  if (year && year >= new Date().getFullYear() - 1) return { order: 2, tag: "最新", accent: "teal" };
+  return { order: 1, tag: "经典", accent: "coral" };
+}
+
+function buildWeekPlanReply(papers, query) {
+  const dailyBudget = parseDailyMinutes(query);
+  const ddl = parseDDL(query);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  let totalDays = 7;
+  if (ddl) {
+    const diff = Math.ceil((ddl.getTime() - today.getTime()) / 86400000);
+    totalDays = Math.max(3, Math.min(14, diff));
+  }
+  const enriched = papers.map((p) => ({ paper: p, prio: stagePriorityFor(p) }));
+  enriched.sort((a, b) => {
+    if (a.prio.order !== b.prio.order) return a.prio.order - b.prio.order;
+    return (b.paper.match_score || 0) - (a.paper.match_score || 0);
+  });
+
+  const days = Array.from({ length: totalDays }, (_, i) => {
+    const d = new Date(today.getTime() + i * 86400000);
+    return { date: d, minutes: 0, items: [] };
+  });
+  const overflow = [];
+  let cursor = 0;
+  for (const { paper, prio } of enriched) {
+    const need = Number(paper.read_minutes) || 25;
+    let placed = false;
+    for (let step = 0; step < totalDays; step++) {
+      const idx = (cursor + step) % totalDays;
+      if (days[idx].minutes + need <= dailyBudget + 10) {
+        days[idx].items.push({ paper, prio, minutes: need });
+        days[idx].minutes += need;
+        cursor = (idx + 1) % totalDays;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) overflow.push({ paper, prio, minutes: need });
+  }
+
+  return {
+    type: "weekplan",
+    data: {
+      title: `按 ${dailyBudget} 分钟/天为你排好了 ${totalDays} 天阅读计划`,
+      subtitle: ddl
+        ? `DDL：${ddl.getFullYear()}/${ddl.getMonth() + 1}/${ddl.getDate()}｜共 ${enriched.length - overflow.length} 篇入表`
+        : `共 ${enriched.length - overflow.length} 篇入表，按 综述 → 经典 → 最新 顺序推进`,
+      dailyBudget,
+      ddl: ddl ? ddl.toISOString() : null,
+      days,
+      overflow,
+    },
+  };
+}
+
+function buildTopPickReply(papers, query) {
+  const pick = pickBestForToday(papers);
+  if (!pick) return "我暂时没找到候选论文，可以先去 Library 加几篇。";
+  const digest = pick.digest || {};
+  const reason = digest.why_keep || digest.tldr || digest.verdict || "与你 Library 里的主线方向相关度最高";
+  const focus = digest.reading_focus || "先看方法框架、主实验与局限性";
+  return {
+    type: "toppick",
+    data: {
+      paper: pick,
+      reason,
+      focus,
+      intent: query.trim() ? shorten(query, 60) : "",
+    },
+  };
+}
+
+function buildRoadmapReply(papers) {
+  return { type: "roadmap", data: window.__PAPERSWIPE_ROADMAP__ };
+}
+
+function appendBotRoadmap(data) {
+  if (!data || !Array.isArray(data.stages) || !data.stages.length) {
+    appendBotMessage("我暂时没能生成 roadmap，请稍后再试。");
+    return;
+  }
+  const container = document.createElement("div");
+  container.className = "ai-bot-roadmap";
+  container.innerHTML = `
+    <header class="ai-bot-roadmap-head">
+      <span class="ai-bot-roadmap-badge"><i data-lucide="route"></i></span>
+      <div>
+        <strong>${escapeHTML(data.title || "为你生成的学习 roadmap")}</strong>
+        ${data.subtitle ? `<small>${escapeHTML(data.subtitle)}</small>` : ""}
+      </div>
+    </header>
+    <ol class="ai-bot-roadmap-timeline">
+      ${data.stages.map((stage, index) => `
+        <li class="ai-bot-roadmap-stage accent-${stage.accent || "violet"}" style="--stage-index: ${index};">
+          <span class="ai-bot-roadmap-node"><i data-lucide="${stage.icon || "dot"}"></i></span>
+          <div class="ai-bot-roadmap-stage-body">
+            <div class="ai-bot-roadmap-stage-head">
+              <strong>${escapeHTML(stage.title || "")}</strong>
+            </div>
+            ${stage.hint ? `<p class="ai-bot-roadmap-hint">${escapeHTML(stage.hint)}</p>` : ""}
+            <div class="ai-bot-roadmap-papers">
+              ${(stage.papers || []).map((paper, paperIndex) => `
+                <article class="ai-bot-roadmap-paper" style="--paper-index: ${paperIndex};">
+                    <div class="ai-bot-roadmap-paper-meta">
+                      <span class="ai-bot-roadmap-chip">${escapeHTML(stage.tag || "")}</span>
+                      ${paper.year ? `<small>${escapeHTML(String(paper.year))}</small>` : ""}
+                      ${paper.venue ? `<small>· ${escapeHTML(paper.venue)}</small>` : ""}
+                      ${paper.minutes ? `<small class="ai-bot-roadmap-time"><i data-lucide="clock-3"></i>${escapeHTML(String(paper.minutes))} 分钟</small>` : ""}
+                    </div>
+                    <h4>${escapeHTML(paper.title || "")}</h4>
+                    ${paper.authors ? `<small class="ai-bot-roadmap-authors">${escapeHTML(paper.authors)}</small>` : ""}
+                    ${paper.tldr ? `<p class="ai-bot-roadmap-tldr">${escapeHTML(paper.tldr)}</p>` : ""}
+                  </article>
+              `).join("")}
+            </div>
+          </div>
+        </li>
+      `).join("")}
+    </ol>
+  `;
+  elements.aiBotMessages.appendChild(container);
+  elements.aiBotMessages.scrollTop = elements.aiBotMessages.scrollHeight;
+  refreshIcons();
+  requestAnimationFrame(() => container.classList.add("is-visible"));
+}
+
+const WEEKDAY_LABEL = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+let __weekPlanCounter = 0;
+
+function appendBotWeekPlan(data) {
+  if (!data || !Array.isArray(data.days) || !data.days.length) {
+    appendBotMessage("我暂时没能生成周计划，请稍后再试。");
+    return;
+  }
+  const planId = `wp${++__weekPlanCounter}${Date.now().toString(36)}`;
+  window.__PAPERSWIPE_WEEKPLANS__ = window.__PAPERSWIPE_WEEKPLANS__ || {};
+  window.__PAPERSWIPE_WEEKPLANS__[planId] = data;
+
+  const container = document.createElement("div");
+  container.className = "ai-bot-weekplan";
+  const filledDays = data.days.filter((d) => d.items.length);
+  container.innerHTML = `
+    <header class="ai-bot-weekplan-head">
+      <span class="ai-bot-weekplan-badge"><i data-lucide="calendar-check-2"></i></span>
+      <div>
+        <strong>${escapeHTML(data.title || "本周阅读计划")}</strong>
+        ${data.subtitle ? `<small>${escapeHTML(data.subtitle)}</small>` : ""}
+      </div>
+    </header>
+    <ol class="ai-bot-weekplan-days">
+      ${filledDays.map((day, index) => {
+        const d = new Date(day.date);
+        const dateLabel = `${d.getMonth() + 1}/${d.getDate()} · ${WEEKDAY_LABEL[d.getDay()]}`;
+        return `
+          <li class="ai-bot-weekplan-day" style="--day-index: ${index};">
+            <div class="ai-bot-weekplan-day-head">
+              <span class="ai-bot-weekplan-date">${escapeHTML(dateLabel)}</span>
+              <span class="ai-bot-weekplan-day-sum"><i data-lucide="clock-3"></i>${day.minutes} 分钟</span>
+            </div>
+            <ul class="ai-bot-weekplan-items">
+              ${day.items.map((it) => `
+                <li class="ai-bot-weekplan-item accent-${escapeAttribute(it.prio.accent || "violet")}">
+                  <span class="ai-bot-weekplan-chip">${escapeHTML(it.prio.tag || "")}</span>
+                  <div class="ai-bot-weekplan-item-body">
+                    <h5>${escapeHTML(it.paper.title || "")}</h5>
+                    <small>约 ${it.minutes} 分钟</small>
+                  </div>
+                </li>
+              `).join("")}
+            </ul>
+          </li>
+        `;
+      }).join("")}
+    </ol>
+    ${data.overflow && data.overflow.length ? `
+      <p class="ai-bot-weekplan-overflow">还有 ${data.overflow.length} 篇没排进日程，DDL 之后可继续跟进。</p>
+    ` : ""}
+    <footer class="ai-bot-weekplan-foot">
+      <button type="button" class="ai-bot-weekplan-cta" data-weekplan-export="${planId}">
+        <i data-lucide="calendar-plus"></i>
+        <span>一键加到我的日历</span>
+      </button>
+      <small>会下载一个 .ics 文件，双击即可导入 Apple / Google / Outlook 日历</small>
+    </footer>
+  `;
+  elements.aiBotMessages.appendChild(container);
+  elements.aiBotMessages.scrollTop = elements.aiBotMessages.scrollHeight;
+  refreshIcons();
+  requestAnimationFrame(() => container.classList.add("is-visible"));
+}
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+function icsDateTime(d) {
+  return `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}T${pad2(d.getHours())}${pad2(d.getMinutes())}00`;
+}
+
+function icsEscape(text) {
+  return String(text || "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+}
+
+function exportWeekPlanIcs(planId) {
+  const data = window.__PAPERSWIPE_WEEKPLANS__ && window.__PAPERSWIPE_WEEKPLANS__[planId];
+  if (!data) { showToast("找不到这份计划，可能已过期"); return; }
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PaperSwipe//AI Bot//CN", "CALSCALE:GREGORIAN"];
+  const stamp = icsDateTime(new Date());
+  data.days.filter((day) => day.items.length).forEach((day, i) => {
+    const start = new Date(day.date); start.setHours(20, 0, 0, 0);
+    const end = new Date(start.getTime() + day.minutes * 60000);
+    const summary = `PaperSwipe · ${day.items.length} 篇 · ${day.minutes}min`;
+    const desc = day.items.map((it, idx) => `${idx + 1}. [${it.prio.tag}] ${it.paper.title}（约 ${it.minutes} 分钟）`).join("\n");
+    lines.push("BEGIN:VEVENT",
+      `UID:${planId}-${i}@paperswipe`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${icsDateTime(start)}`,
+      `DTEND:${icsDateTime(end)}`,
+      `SUMMARY:${icsEscape(summary)}`,
+      `DESCRIPTION:${icsEscape(desc)}`,
+      "END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `paperswipe-plan-${new Date().toISOString().slice(0, 10)}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  showToast("已生成 .ics 文件，双击导入你的日历");
+}
+
+function appendBotTopPick(data) {
+  if (!data || !data.paper) {
+    appendBotMessage("我暂时没找到候选论文，可以先去 Library 加几篇。");
+    return;
+  }
+  const paper = data.paper;
+  const digest = paper.digest || {};
+  const theme = paperTheme(paper);
+  const authors = formatAuthors(paper.authors);
+  const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
+  const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
+  const tags = deriveTags(paper);
+  const paperLink = safeURL(paper.url) ? `<a href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Original</a>` : "";
+  const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
+  const highlights = [
+    { label: "研究问题", icon: "search", text: digest.problem || "摘要未提供明确的研究问题" },
+    { label: "核心方法", icon: "book-open", text: digest.method || digest.novelty || "摘要未提供明确的方法说明" },
+    { label: "主要结果", icon: "sparkles", text: digest.result || "摘要未提供可核验的研究结果" },
+  ];
+  const minutes = Number(paper.read_minutes) || 0;
+  const needsReproduction = /复现|repro|reproduc/i.test(digest.reading_focus || "") || /代码|code|开源/i.test(digest.audience || "");
+  const focusText = digest.reading_focus || "先看方法框架、主实验与局限性";
+
+  const container = document.createElement("div");
+  container.className = "ai-bot-toppick";
+  container.innerHTML = `
+    <article class="paper-card ai-bot-toppick-card ${theme}" data-bot-flip>
+      <div class="card-flip">
+        <div class="card-face card-front">
+          <header class="knowledge-hero card-front-hero">
+            <div class="knowledge-topline">
+              <span>Knowledge Card · ${escapeHTML(paper.source || state.source || "PaperSwipe")}</span>
+            </div>
+            <div class="front-main">
+              <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
+              <p class="front-tldr">${escapeHTML(digest.tldr || digest.verdict || "点击卡片查看详细分析")}</p>
+            </div>
+            <div class="knowledge-byline">
+              <span class="author-avatar">${escapeHTML(authorInitials)}</span>
+              <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
+            </div>
+            <span class="match-pill">${numberOrZero(paper.match_score)}</span>
+            <button class="flip-hint" type="button" data-bot-flip-btn aria-label="翻到详情"><i data-lucide="repeat"></i><span>轻点卡片查看要点</span></button>
+          </header>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-scroll">
+            <div class="back-topbar">
+              <button class="flip-back-button" type="button" data-bot-flip-btn aria-label="返回一句话总结"><i data-lucide="arrow-left"></i><span>返回</span></button>
+              <strong>${escapeHTML(paper.title)}</strong>
+            </div>
+            <div class="knowledge-body">
+              <section class="knowledge-section">
+                <h3>Highlights</h3>
+                <div class="core-idea">
+                  ${highlights.map((item) => `
+                    <div class="highlight-item">
+                      <span class="core-node"><i data-lucide="${item.icon}"></i></span>
+                      <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
+                    </div>`).join("")}
+                </div>
+              </section>
+              <section class="knowledge-section">
+                <h3>Key Contributions</h3>
+                <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
+              </section>
+              <section class="knowledge-section">
+                <h3>Why it matters?</h3>
+                <p class="insight-copy">${escapeHTML(digest.why_keep || digest.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
+              </section>
+              <div class="paper-meta">
+                <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
+                <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
+                <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
+                ${paperLink}${pdfLink}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <div class="ai-bot-toppick-brief">
+      <p class="ai-bot-toppick-reason">${escapeHTML(data.reason)}</p>
+      <ul class="ai-bot-toppick-facts">
+        <li><i data-lucide="target"></i><span><strong>阅读重点：</strong>${escapeHTML(focusText)}${needsReproduction ? "（建议动手复现）" : ""}</span></li>
+        ${minutes ? `<li><i data-lucide="clock-3"></i><span><strong>所需时间：</strong>约 ${minutes} 分钟</span></li>` : ""}
+      </ul>
+    </div>
+  `;
+  elements.aiBotMessages.appendChild(container);
+  elements.aiBotMessages.scrollTop = elements.aiBotMessages.scrollHeight;
+  refreshIcons();
+  requestAnimationFrame(() => container.classList.add("is-visible"));
+}
+
+function sendBotMessage() {
+  const input = elements.aiBotInput;
+  const text = input.value.trim();
+  if (!text) return;
+  clearBotWelcome();
+  appendBotMessage(text, "user");
+  input.value = "";
+  input.style.height = "auto";
+  const typing = showBotTyping();
+  const delay = 500 + Math.min(text.length * 8, 900);
+  setTimeout(() => {
+    typing.remove();
+    const reply = buildBotReply(text);
+    if (reply && typeof reply === "object" && reply.type === "roadmap") {
+      appendBotRoadmap(reply.data);
+    } else if (reply && typeof reply === "object" && reply.type === "weekplan") {
+      appendBotWeekPlan(reply.data);
+    } else if (reply && typeof reply === "object" && reply.type === "toppick") {
+      appendBotTopPick(reply.data);
+    } else {
+      appendBotMessage(reply);
+    }
+  }, delay);
+}
+
+function clearBotWelcome() {
+  elements.aiBotMessages.querySelectorAll(".ai-bot-hero, .ai-bot-suggestions").forEach((el) => el.remove());
+}
+
 async function refreshLibrary() {
   try {
     const response = await fetch("/api/library");
@@ -732,13 +1650,17 @@ async function refreshLibrary() {
 
 function renderLibrary() {
   let entries = state.library.filter((entry) => entry.action === state.libraryFilter);
+  if (state.libraryTags.length) {
+    const selected = new Set(state.libraryTags);
+    entries = entries.filter((entry) => deriveTags(entry.paper).some((tag) => selected.has(tag)));
+  }
   if (state.librarySort === "citations") {
     entries = [...entries].sort((a, b) => numberOrZero(b.paper.citation_count) - numberOrZero(a.paper.citation_count));
   } else if (state.librarySort === "easy") {
     entries = [...entries].sort((a, b) => numberOrZero(a.paper.read_minutes) - numberOrZero(b.paper.read_minutes));
   }
 
-  renderLibrarySummary();
+  renderLibraryTags();
   if (!entries.length) {
     const labels = { save: "Interested", priority: "Key", read: "Read" };
     elements.libraryList.innerHTML = `<div class="library-empty"><i data-lucide="library"></i><h2>${labels[state.libraryFilter]} 还是空的</h2><p>回到 Explore，保留第一篇真正值得读的论文。</p></div>`;
@@ -746,33 +1668,312 @@ function renderLibrary() {
     return;
   }
 
-  const actionIcons = { save: "heart", priority: "star", read: "check" };
-  elements.libraryList.innerHTML = entries.map((entry) => {
+  const themes = ["theme-teal", "theme-violet", "theme-coral", "theme-green"];
+  const selectMode = state.librarySelectMode;
+  elements.libraryList.innerHTML = `<div class="library-grid${selectMode ? " is-selecting" : ""}">${entries.map((entry, index) => {
     const paper = entry.paper;
-    return `<article class="library-item">
-      <div class="library-visual"><i data-lucide="workflow"></i></div>
-      <div class="library-copy">
-        <h2>${escapeHTML(paper.title)}</h2>
-        <p>${escapeHTML(paper.digest?.verdict || paper.digest?.why_keep || "等待核验")}</p>
-        <small><span>${numberOrZero(paper.match_score)}% match</span> · ${numberOrZero(paper.read_minutes)} min · ${numberOrZero(paper.citation_count)} citations</small>
-      </div>
-      <div class="library-actions">
-        <span class="library-badge"><i data-lucide="${actionIcons[entry.action]}"></i></span>
-        <button type="button" data-detail-id="${escapeAttribute(paper.id)}" aria-label="查看论文详情" title="详情"><i data-lucide="chevron-right"></i></button>
-        <button type="button" data-remove-id="${escapeAttribute(paper.id)}" aria-label="移出清单" title="移出清单"><i data-lucide="trash-2"></i></button>
-      </div>
+    const theme = themes[index % themes.length];
+    const authors = formatAuthors(paper.authors);
+    const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
+    const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
+    const isSelected = state.librarySelected.has(paper.id);
+    return `<article class="library-card ${theme}${isSelected ? " is-selected" : ""}" data-library-card data-id="${escapeAttribute(paper.id)}">
+      ${selectMode ? `<span class="library-card-check" aria-hidden="true"><i data-lucide="${isSelected ? "check-square" : "square"}"></i></span>` : ""}
+      <header class="library-card-hero">
+        <div class="library-card-title">${escapeHTML(paper.title)}</div>
+        <div class="library-card-byline">
+          <span class="author-avatar">${escapeHTML(authorInitials)}</span>
+          <div><strong>${escapeHTML(authors)}</strong><span>${escapeAttribute(venue)}</span></div>
+        </div>
+      </header>
     </article>`;
-  }).join("");
+  }).join("")}</div>`;
   refreshIcons();
+  updateLibraryExportBar();
 }
 
-function renderLibrarySummary() {
-  const interested = state.library.filter((entry) => entry.action === "save").length;
-  const total = state.library.length;
-  const strong = interested >= 90 ? `Interested 已接近上限 (${interested}/100)` : `${total} papers in your reading system`;
-  const detail = interested >= 90 ? "先完成或归档一批论文，再继续滑动。" : "让 Key 保持稀缺，让 Read 记录真正完成的阅读。";
-  elements.librarySummary.innerHTML = `<i data-lucide="${interested >= 90 ? "triangle-alert" : "sparkles"}"></i><div><strong>${escapeHTML(strong)}</strong><span>${escapeHTML(detail)}</span></div>`;
-  refreshIcons();
+function collectLibraryTags() {
+  const tags = [];
+  state.library
+    .filter((entry) => entry.action === state.libraryFilter)
+    .forEach((entry) => deriveTags(entry.paper).forEach((tag) => {
+      if (tag && !tags.includes(tag)) tags.push(tag);
+    }));
+  return tags;
+}
+
+function toggleLibrarySelectMode(forceValue) {
+  const next = typeof forceValue === "boolean" ? forceValue : !state.librarySelectMode;
+  state.librarySelectMode = next;
+  if (!next) state.librarySelected.clear();
+  if (elements.libraryExportToggle) {
+    elements.libraryExportToggle.classList.toggle("is-active", next);
+    elements.libraryExportToggle.setAttribute("aria-pressed", next ? "true" : "false");
+  }
+  renderLibrary();
+}
+
+function toggleLibrarySelection(id) {
+  if (state.librarySelected.has(id)) state.librarySelected.delete(id);
+  else state.librarySelected.add(id);
+  renderLibrary();
+}
+
+function visibleLibraryIds() {
+  let entries = state.library.filter((entry) => entry.action === state.libraryFilter);
+  if (state.libraryTags.length) {
+    const selected = new Set(state.libraryTags);
+    entries = entries.filter((entry) => deriveTags(entry.paper).some((tag) => selected.has(tag)));
+  }
+  return entries.map((entry) => entry.paper.id);
+}
+
+function selectAllLibraryVisible() {
+  visibleLibraryIds().forEach((id) => state.librarySelected.add(id));
+  renderLibrary();
+}
+
+function clearLibrarySelection() {
+  state.librarySelected.clear();
+  renderLibrary();
+}
+
+function updateLibraryExportBar() {
+  if (!elements.libraryExportBar) return;
+  elements.libraryExportBar.hidden = !state.librarySelectMode;
+  if (elements.libraryExportCount) {
+    elements.libraryExportCount.textContent = String(state.librarySelected.size);
+  }
+  const empty = state.librarySelected.size === 0;
+  elements.libraryExportBar.querySelectorAll('[data-library-export-action="bibtex"], [data-library-export-action="zotero"]').forEach((btn) => {
+    btn.disabled = empty;
+  });
+}
+
+function bibtexEscape(text) {
+  return String(text || "")
+    .replace(/[{}\\]/g, (m) => `\\${m}`)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function bibtexCiteKey(paper) {
+  const first = ((paper.authors || [])[0]?.name || "anon").split(/\s+/).pop() || "anon";
+  const year = paper.year || "n.d.";
+  const slug = (paper.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 12) || "paper";
+  return `${first.toLowerCase().replace(/[^a-z0-9]/g, "")}${year}${slug}`;
+}
+
+function paperToBibTeX(paper) {
+  const type = /thesis|dissertation/i.test(paper.venue || "") ? "phdthesis"
+    : /proceedings|conf|workshop|symposium/i.test(paper.venue || "") ? "inproceedings"
+    : paper.venue ? "article"
+    : "misc";
+  const key = bibtexCiteKey(paper);
+  const fields = [];
+  const push = (k, v) => { if (v != null && String(v).trim() !== "") fields.push(`  ${k} = {${bibtexEscape(v)}}`); };
+  push("title", paper.title);
+  const authorList = (paper.authors || []).map((a) => a.name || a).filter(Boolean).join(" and ");
+  push("author", authorList);
+  push("year", paper.year);
+  if (type === "inproceedings") push("booktitle", paper.venue);
+  else push("journal", paper.venue);
+  push("url", paper.url);
+  push("doi", paper.doi);
+  if (paper.digest?.tldr) push("abstract", paper.digest.tldr);
+  const noteParts = [];
+  if (paper.match_score != null) noteParts.push(`match=${paper.match_score}`);
+  if (paper.read_minutes) noteParts.push(`read=${paper.read_minutes}min`);
+  noteParts.push("via PaperSwipe");
+  push("note", noteParts.join("; "));
+  return `@${type}{${key},\n${fields.join(",\n")}\n}`;
+}
+
+function exportSelectedBibTeX() {
+  const ids = [...state.librarySelected];
+  if (!ids.length) { showToast("请先选中至少一篇论文"); return; }
+  const papers = state.library
+    .filter((entry) => ids.includes(entry.paper.id))
+    .map((entry) => entry.paper);
+  const usedKeys = new Map();
+  const body = papers.map((paper) => {
+    const bib = paperToBibTeX(paper);
+    return bib.replace(/@(\w+)\{([^,]+),/, (match, type, key) => {
+      const n = (usedKeys.get(key) || 0) + 1;
+      usedKeys.set(key, n);
+      return `@${type}{${n > 1 ? `${key}${n}` : key},`;
+    });
+  }).join("\n\n");
+  const header = `% Exported from PaperSwipe · ${new Date().toISOString().slice(0, 10)}\n% ${papers.length} paper${papers.length > 1 ? "s" : ""}\n\n`;
+  const blob = new Blob([header + body + "\n"], { type: "application/x-bibtex;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `paperswipe-${new Date().toISOString().slice(0, 10)}.bib`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  showToast(`已导出 ${papers.length} 篇到 .bib 文件`);
+}
+
+const ZOTERO_STORAGE_KEY = "paperswipe_zotero_v1";
+const ZOTERO_API_BASE = "https://api.zotero.org";
+
+function loadZoteroCredentials() {
+  try {
+    const raw = window.localStorage.getItem(ZOTERO_STORAGE_KEY);
+    if (!raw) return { apiKey: "", userId: "" };
+    const parsed = JSON.parse(raw);
+    return { apiKey: parsed.apiKey || "", userId: parsed.userId || "" };
+  } catch (_) {
+    return { apiKey: "", userId: "" };
+  }
+}
+
+function persistZoteroCredentials() {
+  const apiKey = (document.querySelector("#zotero-api-key")?.value || "").trim();
+  const userId = (document.querySelector("#zotero-user-id")?.value || "").trim();
+  window.localStorage.setItem(ZOTERO_STORAGE_KEY, JSON.stringify({ apiKey, userId }));
+}
+
+function clearZoteroCredentials() {
+  window.localStorage.removeItem(ZOTERO_STORAGE_KEY);
+  const apiKey = document.querySelector("#zotero-api-key");
+  const userId = document.querySelector("#zotero-user-id");
+  if (apiKey) apiKey.value = "";
+  if (userId) userId.value = "";
+  setZoteroStatus("已清空 Zotero 凭据。", "muted");
+}
+
+function setZoteroStatus(text, tone = "muted") {
+  const el = document.querySelector("#zotero-status");
+  if (!el) return;
+  if (!text) { el.hidden = true; el.textContent = ""; return; }
+  el.hidden = false;
+  el.textContent = text;
+  el.dataset.tone = tone;
+}
+
+async function testZoteroConnection() {
+  persistZoteroCredentials();
+  const { apiKey, userId } = loadZoteroCredentials();
+  if (!apiKey || !userId) { setZoteroStatus("请先填写 API Key 和 userID。", "warn"); return; }
+  setZoteroStatus("正在验证连接…", "muted");
+  try {
+    const res = await fetch(`${ZOTERO_API_BASE}/users/${encodeURIComponent(userId)}/items?limit=1&format=json`, {
+      headers: { "Zotero-API-Key": apiKey, "Zotero-API-Version": "3" },
+    });
+    if (res.status === 403 || res.status === 401) { setZoteroStatus("鉴权失败：请检查 API Key 是否有写入权限，以及 userID 是否正确。", "warn"); return; }
+    if (!res.ok) { setZoteroStatus(`连接失败：HTTP ${res.status}`, "warn"); return; }
+    const total = res.headers.get("Total-Results") || "?";
+    setZoteroStatus(`✓ 已连接。你的 library 当前有 ${total} 条 items。`, "ok");
+  } catch (err) {
+    setZoteroStatus(`连接失败：${err.message || err}`, "warn");
+  }
+}
+
+function paperToZoteroItem(paper) {
+  const venue = paper.venue || "";
+  const isConf = /proceedings|conf|workshop|symposium/i.test(venue);
+  const isThesis = /thesis|dissertation/i.test(venue);
+  const isPreprint = /arxiv|preprint|biorxiv|medrxiv/i.test(venue);
+  const itemType = isThesis ? "thesis" : isConf ? "conferencePaper" : isPreprint ? "preprint" : venue ? "journalArticle" : "document";
+  const creators = (paper.authors || []).map((a) => {
+    const name = a.name || a || "";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length <= 1) return { creatorType: "author", lastName: name, firstName: "" };
+    return { creatorType: "author", firstName: parts.slice(0, -1).join(" "), lastName: parts[parts.length - 1] };
+  });
+  const tags = (typeof deriveTags === "function" ? deriveTags(paper) : []).slice(0, 12).map((tag) => ({ tag }));
+  const item = {
+    itemType,
+    title: paper.title || "",
+    creators,
+    date: paper.year ? String(paper.year) : "",
+    url: paper.url || paper.pdf_url || "",
+    abstractNote: paper.digest?.tldr || paper.abstract || "",
+    tags,
+    extra: [
+      paper.doi ? `DOI: ${paper.doi}` : "",
+      paper.match_score != null ? `PaperSwipe match: ${paper.match_score}` : "",
+      paper.read_minutes ? `PaperSwipe read: ${paper.read_minutes} min` : "",
+      "via PaperSwipe",
+    ].filter(Boolean).join("\n"),
+  };
+  if (itemType === "journalArticle") item.publicationTitle = venue;
+  else if (itemType === "conferencePaper") item.proceedingsTitle = venue;
+  else if (itemType === "thesis") item.university = venue;
+  else if (itemType === "preprint") item.repository = venue;
+  if (paper.doi) item.DOI = paper.doi;
+  return item;
+}
+
+async function exportSelectedToZotero() {
+  const ids = [...state.librarySelected];
+  if (!ids.length) { showToast("请先选中至少一篇论文"); return; }
+  const { apiKey, userId } = loadZoteroCredentials();
+  if (!apiKey || !userId) {
+    showToast("请先在 Settings → Zotero 里填 API Key 和 userID");
+    openSettingsPage();
+    return;
+  }
+  const papers = state.library
+    .filter((entry) => ids.includes(entry.paper.id))
+    .map((entry) => entry.paper);
+
+  const btn = document.querySelector('[data-library-export-action="zotero"]');
+  if (btn) { btn.disabled = true; btn.dataset.busy = "1"; }
+
+  let ok = 0, fail = 0;
+  try {
+    for (let i = 0; i < papers.length; i += 50) {
+      const batch = papers.slice(i, i + 50).map(paperToZoteroItem);
+      const res = await fetch(`${ZOTERO_API_BASE}/users/${encodeURIComponent(userId)}/items`, {
+        method: "POST",
+        headers: {
+          "Zotero-API-Key": apiKey,
+          "Zotero-API-Version": "3",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(batch),
+      });
+      if (res.status === 403 || res.status === 401) {
+        showToast("Zotero 鉴权失败，请检查 API Key 权限");
+        return;
+      }
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        showToast(`Zotero 写入失败：HTTP ${res.status} ${text.slice(0, 80)}`);
+        return;
+      }
+      const data = await res.json();
+      ok += Object.keys(data.successful || {}).length;
+      fail += Object.keys(data.failed || {}).length;
+    }
+    if (fail === 0) {
+      showToast(`已导入 ${ok} 篇到你的 Zotero`);
+    } else {
+      showToast(`Zotero 完成：成功 ${ok} 篇，失败 ${fail} 篇`);
+    }
+    toggleLibrarySelectMode(false);
+  } catch (err) {
+    showToast(`Zotero 请求失败：${err.message || err}`);
+  } finally {
+    if (btn) { btn.disabled = false; delete btn.dataset.busy; }
+  }
+}
+
+function renderLibraryTags() {
+  const tags = collectLibraryTags();
+  if (!tags.length) {
+    elements.libraryTags.innerHTML = "";
+    return;
+  }
+  elements.libraryTags.innerHTML = tags.map((tag) => {
+    const active = state.libraryTags.includes(tag);
+    return `<button type="button" class="library-tag${active ? " is-active" : ""}" data-library-tag="${escapeAttribute(tag)}" aria-pressed="${active}">${escapeHTML(tag)}</button>`;
+  }).join("");
 }
 
 async function removeFromLibrary(id) {
@@ -815,13 +2016,15 @@ async function refreshSearches() {
 }
 
 function switchView(view) {
-  const validViews = ["discover", "library", "network", "settings"];
+  const validViews = ["discover", "library", "network", "profile"];
   state.activeView = validViews.includes(view) ? view : "discover";
+  closeAiBotPage();
+  closeSettingsPage();
   const views = {
     discover: elements.discoverView,
     library: elements.libraryView,
     network: elements.networkView,
-    settings: elements.settingsView,
+    profile: elements.profileView,
   };
   Object.entries(views).forEach(([name, panel]) => {
     const active = name === state.activeView;
@@ -832,7 +2035,7 @@ function switchView(view) {
   elements.searchPanel.hidden = true;
   if (state.activeView === "library") refreshLibrary();
   if (state.activeView === "network") renderPeople();
-  if (state.activeView === "settings") renderSettings();
+  if (state.activeView === "profile") renderProfile();
 }
 
 function switchNetworkTab(tab) {
@@ -840,6 +2043,21 @@ function switchNetworkTab(tab) {
   document.querySelector("#network-heatmap").hidden = state.networkTab !== "heatmap";
   document.querySelector("#network-connections").hidden = state.networkTab !== "connections";
   document.querySelectorAll("[data-network-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.networkTab === state.networkTab));
+}
+
+function openAiBotPage() {
+  if (!elements.aiBotPage) return;
+  if (elements.aiBotMessages.childElementCount === 0) renderBotGreeting();
+  elements.aiBotPage.hidden = false;
+  document.body.classList.add("is-ai-bot-open");
+  refreshIcons();
+  setTimeout(() => elements.aiBotInput && elements.aiBotInput.focus(), 60);
+}
+
+function closeAiBotPage() {
+  if (!elements.aiBotPage) return;
+  elements.aiBotPage.hidden = true;
+  document.body.classList.remove("is-ai-bot-open");
 }
 
 function renderPeople() {
@@ -872,9 +2090,8 @@ function toggleConnection(button) {
 }
 
 function renderSettings() {
-  const identities = { graduate: "研究生", researcher: "教授 / 研究员", enthusiast: "AI 探索者" };
+  const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
   const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
-  document.querySelector("#settings-identity").textContent = `${identities[onboardingProfile.identity] || "研究者"} · ${styleLabel}`;
   elements.settingsTopicChips.innerHTML = onboardingProfile.topics.map((topic) => `<button type="button" data-settings-topic-remove="${escapeAttribute(topic)}"><span>${escapeHTML(topic)}</span><i data-lucide="x"></i></button>`).join("");
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     const selected = button.dataset.appearance === state.appearance;
@@ -889,6 +2106,107 @@ function renderSettings() {
   elements.settingsComplexity.value = String(onboardingProfile.complexity);
   updateComplexityLabel(elements.settingsComplexityLabel, onboardingProfile.complexity);
   refreshIcons();
+}
+
+const TODO_STORAGE_KEY = "paperswipe_todos";
+const TODO_SCOPES = ["day", "week", "month"];
+
+function loadTodos() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(TODO_STORAGE_KEY));
+    if (!Array.isArray(saved)) return null;
+    return saved.filter((item) => item && typeof item.text === "string");
+  } catch (_) {
+    return null;
+  }
+}
+
+function persistTodos() {
+  window.localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(state.todos));
+}
+
+function defaultTodos() {
+  return [
+    { id: "t1", text: "Deep-read MemGPT hierarchical memory management", done: false, scope: "day" },
+    { id: "t2", text: "Organize RAG evaluation benchmark notes", done: false, scope: "week" },
+    { id: "t3", text: "Track this week's new Memory Agent papers", done: false, scope: "week" },
+    { id: "t4", text: "Finish the long-term memory survey monthly report", done: false, scope: "month" },
+  ];
+}
+
+function scopeLabel(scope) {
+  return scope === "day" ? "Today" : scope === "week" ? "This week" : "This month";
+}
+
+function renderProfile() {
+  const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
+  const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
+  if (elements.profileIdentity) elements.profileIdentity.textContent = `${identities[onboardingProfile.identity] || "研究者"} · ${styleLabel}`;
+  renderTodos();
+  refreshIcons();
+}
+
+function renderTodos() {
+  const scope = state.todoScope || "day";
+  document.querySelectorAll("[data-todo-scope]").forEach((button) => {
+    const active = button.dataset.todoScope === scope;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-checked", String(active));
+  });
+  const items = state.todos.filter((item) => item.scope === scope);
+  if (!items.length) {
+    elements.todoList.innerHTML = `<li class="todo-empty">${scopeLabel(scope)}暂无阅读任务，添加一项吧。</li>`;
+    return;
+  }
+  elements.todoList.innerHTML = items.map((item) => `
+    <li class="todo-item${item.done ? " is-done" : ""}" data-todo-id="${escapeAttribute(item.id)}">
+      <button class="todo-check" type="button" data-todo-toggle="${escapeAttribute(item.id)}" aria-label="${item.done ? "标记为未完成" : "标记为完成"}" title="完成">
+        <i data-lucide="${item.done ? "check" : "circle"}"></i>
+      </button>
+      <span class="todo-text">${escapeHTML(item.text)}</span>
+      <button class="todo-remove" type="button" data-todo-remove="${escapeAttribute(item.id)}" aria-label="删除任务" title="删除"><i data-lucide="x"></i></button>
+    </li>`).join("");
+}
+
+function addTodo(text) {
+  const scope = state.todoScope || "day";
+  state.todos.unshift({ id: `t${Date.now()}`, text: text.trim(), done: false, scope });
+  persistTodos();
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const item = state.todos.find((entry) => entry.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  persistTodos();
+  renderTodos();
+}
+
+function removeTodo(id) {
+  state.todos = state.todos.filter((entry) => entry.id !== id);
+  persistTodos();
+  renderTodos();
+}
+
+function switchTodoScope(scope) {
+  if (!TODO_SCOPES.includes(scope)) return;
+  state.todoScope = scope;
+  renderTodos();
+}
+
+function openSettingsPage() {
+  if (!elements.settingsPage) return;
+  renderSettings();
+  elements.settingsPage.hidden = false;
+  document.body.classList.add("is-settings-open");
+  refreshIcons();
+}
+
+function closeSettingsPage() {
+  if (!elements.settingsPage) return;
+  elements.settingsPage.hidden = true;
+  document.body.classList.remove("is-settings-open");
 }
 
 function removeSettingsTopic(topic) {
@@ -963,6 +2281,87 @@ function openDetails(id) {
     <div class="detail-links">${links}</div>`;
   refreshIcons();
   elements.dialog.showModal();
+}
+
+function openLibraryCard(id) {
+  const entry = state.library.find((item) => item.paper.id === id);
+  if (!entry) return;
+  const paper = entry.paper;
+  const theme = paperTheme(paper);
+  const authors = formatAuthors(paper.authors);
+  const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
+  const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
+  const tags = deriveTags(paper);
+  const paperLink = safeURL(paper.url) ? `<a href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Original</a>` : "";
+  const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
+  const highlights = [
+    { label: "研究问题", icon: "search", text: paper.digest?.problem || "摘要未提供明确的研究问题" },
+    { label: "核心方法", icon: "book-open", text: paper.digest?.method || paper.digest?.novelty || "摘要未提供明确的方法说明" },
+    { label: "主要结果", icon: "sparkles", text: paper.digest?.result || "摘要未提供可核验的研究结果" },
+  ];
+  elements.libraryCardDialogContent.innerHTML = `
+    <article class="paper-card library-pop-card ${theme}" data-library-pop-card>
+      <div class="card-flip">
+        <div class="card-face card-front">
+          <header class="knowledge-hero card-front-hero">
+            <div class="knowledge-topline">
+              <span>Knowledge Card · ${escapeHTML(paper.source || state.source)}</span>
+            </div>
+            <div class="front-main">
+              <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
+              <p class="front-tldr">${escapeHTML(paper.digest?.tldr || paper.digest?.verdict || "点击卡片查看详细分析")}</p>
+            </div>
+            <div class="knowledge-byline">
+              <span class="author-avatar">${escapeHTML(authorInitials)}</span>
+              <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
+            </div>
+          </header>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-scroll">
+            <div class="back-topbar">
+              <button class="flip-back-button" type="button" data-close-dialog="library-card-dialog" aria-label="关闭卡片"><i data-lucide="arrow-left"></i><span>返回</span></button>
+              <strong>${escapeHTML(paper.title)}</strong>
+            </div>
+            <div class="knowledge-body">
+              <section class="knowledge-section">
+                <h3>Highlights</h3>
+                <div class="core-idea" aria-label="AI 提取的论文要点">
+                  ${highlights.map((item) => `
+                    <div class="highlight-item">
+                      <span class="core-node"><i data-lucide="${item.icon}"></i></span>
+                      <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
+                    </div>`).join("")}
+                </div>
+              </section>
+              <section class="knowledge-section">
+                <h3>Key Contributions</h3>
+                <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
+              </section>
+              <section class="knowledge-section">
+                <h3>Why it matters?</h3>
+                <p class="insight-copy">${escapeHTML(paper.digest?.why_keep || paper.digest?.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
+              </section>
+              <section class="knowledge-section">
+                <h3>Application</h3>
+                <div class="application-copy"><i data-lucide="briefcase-business"></i><span>${escapeHTML(paper.digest?.audience || paper.digest?.reading_focus || "适合关注该方向的方法研究者")}</span></div>
+              </section>
+              <div class="paper-meta">
+                <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
+                <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
+                <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
+                ${paperLink}${pdfLink}
+              </div>
+              <button class="detail-trigger" type="button" data-detail-id="${escapeAttribute(paper.id)}"><i data-lucide="panel-right-open"></i><span>查看判断依据与原始摘要</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  refreshIcons();
+  elements.libraryCardDialog.showModal();
+  const popCard = elements.libraryCardDialogContent.querySelector(".library-pop-card");
+  if (popCard) requestAnimationFrame(() => requestAnimationFrame(() => popCard.classList.add("is-flipped")));
 }
 
 function updateProgress() {

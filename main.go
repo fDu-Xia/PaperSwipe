@@ -34,10 +34,16 @@ func main() {
 	images := NewImageGenerator(imageClient)
 	api := NewAPI(searcher, summarizer, images, store, logger)
 
-	staticFS, err := fs.Sub(webFiles, "web")
-	if err != nil {
-		logger.Error("load embedded web files", "error", err)
-		os.Exit(1)
+	var staticFS fs.FS
+	if os.Getenv("DEV") == "1" {
+		staticFS = os.DirFS("web")
+		logger.Info("serving web assets from disk (DEV mode)")
+	} else {
+		staticFS, err = fs.Sub(webFiles, "web")
+		if err != nil {
+			logger.Error("load embedded web files", "error", err)
+			os.Exit(1)
+		}
 	}
 	static := spaFileServer(staticFS)
 	server := &http.Server{
