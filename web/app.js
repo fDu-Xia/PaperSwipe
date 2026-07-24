@@ -23,13 +23,14 @@ const state = {
   libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
-  networkTab: "heatmap",
+  networkTab: "friends",
   aiModel: "",
   imageEnabled: false,
   imageModel: "",
   paperImages: new Map(),
   generatingImage: "",
   connectedPeople: new Set(),
+  userForumPosts: [],
   stats: { saved: 0, priority: 0, read: 0, dismissed: 0 },
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
   todos: [],
@@ -451,6 +452,11 @@ function bindEvents() {
       toggleConnection(connectButton);
       return;
     }
+    const forumPost = event.target.closest("[data-forum-post-id]");
+    if (forumPost) {
+      openForumPost(forumPost.dataset.forumPostId);
+      return;
+    }
     const chatButton = event.target.closest("[data-chat-person]");
     if (chatButton) {
       showToast(`已打开与 ${chatButton.dataset.chatPerson} 的研究对话`);
@@ -557,10 +563,41 @@ function bindEvents() {
     });
   });
 
-  document.querySelector("#forums-button").addEventListener("click", () => elements.forumDialog.showModal());
+  const forumsBtn = document.querySelector("#forums-button");
+  if (forumsBtn && elements.forumDialog) forumsBtn.addEventListener("click", () => elements.forumDialog.showModal());
   document.querySelectorAll("[data-network-tab]").forEach((button) => {
     button.addEventListener("click", () => switchNetworkTab(button.dataset.networkTab));
   });
+  document.querySelectorAll("[data-compose-type]").forEach((button) => {
+    button.addEventListener("click", () => {
+      composeType = button.dataset.composeType;
+      document.querySelectorAll("[data-compose-type]").forEach((b) => b.classList.toggle("is-active", b.dataset.composeType === composeType));
+    });
+  });
+  const composeFab = document.querySelector("#compose-fab");
+  if (composeFab) composeFab.addEventListener("click", openCompose);
+  const composeSubmit = document.querySelector("#compose-submit");
+  if (composeSubmit) composeSubmit.addEventListener("click", submitComposePost);
+  const friendsSearchInput = document.querySelector("#friends-search-input");
+  if (friendsSearchInput) friendsSearchInput.addEventListener("input", renderPeople);
+  const trendingCard = document.querySelector("#trending-card");
+  if (trendingCard) {
+    const flip = () => trendingCard.classList.toggle("is-flipped");
+    trendingCard.addEventListener("click", flip);
+    trendingCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+    });
+  }
+  const forumReplyForm = document.querySelector("#forum-detail-reply-form");
+  if (forumReplyForm) {
+    forumReplyForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#forum-reply-input");
+      if (!input) return;
+      submitForumReply(input.value);
+      input.value = "";
+    });
+  }
 
   document.querySelector("#save-topics-button").addEventListener("click", saveSettingsTopics);
   document.querySelectorAll("[data-appearance]").forEach((button) => {
@@ -2863,7 +2900,17 @@ function switchView(view) {
   document.querySelectorAll(".bottom-nav [data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === state.activeView));
   elements.searchPanel.hidden = true;
   if (state.activeView === "library") refreshLibrary();
-  if (state.activeView === "network") renderPeople();
+  if (state.activeView === "network") {
+    renderPeople();
+    renderForumPosts();
+    // Sync panel visibility to current tab
+    const friendsPanel = document.querySelector("#network-friends");
+    const forumPanel = document.querySelector("#network-forum");
+    if (friendsPanel) friendsPanel.hidden = state.networkTab !== "friends";
+    if (forumPanel) forumPanel.hidden = state.networkTab !== "forum";
+    const fab = document.querySelector("#compose-fab");
+    if (fab) fab.hidden = state.networkTab !== "forum";
+  }
   if (state.activeView === "profile") renderProfile();
   if (state.activeView === "todos") {
     state.weekPlanOffset = 0;
@@ -2876,10 +2923,14 @@ function switchView(view) {
 }
 
 function switchNetworkTab(tab) {
-  state.networkTab = tab === "connections" ? "connections" : "heatmap";
-  document.querySelector("#network-heatmap").hidden = state.networkTab !== "heatmap";
-  document.querySelector("#network-connections").hidden = state.networkTab !== "connections";
+  state.networkTab = tab === "forum" ? "forum" : "friends";
+  const friendsPanel = document.querySelector("#network-friends");
+  const forumPanel = document.querySelector("#network-forum");
+  if (friendsPanel) friendsPanel.hidden = state.networkTab !== "friends";
+  if (forumPanel) forumPanel.hidden = state.networkTab !== "forum";
   document.querySelectorAll("[data-network-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.networkTab === state.networkTab));
+  const fab = document.querySelector("#compose-fab");
+  if (fab) fab.hidden = state.networkTab !== "forum";
 }
 
 function openAiBotPage() {
@@ -2897,33 +2948,297 @@ function closeAiBotPage() {
   document.body.classList.remove("is-ai-bot-open");
 }
 
+/* ── Friends (Network) ── */
+
+const MOCK_FRIENDS_NETWORK = [
+  { id: "chen",  initials: "JC", name: "J. Chen",     bio: "Explainable AI Agents",         avatar: "fa1" },
+  { id: "maya",  initials: "MG", name: "Maya Garcia", bio: "Deep Reinforcement Learning",   avatar: "fa2" },
+  { id: "alex",  initials: "AL", name: "Alex Lin",    bio: "Multimodal Computer Vision",    avatar: "fa3" },
+  { id: "yuki",  initials: "YT", name: "Yuki Tanaka", bio: "Long-term Memory in LLM Agents", avatar: "fa4" },
+  { id: "priya", initials: "PS", name: "Priya Shah",  bio: "Medical Imaging & Few-shot",    avatar: "fa5" },
+];
+
+const MOCK_FRIENDS_ACTIVITY = [
+  {
+    id: "act-1",
+    friendId: "chen",
+    kind: "reading",
+    when: "2h ago",
+    body: "Currently reading",
+    paper: "Reflexion: Language Agents with Verbal Reinforcement Learning",
+    meta: "arXiv 2303.11366 · 32 min read",
+  },
+  {
+    id: "act-2",
+    friendId: "yuki",
+    kind: "post",
+    when: "4h ago",
+    body: "Posted in Q&A",
+    paper: "How to keep long-term memory stable across multi-step web browsing agents?",
+    meta: "4 replies · 12 upvotes",
+    postId: "p1",
+  },
+  {
+    id: "act-3",
+    friendId: "maya",
+    kind: "save",
+    when: "6h ago",
+    body: "Saved to library",
+    paper: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+    meta: "NeurIPS 2023 · Priority",
+  },
+  {
+    id: "act-4",
+    friendId: "priya",
+    kind: "reading",
+    when: "yesterday",
+    body: "Currently reading",
+    paper: "Segment Anything Model 2: Unified Segmentation across Images and Videos",
+    meta: "Meta AI · 48 min read",
+  },
+  {
+    id: "act-5",
+    friendId: "alex",
+    kind: "post",
+    when: "yesterday",
+    body: "Recommended in 论文速递",
+    paper: "Vision Transformers Need Registers",
+    meta: "ICLR 2024 · +28 likes",
+    postId: "p3",
+  },
+  {
+    id: "act-6",
+    friendId: "chen",
+    kind: "reflect",
+    when: "2 days ago",
+    body: "Left a reflection",
+    paper: '"Thinking out loud consistently helps small models — surprised how well 7B can plan multi-step tasks once given verbal traces."',
+    meta: "on Chain-of-Thought Prompting",
+  },
+];
+
+function friendAvatarClass(friendId) {
+  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
+  return f ? f.avatar : "fa1";
+}
+function friendInitials(friendId) {
+  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
+  return f ? f.initials : "?";
+}
+function friendName(friendId) {
+  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
+  return f ? f.name : "Friend";
+}
+
+function activityKindIcon(kind) {
+  if (kind === "reading") return "📖";
+  if (kind === "save") return "🔖";
+  if (kind === "reflect") return "💭";
+  return "💬";
+}
+
 function renderPeople() {
-  const people = [
-    { id: "maya", initials: "MG", name: "Maya Garcia", role: "Postdoc", topic: "Deep RL in robotics" },
-    { id: "chen", initials: "JC", name: "J. Chen", role: "PhD", topic: "Explainable AI agents" },
-    { id: "alex", initials: "AL", name: "Alex Lin", role: "Researcher", topic: "Multimodal computer vision" },
-  ];
-  elements.peopleList.innerHTML = people.map((person) => {
-    const connected = state.connectedPeople.has(person.id);
-    return `<article class="person-item">
-      <span class="person-avatar">${person.initials}</span>
-      <div class="person-info"><strong>${escapeHTML(person.name)} <small>${escapeHTML(person.role)}</small></strong><span>${escapeHTML(person.topic)}</span></div>
-      <button class="connect-button${connected ? " is-connected" : ""}" type="button" data-connect-person="${person.id}">${connected ? "Connected" : "Connect"}</button>
-      <button class="chat-button" type="button" data-chat-person="${escapeAttribute(person.name)}" aria-label="与 ${escapeAttribute(person.name)} 对话" title="Chat"><i data-lucide="message-circle"></i></button>
-    </article>`;
-  }).join("");
-  document.querySelector("#connection-count").textContent = String(3 + state.connectedPeople.size);
-  const topics = onboardingProfile.topics.slice(0, 2).join(" and ") || "AI agents";
-  document.querySelector("#network-overlap").textContent = `Your interests overlap most with ${topics}.`;
+  const listEl = document.querySelector("#friends-activity");
+  if (!listEl) return;
+  const query = String((document.querySelector("#friends-search-input") || {}).value || "").trim().toLowerCase();
+  const filtered = query
+    ? MOCK_FRIENDS_ACTIVITY.filter((a) =>
+        friendName(a.friendId).toLowerCase().includes(query) ||
+        (a.paper || "").toLowerCase().includes(query) ||
+        (a.body || "").toLowerCase().includes(query))
+    : MOCK_FRIENDS_ACTIVITY;
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="wp-empty" style="text-align:center;padding:20px 0;">No activity matches "${escapeHTML(query)}".</div>`;
+    return;
+  }
+  listEl.innerHTML = filtered.map((a, idx) => `
+    <article class="activity-item" style="--activity-index:${idx}" ${a.postId ? `data-forum-post-id="${escapeAttribute(a.postId)}"` : ""}>
+      <span class="friend-avatar ${friendAvatarClass(a.friendId)}">${escapeHTML(friendInitials(a.friendId))}</span>
+      <div class="activity-body">
+        <div class="activity-meta">
+          <strong>${escapeHTML(friendName(a.friendId))}</strong>
+          <span class="activity-kind">${activityKindIcon(a.kind)} ${escapeHTML(a.body)}</span>
+          <span class="activity-when">· ${escapeHTML(a.when)}</span>
+        </div>
+        <div class="activity-paper">${escapeHTML(a.paper)}</div>
+        ${a.meta ? `<div class="activity-sub">${escapeHTML(a.meta)}</div>` : ""}
+      </div>
+    </article>`).join("");
   refreshIcons();
 }
 
-function toggleConnection(button) {
-  const id = button.dataset.connectPerson;
-  if (state.connectedPeople.has(id)) state.connectedPeople.delete(id);
-  else state.connectedPeople.add(id);
-  renderPeople();
-  showToast(state.connectedPeople.has(id) ? "已建立研究连接" : "已取消连接");
+// Kept as a no-op stub for legacy callers.
+function toggleConnection(_button) {}
+
+/* ── Forum ── */
+
+const MOCK_FORUM_POSTS = [
+  {
+    id: "p1", type: "qa", avatar: "av1", author: "Alice L.", when: "2 小时前",
+    title: "如何让 LLM agent 在长任务中保持稳定的长期记忆？",
+    body: "我在做一个 web 浏览 agent，多步之后经常忘掉早期的 subgoal。看过 MemGPT 但集成太复杂，大家有没有更轻量的方案？",
+    tags: ["LLM Agents", "Long-term Memory"],
+    likes: 12, replies: 4, saved: false, liked: false,
+    repliesList: [
+      { author: "J. Chen", when: "1 小时前", body: "可以试试 hierarchical summary：把每 N 步压缩成一段记忆，塞回 context。简单但意外好用。" },
+      { author: "Maya G.", when: "45 分钟前", body: "推荐读一下 RETRO 和 ReadAgent，都是把 memory 外挂到 retrieval 的思路。" },
+    ],
+  },
+  {
+    id: "p2", type: "discuss", avatar: "av2", author: "Bob Y.", when: "5 小时前",
+    title: "Chain-of-Thought 到底是学到的还是模式匹配？",
+    body: "最近有几篇论文说小模型也能 CoT，但同样有反驳的证据。你怎么看这个问题？",
+    tags: ["Reasoning", "LLMs"],
+    likes: 34, replies: 12, saved: true, liked: true,
+    repliesList: [
+      { author: "Priya S.", when: "3 小时前", body: "我倾向于说是 pattern。真正的推理会在 few-shot 之外仍然稳定，但目前没有这个。" },
+    ],
+  },
+  {
+    id: "p3", type: "rec", avatar: "av3", author: "Yuki T.", when: "1 天前",
+    title: "推荐一篇最近很喜欢的论文：Reflexion",
+    body: "让 agent 在每次失败后写一段自省，再重新尝试。简单粗暴但在 HumanEval 上有惊喜的提升。",
+    tags: ["Agents", "Self-improvement"],
+    likes: 28, replies: 6, saved: false, liked: false,
+    repliesList: [],
+  },
+];
+
+let composeType = "qa";
+
+// Post-type label helpers — the type still exists as a small tag on each card,
+// but is no longer used to filter the list.
+function forumTypeLabel(t) {
+  if (t === "qa") return "Q&A";
+  if (t === "discuss") return "Discussion";
+  if (t === "rec") return "Rec";
+  return t;
+}
+
+function renderForumPosts() {
+  const listEl = document.querySelector("#forum-posts");
+  if (!listEl) return;
+  const posts = (state.userForumPosts || []).concat(MOCK_FORUM_POSTS);
+  if (!posts.length) {
+    listEl.innerHTML = `<div class="wp-empty" style="text-align:center;padding:24px 0;">还没有帖子。用右下角的按钮发一条吧。</div>`;
+    return;
+  }
+  listEl.innerHTML = posts.map((p) => `
+    <article class="forum-post" data-forum-post-id="${escapeAttribute(p.id)}">
+      <div class="forum-post-header">
+        <span class="forum-post-avatar ${p.avatar}">${escapeHTML((p.author || "?").slice(0, 2).toUpperCase())}</span>
+        <div class="forum-post-meta">
+          <strong>${escapeHTML(p.author)}</strong>
+          <span>${escapeHTML(p.when)}</span>
+        </div>
+        <span class="forum-post-type-tag ${p.type}">${escapeHTML(forumTypeLabel(p.type))}</span>
+      </div>
+      <div class="forum-post-title">${escapeHTML(p.title)}</div>
+      <div class="forum-post-body">${escapeHTML(p.body)}</div>
+      ${p.tags && p.tags.length ? `<div class="forum-post-tags">${p.tags.map((t) => `<span class="forum-post-tag">#${escapeHTML(t)}</span>`).join("")}</div>` : ""}
+      <div class="forum-post-stats">
+        <span class="${p.liked ? "liked" : ""}"><i data-lucide="heart"></i> ${p.likes || 0}</span>
+        <span><i data-lucide="message-circle"></i> ${p.replies || (p.repliesList ? p.repliesList.length : 0)}</span>
+        <span class="${p.saved ? "saved" : ""}"><i data-lucide="bookmark"></i> ${p.saved ? "已收藏" : "收藏"}</span>
+      </div>
+    </article>`).join("");
+  refreshIcons();
+}
+
+function openForumPost(id) {
+  const post = MOCK_FORUM_POSTS.concat(state.userForumPosts || []).find((p) => p.id === id);
+  if (!post) return;
+  const bodyEl = document.querySelector("#forum-detail-body");
+  const typeEl = document.querySelector("#forum-detail-type");
+  const dialog = document.querySelector("#forum-detail-dialog");
+  if (!bodyEl || !dialog) return;
+  if (typeEl) typeEl.textContent = post.type === "qa" ? "Q&A 求助" : (post.type === "discuss" ? "观点讨论" : "论文速递");
+  const repliesHTML = (post.repliesList || []).map((r) => `
+    <div class="reply-item">
+      <span class="reply-avatar">${escapeHTML((r.author || "?").slice(0, 2).toUpperCase())}</span>
+      <div class="reply-body">
+        <strong>${escapeHTML(r.author)}</strong>
+        <time>${escapeHTML(r.when)}</time>
+        <p>${escapeHTML(r.body)}</p>
+      </div>
+    </div>`).join("");
+  bodyEl.innerHTML = `
+    <article class="forum-post">
+      <div class="forum-post-header">
+        <span class="forum-post-avatar ${post.avatar}">${escapeHTML((post.author || "?").slice(0, 2).toUpperCase())}</span>
+        <div class="forum-post-meta">
+          <strong>${escapeHTML(post.author)}</strong>
+          <span>${escapeHTML(post.when)}</span>
+        </div>
+        <span class="forum-post-type-tag ${post.type}">${post.type === "qa" ? "Q&A" : (post.type === "discuss" ? "讨论" : "速递")}</span>
+      </div>
+      <div class="forum-post-title">${escapeHTML(post.title)}</div>
+      <div class="forum-post-body">${escapeHTML(post.body)}</div>
+      ${post.tags && post.tags.length ? `<div class="forum-post-tags">${post.tags.map((t) => `<span class="forum-post-tag">#${escapeHTML(t)}</span>`).join("")}</div>` : ""}
+    </article>
+    <div class="forum-detail-replies">
+      <h3>回复 <small>${(post.repliesList || []).length} 条</small></h3>
+      ${repliesHTML || `<p style="color:var(--muted);font-size:11px;">还没有回复。来说两句 →</p>`}
+    </div>`;
+  dialog.dataset.postId = id;
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  refreshIcons();
+}
+
+function submitForumReply(text) {
+  const dialog = document.querySelector("#forum-detail-dialog");
+  const id = dialog && dialog.dataset.postId;
+  if (!id || !text.trim()) return;
+  const post = MOCK_FORUM_POSTS.concat(state.userForumPosts || []).find((p) => p.id === id);
+  if (!post) return;
+  post.repliesList = post.repliesList || [];
+  post.repliesList.push({ author: "你", when: "刚刚", body: text.trim() });
+  post.replies = (post.replies || 0) + 1;
+  openForumPost(id);
+  renderForumPosts();
+}
+
+/* ── Compose ── */
+
+function openCompose() {
+  // Default new post to Q&A; the compose dialog still lets user pick type.
+  composeType = composeType || "qa";
+  document.querySelectorAll("[data-compose-type]").forEach((b) => b.classList.toggle("is-active", b.dataset.composeType === composeType));
+  const dialog = document.querySelector("#compose-dialog");
+  const titleEl = document.querySelector("#compose-title");
+  const bodyEl = document.querySelector("#compose-body");
+  if (titleEl) titleEl.value = "";
+  if (bodyEl) bodyEl.value = "";
+  if (dialog && typeof dialog.showModal === "function") dialog.showModal();
+  setTimeout(() => titleEl && titleEl.focus(), 80);
+}
+
+function submitComposePost() {
+  const titleEl = document.querySelector("#compose-title");
+  const bodyEl = document.querySelector("#compose-body");
+  const title = (titleEl && titleEl.value || "").trim();
+  const body = (bodyEl && bodyEl.value || "").trim();
+  if (!title) {
+    showToast("请输入标题");
+    return;
+  }
+  const post = {
+    id: `user-${Date.now()}`,
+    type: composeType,
+    avatar: "av1",
+    author: "你",
+    when: "刚刚",
+    title, body,
+    tags: [],
+    likes: 0, replies: 0, saved: false, liked: false,
+    repliesList: [],
+  };
+  if (!Array.isArray(state.userForumPosts)) state.userForumPosts = [];
+  state.userForumPosts.unshift(post);
+  const dialog = document.querySelector("#compose-dialog");
+  if (dialog) dialog.close();
+  renderForumPosts();
+  showToast("已发布");
 }
 
 function renderSettings() {

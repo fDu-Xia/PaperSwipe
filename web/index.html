@@ -259,39 +259,228 @@
         <header class="page-topbar">
           <span class="topbar-spacer"></span>
           <h1 id="network-title">Your Network</h1>
-          <button id="forums-button" class="topbar-button forum-button" type="button" aria-label="打开研究论坛" title="研究论坛"><i data-lucide="messages-square"></i><b></b></button>
+          <span class="topbar-spacer"></span>
         </header>
 
         <div class="network-tabs" role="tablist" aria-label="Network 页面">
-          <button class="is-active" type="button" data-network-tab="heatmap" role="tab">Network Heatmap</button>
-          <button type="button" data-network-tab="connections" role="tab">Connections <b id="connection-count">3</b></button>
+          <button class="is-active" type="button" data-network-tab="friends" role="tab"><i data-lucide="users-round"></i> 好友圈</button>
+          <button type="button" data-network-tab="forum" role="tab"><i data-lucide="messages-square"></i> 论坛<b id="forum-badge" class="tab-badge"></b></button>
         </div>
 
-        <div id="network-heatmap" class="network-panel">
-          <div class="heatmap-stage" aria-label="研究兴趣关系热力图">
-            <div class="hex-grid" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
-              <span></span><span class="warm"></span><span class="active"></span><span></span><span></span>
-              <span></span><span class="active"></span><span class="core">+12</span><span class="warm"></span><span></span>
-              <span></span><span></span><span class="warm"></span><span></span><span></span>
+        <div class="network-scroll" id="network-scroll">
+          <!-- FRIENDS PANEL -->
+          <div id="network-friends" class="network-panel is-active">
+            <div class="friends-search">
+              <i data-lucide="search"></i>
+              <input type="search" id="friends-search-input" placeholder="搜索研究者姓名或研究领域…" autocomplete="off">
             </div>
-            <div class="heatmap-person person-one"><span>JC</span><b>J. Chen, PhD</b><small>Explainable Agents</small></div>
-            <div class="heatmap-person person-two"><span>MG</span><b>+12 connections</b></div>
-            <div class="heatmap-person person-three"><span>AL</span><b>Computer Vision</b></div>
+
+            <div class="trending-card" id="trending-card" role="button" tabindex="0" aria-label="Trending research topics (tap to flip)">
+              <div class="trending-inner">
+                <!-- FRONT: Global -->
+                <div class="trending-face trending-face--front">
+                  <header class="trending-head">
+                    <div class="trending-title">
+                      <span class="trending-icon">🌍</span>
+                      <div>
+                        <strong>Trending globally</strong>
+                        <small>Top 5 research topics this week</small>
+                      </div>
+                    </div>
+                    <div class="trending-toggle" aria-hidden="true">
+                      <span class="is-active">Global</span><span>Friends</span>
+                    </div>
+                  </header>
+                  <ol class="trending-list">
+                    <li class="trending-item" style="--rank:1;--pct:100;--tint:265">
+                      <span class="trending-rank">1</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Large Language Model Agents</span>
+                          <span class="trending-metric">18.4k</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 42%</span>
+                    </li>
+                    <li class="trending-item" style="--rank:2;--pct:86;--tint:200">
+                      <span class="trending-rank">2</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Diffusion Models</span>
+                          <span class="trending-metric">15.8k</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 18%</span>
+                    </li>
+                    <li class="trending-item" style="--rank:3;--pct:70;--tint:145">
+                      <span class="trending-rank">3</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Retrieval-Augmented Generation</span>
+                          <span class="trending-metric">12.9k</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 9%</span>
+                    </li>
+                    <li class="trending-item" style="--rank:4;--pct:55;--tint:35">
+                      <span class="trending-rank">4</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Vision-Language Models</span>
+                          <span class="trending-metric">10.1k</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta flat">— 2%</span>
+                    </li>
+                    <li class="trending-item" style="--rank:5;--pct:42;--tint:320">
+                      <span class="trending-rank">5</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Reinforcement Learning from Human Feedback</span>
+                          <span class="trending-metric">7.7k</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta down">▼ 4%</span>
+                    </li>
+                  </ol>
+                  <footer class="trending-foot">
+                    <span>Papers indexed last 7 days</span>
+                    <span class="trending-flip-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4"/><path d="M12 3v18"/></svg> Tap to see friends</span>
+                  </footer>
+                </div>
+
+                <!-- BACK: Friends -->
+                <div class="trending-face trending-face--back">
+                  <header class="trending-head">
+                    <div class="trending-title">
+                      <span class="trending-icon">👥</span>
+                      <div>
+                        <strong>Trending in your circle</strong>
+                        <small>What 27 friends are reading</small>
+                      </div>
+                    </div>
+                    <div class="trending-toggle" aria-hidden="true">
+                      <span>Global</span><span class="is-active">Friends</span>
+                    </div>
+                  </header>
+                  <ol class="trending-list">
+                    <li class="trending-item" style="--rank:1;--pct:100;--tint:265">
+                      <span class="trending-rank">1</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Long-term Memory in LLM Agents</span>
+                          <span class="trending-metric">14 friends</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 5</span>
+                    </li>
+                    <li class="trending-item" style="--rank:2;--pct:88;--tint:145">
+                      <span class="trending-rank">2</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Explainable AI</span>
+                          <span class="trending-metric">12 friends</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 3</span>
+                    </li>
+                    <li class="trending-item" style="--rank:3;--pct:68;--tint:200">
+                      <span class="trending-rank">3</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Medical Image Segmentation</span>
+                          <span class="trending-metric">9 friends</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta up">▲ 2</span>
+                    </li>
+                    <li class="trending-item" style="--rank:4;--pct:52;--tint:35">
+                      <span class="trending-rank">4</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Few-shot Learning</span>
+                          <span class="trending-metric">7 friends</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta flat">— 0</span>
+                    </li>
+                    <li class="trending-item" style="--rank:5;--pct:38;--tint:320">
+                      <span class="trending-rank">5</span>
+                      <div class="trending-body">
+                        <div class="trending-topic-row">
+                          <span class="trending-topic">Graph Neural Networks</span>
+                          <span class="trending-metric">5 friends</span>
+                        </div>
+                        <div class="trending-bar"><span></span></div>
+                      </div>
+                      <span class="trending-delta down">▼ 1</span>
+                    </li>
+                  </ol>
+                  <footer class="trending-foot">
+                    <span>Based on what your friends saved</span>
+                    <span class="trending-flip-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4"/><path d="M12 3v18"/></svg> Tap to see global</span>
+                  </footer>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-header">Friends' Activity <small>What your circle has been up to</small></div>
+            <div id="friends-activity" class="friends-activity"></div>
           </div>
-          <p id="network-overlap" class="network-overlap">Your interests overlap most with AI agents and computer vision.</p>
+
+          <!-- FORUM PANEL -->
+          <div id="network-forum" class="network-panel" hidden>
+            <div class="forum-posts" id="forum-posts"></div>
+          </div>
         </div>
 
-        <div id="network-connections" class="network-panel connections-panel" hidden>
-          <div class="connection-stat"><strong>3</strong><span>active research connections</span></div>
-          <div class="shared-topics"><span>AI Agents</span><span>Computer Vision</span><span>HCI</span></div>
-        </div>
-
-        <section class="people-section" aria-labelledby="people-title">
-          <h2 id="people-title">Recommended People <small>Based on swipe activity</small></h2>
-          <div id="people-list" class="people-list"></div>
-        </section>
+        <button class="compose-fab" id="compose-fab" type="button" aria-label="发布新帖" hidden>+</button>
       </section>
+
+      <dialog id="compose-dialog" class="app-dialog compose-dialog">
+        <div class="dialog-header">
+          <strong>发布新帖</strong>
+          <button class="icon-button" type="button" data-close-dialog="compose-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
+        </div>
+        <div class="compose-body">
+          <label class="compose-label">帖子类型</label>
+          <div class="compose-type-picker">
+            <button class="is-active" type="button" data-compose-type="qa"><i data-lucide="help-circle"></i>求助 Q&amp;A</button>
+            <button type="button" data-compose-type="discuss"><i data-lucide="message-circle"></i>观点讨论</button>
+            <button type="button" data-compose-type="rec"><i data-lucide="star"></i>论文速递</button>
+          </div>
+          <label class="compose-label" for="compose-title">标题</label>
+          <input id="compose-title" type="text" placeholder="用一句话概括你的帖子…" maxlength="120">
+          <label class="compose-label" for="compose-body">内容</label>
+          <textarea id="compose-body" rows="4" placeholder="详细描述你的问题、观点或推荐理由…" maxlength="2000"></textarea>
+          <button class="compose-submit" type="button" id="compose-submit">
+            <i data-lucide="plus"></i> 发布
+          </button>
+        </div>
+      </dialog>
+
+      <dialog id="forum-detail-dialog" class="app-dialog forum-detail-dialog">
+        <div class="forum-detail-dialog-inner">
+          <div class="dialog-header">
+            <strong id="forum-detail-type">帖子详情</strong>
+            <button class="icon-button" type="button" data-close-dialog="forum-detail-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
+          </div>
+          <div class="forum-detail-body" id="forum-detail-body"></div>
+          <form class="forum-detail-reply-form" id="forum-detail-reply-form">
+            <input type="text" id="forum-reply-input" placeholder="写下你的回复…" maxlength="500" autocomplete="off">
+            <button type="submit" aria-label="发送回复"><i data-lucide="send"></i></button>
+          </form>
+        </div>
+      </dialog>
 
       <section id="profile-view" class="view profile-view" aria-labelledby="profile-title" hidden>
         <header class="page-topbar">
