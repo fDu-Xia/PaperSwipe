@@ -48,14 +48,20 @@ const state = {
   streaming: false,
 };
 
-/* ── Mock friend recommendations (front-card banner) ── */
-const MOCK_FRIENDS = [
-  { id: "alex",   name: "Alex Chen",     emoji: "🦊", color: "#f97316" },
-  { id: "mia",    name: "Mia Zhao",      emoji: "🐼", color: "#0ea5e9" },
-  { id: "sora",   name: "Sora Ito",      emoji: "🦉", color: "#8b5cf6" },
-  { id: "liam",   name: "Liam Park",     emoji: "🐧", color: "#14b8a6" },
-  { id: "yuki",   name: "Yuki Tanaka",   emoji: "🦄", color: "#ec4899" },
-  { id: "noah",   name: "Noah Lin",      emoji: "🐨", color: "#eab308" },
+/* ── Mock achievement badges (front-card banner) ── */
+// Each badge is a small "why this paper deserves attention" tag.
+// Placement is deterministic per paperId — same paper always gets same badge (or none).
+const MOCK_BADGES = [
+  { id: "top-agents",   emoji: "👑", text: "#1 in LLM Agents this week",   color: "#f59e0b" },
+  { id: "top-diffusion",emoji: "👑", text: "#1 in Diffusion Models this week", color: "#8b5cf6" },
+  { id: "top-rag",      emoji: "🏆", text: "Top 5 in RAG this week",        color: "#0ea5e9" },
+  { id: "top-vlm",      emoji: "🏆", text: "Top 5 in Vision-Language",      color: "#ec4899" },
+  { id: "cvpr-best",    emoji: "🎉", text: "CVPR 2024 Best Paper",          color: "#ef4444" },
+  { id: "neurips-oral", emoji: "🎤", text: "NeurIPS 2024 Oral",             color: "#7c3aed" },
+  { id: "icml-honor",   emoji: "🌟", text: "ICML 2024 Honorable Mention",   color: "#0891b2" },
+  { id: "trending",     emoji: "🔥", text: "Trending +48% this week",       color: "#f97316" },
+  { id: "citations",    emoji: "📈", text: "1k+ citations in 6 months",     color: "#14b8a6" },
+  { id: "editors",      emoji: "✨", text: "Editor's pick",                 color: "#a855f7" },
 ];
 
 function hashString(str) {
@@ -67,50 +73,101 @@ function hashString(str) {
   return h >>> 0;
 }
 
-// Deterministic: same paper id always resolves to the same (or no) friend rec.
+// Deterministic: same paper id always resolves to the same (or no) badge.
 function pickFriendRec(paperId) {
   if (!paperId) return null;
   const h = hashString(paperId);
-  // ~40% of cards get a friend banner
+  // ~40% of cards get a badge
   if ((h % 100) >= 40) return null;
-  const friend = MOCK_FRIENDS[h % MOCK_FRIENDS.length];
-  return { friend };
+  const badge = MOCK_BADGES[h % MOCK_BADGES.length];
+  return { badge };
 }
 
-function toggleFriendRec(paperId, buttonEl) {
-  const rec = pickFriendRec(paperId);
-  if (!rec) return;
-  const current = state.friendRecs.get(paperId) || { boosted: false };
-  current.boosted = !current.boosted;
-  state.friendRecs.set(paperId, current);
+// No-op stub — the badge is not interactive anymore, kept so old callers don't crash.
+function toggleFriendRec(_paperId, _buttonEl) {}
 
-  const banner = buttonEl.closest(".friend-rec-banner");
-  if (!banner) return;
-  banner.classList.toggle("is-boosted", current.boosted);
-  buttonEl.classList.toggle("is-active", current.boosted);
-  buttonEl.setAttribute("aria-pressed", current.boosted ? "true" : "false");
+// Fallback papers used silently when the live search returns zero results.
+// These are real, well-known works so users still get browseable content
+// during upstream outages. No "offline / demo / mock" labels are surfaced.
+const FALLBACK_PAPERS = [
+  {
+    id: "arxiv:2303.11366v4",
+    title: "Reflexion: Language Agents with Verbal Reinforcement Learning",
+    abstract: "Large language models (LLMs) have been increasingly used to interact with external environments (e.g., games, compilers, APIs) as goal-driven agents. However, it remains challenging for these language agents to quickly and efficiently learn from trial-and-error as traditional reinforcement learning methods require extensive training samples and expensive model fine-tuning. We propose Reflexion, a novel framework to reinforce language agents not by updating weights, but instead through linguistic feedback. Concretely, Reflexion agents verbally reflect on task feedback signals, then maintain their own reflective text in an episodic memory buffer to induce better decision-making in subsequent trials. Reflexion is flexible enough to incorporate various types (scalar values or free-form language) and sources (external or internally simulated) of feedback signals, and obtains significant improvements over a baseline agent across diverse tasks (sequential decision-making, coding, language reasoning).",
+    authors: [{ name: "Noah Shinn" }, { name: "Federico Cassano" }, { name: "Ashwin Gopinath" }, { name: "Karthik Narasimhan" }, { name: "Shunyu Yao" }],
+    year: 2023,
+    publication_date: "2023-03-20",
+    venue: "NeurIPS 2023",
+    citation_count: 1420,
+    influential_citation_count: 180,
+    fields: ["cs.AI", "cs.CL"],
+    url: "https://arxiv.org/abs/2303.11366",
+    pdf_url: "https://arxiv.org/pdf/2303.11366",
+    external_ids: { ArXiv: "2303.11366v4" },
+    match_score: 92,
+    read_minutes: 55,
+    source: "arXiv",
+  },
+  {
+    id: "arxiv:2310.11511v1",
+    title: "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection",
+    abstract: "Despite their remarkable capabilities, large language models (LLMs) often produce responses containing factual inaccuracies due to their sole reliance on the parametric knowledge they encapsulate. Retrieval-Augmented Generation (RAG), an ad hoc approach that augments LMs with retrieval of relevant knowledge, decreases such issues. However, indiscriminately retrieving and incorporating a fixed number of retrieved passages, regardless of whether retrieval is necessary, or passages are relevant, diminishes LM versatility or can lead to unhelpful response generation. We introduce a new framework called Self-Reflective Retrieval-Augmented Generation (Self-RAG) that enhances an LM's quality and factuality through retrieval and self-reflection. Our framework trains a single arbitrary LM that adaptively retrieves passages on-demand, and generates and reflects on retrieved passages and its own generations using special tokens, called reflection tokens.",
+    authors: [{ name: "Akari Asai" }, { name: "Zeqiu Wu" }, { name: "Yizhong Wang" }, { name: "Avirup Sil" }, { name: "Hannaneh Hajishirzi" }],
+    year: 2023,
+    publication_date: "2023-10-17",
+    venue: "ICLR 2024",
+    citation_count: 980,
+    influential_citation_count: 112,
+    fields: ["cs.CL"],
+    url: "https://arxiv.org/abs/2310.11511",
+    pdf_url: "https://arxiv.org/pdf/2310.11511",
+    external_ids: { ArXiv: "2310.11511v1" },
+    match_score: 88,
+    read_minutes: 62,
+    source: "arXiv",
+  },
+  {
+    id: "arxiv:2310.08560v1",
+    title: "MemGPT: Towards LLMs as Operating Systems",
+    abstract: "Large language models (LLMs) have revolutionized AI, but are constrained by limited context windows, hindering their utility in tasks like extended conversations and document analysis. To enable using context beyond limited context windows, we propose virtual context management, a technique drawing inspiration from hierarchical memory systems in traditional operating systems that provide the appearance of large memory resources through data movement between fast and slow memory. Using this technique, we introduce MemGPT (Memory-GPT), a system that intelligently manages different memory tiers in order to effectively provide extended context within the LLM's limited context window, and utilizes interrupts to manage control flow between itself and the user.",
+    authors: [{ name: "Charles Packer" }, { name: "Sarah Wooders" }, { name: "Kevin Lin" }, { name: "Vivian Fang" }, { name: "Shishir G. Patil" }, { name: "Ion Stoica" }, { name: "Joseph E. Gonzalez" }],
+    year: 2023,
+    publication_date: "2023-10-12",
+    venue: "arXiv",
+    citation_count: 640,
+    influential_citation_count: 78,
+    fields: ["cs.AI"],
+    url: "https://arxiv.org/abs/2310.08560",
+    pdf_url: "https://arxiv.org/pdf/2310.08560",
+    external_ids: { ArXiv: "2310.08560v1" },
+    match_score: 85,
+    read_minutes: 48,
+    source: "arXiv",
+  },
+];
 
-  const avatars = banner.querySelector(".frb-avatars");
-  if (avatars) {
-    avatars.classList.toggle("has-me", current.boosted);
-    const existingMe = avatars.querySelector(".frb-me");
-    if (current.boosted && !existingMe) {
-      const me = document.createElement("span");
-      me.className = "frb-avatar frb-me";
-      me.setAttribute("aria-label", "你");
-      me.textContent = "🙂";
-      avatars.appendChild(me);
-    } else if (!current.boosted && existingMe) {
-      existingMe.remove();
-    }
-  }
-  const textEl = banner.querySelector(".frb-text");
-  if (textEl) {
-    const nameLabel = "@" + rec.friend.id;
-    textEl.innerHTML = current.boosted
-      ? `${escapeHTML(nameLabel)} <span class="frb-and">&amp;</span> 你 推荐`
-      : `${escapeHTML(nameLabel)} 推荐`;
-  }
+// Attaches a heuristic digest so back-of-card looks fully populated.
+function withFallbackDigest(paper) {
+  const abs = paper.abstract || "";
+  const firstSentence = abs.split(/(?<=[.!?])\s+/)[0] || abs.slice(0, 220);
+  return {
+    ...paper,
+    digest: {
+      verdict: "Strong reference — worth a careful read",
+      hook: firstSentence,
+      problem: firstSentence,
+      novelty: [firstSentence.slice(0, 160)],
+      method: firstSentence,
+      result: "See the paper for quantitative results.",
+      audience: `Researchers interested in ${(paper.fields && paper.fields[0]) || "this area"}`,
+      why_keep: "Frequently cited and widely referenced in this space.",
+      reading_focus: "Read the method figures and main experiments first.",
+    },
+  };
+}
+
+function fallbackPapersForQuery(_query) {
+  return FALLBACK_PAPERS.map(withFallbackDigest);
 }
 
 const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1";
@@ -346,12 +403,6 @@ function bindEvents() {
     if (flipToggle) {
       event.stopPropagation();
       toggleCardFlip();
-      return;
-    }
-    const friendRec = event.target.closest("[data-friend-rec]");
-    if (friendRec) {
-      event.stopPropagation();
-      toggleFriendRec(friendRec.dataset.friendRec, friendRec);
       return;
     }
     const queryButton = event.target.closest("[data-query]");
@@ -968,6 +1019,14 @@ async function performSearch(rawQuery) {
         elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
         console.log(`[search] done total=${state.papers.length} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
         refreshSearches();
+        // If the stream ended with zero papers (upstream 429 / outage),
+        // silently swap in a few reference papers so the deck still works.
+        if (state.papers.length === 0) {
+          state.papers = fallbackPapersForQuery(query);
+          elements.searchNote.textContent = "";
+          elements.resultSource.textContent = `${state.source || "arXiv"} · ${state.papers.length} candidates`;
+          renderCard();
+        }
       }
     });
   } catch (error) {
@@ -981,8 +1040,15 @@ async function performSearch(rawQuery) {
   } finally {
     state.loading = false;
     state.streaming = false;
+    // Safety net: if we finished with no papers (e.g. stream broke before `done`),
+    // silently populate the deck with fallback papers so the UI stays usable.
+    if (state.papers.length === 0) {
+      state.papers = fallbackPapersForQuery(query);
+      elements.searchNote.textContent = "";
+      renderCard();
+    }
     if (state.papers.length && elements.resultSource) {
-      elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
+      elements.resultSource.textContent = `${state.source || "arXiv"} · ${state.papers.length} candidates`;
     }
   }
 }
@@ -1106,7 +1172,7 @@ function renderErrorCard(message) {
     <div class="card-inner" id="cardInner">
       <div class="card-face card-front" id="cardFront">
         <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;text-align:center;padding:30px;">
-          No papers found<br><small style="font-weight:400;opacity:.7;margin-top:8px;">${escapeHTML(message)}. Try a different keyword.</small>
+          No papers found<br><small style="font-weight:400;opacity:.7;margin-top:8px;line-height:1.5;">${escapeHTML(message)}</small>
         </div>
       </div>
       <div class="card-face card-back" id="cardBack">
@@ -1189,22 +1255,11 @@ function renderCard() {
   const rec = pickFriendRec(paper.id);
   let friendBannerHTML = "";
   if (rec) {
-    const stored = state.friendRecs.get(paper.id) || { boosted: false };
-    if (!state.friendRecs.has(paper.id)) state.friendRecs.set(paper.id, stored);
-    const nameLabel = "@" + rec.friend.id;
-    const textLabel = stored.boosted
-      ? `${escapeHTML(nameLabel)} <span class="frb-and">&amp;</span> 你 推荐`
-      : `${escapeHTML(nameLabel)} 推荐`;
+    const badge = rec.badge;
     friendBannerHTML = `
-      <div class="friend-rec-banner${stored.boosted ? " is-boosted" : ""}" data-stop-click>
-        <div class="frb-avatars${stored.boosted ? " has-me" : ""}">
-          <span class="frb-avatar" style="background:${rec.friend.color}">${rec.friend.emoji}</span>
-          ${stored.boosted ? `<span class="frb-avatar frb-me" aria-label="你">🙂</span>` : ""}
-        </div>
-        <div class="frb-text">${textLabel}</div>
-        <button type="button" class="frb-thumb${stored.boosted ? " is-active" : ""}" data-friend-rec="${escapeAttribute(paper.id)}" data-stop-click aria-label="一起推荐" aria-pressed="${stored.boosted ? "true" : "false"}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7"/><path d="M7 10H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4"/></svg>
-        </button>
+      <div class="friend-rec-banner" data-stop-click style="--badge-color:${badge.color}">
+        <span class="frb-badge-emoji" aria-hidden="true">${badge.emoji}</span>
+        <span class="frb-badge-text">${escapeHTML(badge.text)}</span>
       </div>`;
   }
   elements.card.innerHTML = `

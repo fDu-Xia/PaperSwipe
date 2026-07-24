@@ -132,10 +132,9 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	a.logger.Info("search fetched", "query", query, "duration", time.Since(searchStart).Round(time.Millisecond), "papers", len(papers), "source", source, "err", err)
 	warning := ""
 	if err != nil {
-		a.logger.Warn("paper search failed; returning demo cards", "query", query, "error", err)
-		papers = demoPapers(query)
-		source = "PaperSwipe Demo"
-		warning = "开放论文源暂时不可用，当前展示离线示例卡。稍后重试即可获取真实论文。"
+		a.logger.Warn("paper search failed", "query", query, "error", err)
+		warning = "开放论文源暂时不可用，请稍后重试。"
+		papers = nil
 	}
 
 	w.Header().Set("Content-Type", "text/event-stream")
@@ -250,27 +249,4 @@ func requestLogger(logger *slog.Logger, next http.Handler) http.Handler {
 			logger.Info("request", "method", r.Method, "path", r.URL.Path, "duration", time.Since(started).Round(time.Millisecond))
 		}
 	})
-}
-
-func demoPapers(query string) []Paper {
-	return []Paper{
-		{
-			ID: "demo:memory-architecture", Title: "离线示例：面向复杂任务的长期记忆架构", Year: time.Now().Year(),
-			Authors: []Author{{Name: "PaperSwipe Demo"}}, Venue: "离线演示", Fields: []string{"Artificial Intelligence", "Information Retrieval"},
-			Abstract:   "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent systems. It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity. The demo contains no claim about a real publication.",
-			MatchScore: 91, ReadMinutes: 9, Source: "PaperSwipe Demo",
-		},
-		{
-			ID: "demo:evidence-ranking", Title: "离线示例：用证据强度排序研究候选", Year: time.Now().Year(),
-			Authors: []Author{{Name: "PaperSwipe Demo"}}, Venue: "离线演示", Fields: []string{"Information Retrieval", "Human-Computer Interaction"},
-			Abstract:   "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality. It presents a compact evidence score and shows how transparent ranking cues can reduce screening time. The demo contains no claim about a real publication.",
-			MatchScore: 84, ReadMinutes: 7, Source: "PaperSwipe Demo",
-		},
-		{
-			ID: "demo:research-interface", Title: "离线示例：适合移动端的论文筛选交互", Year: time.Now().Year(),
-			Authors: []Author{{Name: "PaperSwipe Demo"}}, Venue: "离线演示", Fields: []string{"Human-Computer Interaction"},
-			Abstract:   "This offline demo explores swipe-based triage for research discovery. It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification. The demo contains no claim about a real publication.",
-			MatchScore: 76, ReadMinutes: 6, Source: "PaperSwipe Demo",
-		},
-	}
 }

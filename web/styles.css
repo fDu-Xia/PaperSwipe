@@ -1411,7 +1411,49 @@ html[data-theme="system"] .trend-view .trend-delta.down {
 
 @keyframes wp-fade-in { to { opacity: 1; transform: translateY(0); } }
 
-.settings-page { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; background: transparent; }
+.settings-page {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--app-bg);
+}
+.settings-page::before, .settings-page::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .55;
+  will-change: transform;
+}
+.settings-page::before {
+  width: 320px; height: 320px; top: -80px; right: -100px;
+  background: radial-gradient(circle at 30% 30%, #a688ff 0%, transparent 65%);
+  animation: discover-blob-a 22s ease-in-out infinite alternate;
+}
+.settings-page::after {
+  width: 380px; height: 380px; bottom: -120px; left: -130px;
+  background:
+    radial-gradient(circle at 60% 40%, #ffb37a 0%, transparent 60%),
+    radial-gradient(circle at 30% 70%, #7dd6cd 0%, transparent 55%);
+  animation: discover-blob-b 26s ease-in-out infinite alternate;
+}
+.settings-page > * { position: relative; z-index: 1; }
+html[data-theme="dark"] .settings-page,
+html[data-theme="system"] .settings-page {
+  background:
+    radial-gradient(ellipse at 20% 8%, color-mix(in srgb, #7655e8 40%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 22%, color-mix(in srgb, #ff8f6b 32%, transparent) 0%, transparent 58%),
+    radial-gradient(ellipse at 12% 78%, color-mix(in srgb, #26c5b5 34%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 92%, color-mix(in srgb, #7655e8 32%, transparent) 0%, transparent 60%),
+    linear-gradient(160deg, #14161f 0%, #101118 55%, #14161f 100%);
+}
+html[data-theme="dark"] .settings-page::before,
+html[data-theme="system"] .settings-page::before,
+html[data-theme="dark"] .settings-page::after,
+html[data-theme="system"] .settings-page::after { display: none; }
 .settings-page[hidden] { display: none; }
 .settings-page .settings-scroll { position: relative; inset: auto; padding-bottom: 90px; }
 
@@ -1969,74 +2011,44 @@ body.is-ai-bot-open .bottom-nav { display: none; }
   top: 24px; left: 22px; right: 22px;
 }
 
-/* ── Friend recommendation banner (sits above the card, outside .card-inner) ── */
+/* ── Achievement badge (sits above the card, outside .card-inner) ── */
 .friend-rec-banner {
   position: absolute; z-index: 4;
   left: 8px;
   bottom: calc(100% + 8px);
-  display: inline-flex; align-items: center; gap: 7px;
-  max-width: calc(100% - 48px);
-  padding: 3px 9px 3px 3px;
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: calc(100% - 20px);
+  padding: 5px 12px 5px 8px;
   border-radius: 999px;
-  background: rgba(30, 30, 40, 0.5);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,.14);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,.20);
+  background: linear-gradient(120deg,
+    color-mix(in srgb, var(--badge-color, #f59e0b) 92%, black 8%) 0%,
+    color-mix(in srgb, var(--badge-color, #f59e0b) 70%, black 30%) 100%);
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--badge-color, #f59e0b) 35%, transparent),
+              inset 0 1px 0 rgba(255,255,255,.28);
   pointer-events: auto;
+  animation: frb-badge-in 320ms cubic-bezier(.2,.8,.2,1) both;
 }
-.frb-avatars {
-  position: relative;
-  display: inline-flex;
-  flex: 0 0 auto;
-  width: 22px; height: 22px;
-}
-.frb-avatars.has-me { width: 34px; }
-.frb-avatar {
-  position: absolute; top: 0;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  font-size: 12px;
-  background: #f97316;
-  border: 1.5px solid rgba(30,30,40,.85);
-  box-shadow: 0 1px 3px rgba(0,0,0,.3);
-}
-.frb-avatar:nth-child(1) { left: 0; z-index: 2; }
-.frb-avatar.frb-me { left: 12px; z-index: 1; background: #f5c98a; color: #2a2060; }
-.frb-text {
-  min-width: 0; max-width: 170px;
-  color: #fff;
-  font-size: 10.5px; font-weight: 600;
+.frb-badge-emoji {
+  font-size: 14px;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.2));
 }
-.frb-and { opacity: .8; margin: 0 1px; }
-.frb-thumb {
-  flex: 0 0 auto;
-  width: 22px; height: 22px;
-  display: inline-grid; place-items: center;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.18);
+.frb-badge-text {
   color: #fff;
-  cursor: pointer;
-  transition: transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,.18);
 }
-.frb-thumb svg { width: 12px; height: 12px; }
-.frb-thumb:hover { background: rgba(255,255,255,.32); }
-.frb-thumb:active { transform: scale(.9); }
-.frb-thumb.is-active {
-  background: rgba(255,255,255,.9);
-  border-color: rgba(255,255,255,.95);
-  color: #1a1a1a;
-}
-.friend-rec-banner.is-boosted {
-  background: rgba(30, 30, 40, 0.62);
-  border-color: rgba(255,255,255,.28);
+@keyframes frb-badge-in {
+  from { opacity: 0; transform: translateY(4px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .card-topline {
   display: flex; justify-content: space-between; align-items: center;

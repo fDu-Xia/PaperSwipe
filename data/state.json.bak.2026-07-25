@@ -355,27 +355,27 @@
         "external_ids": {
           "ArXiv": "2510.09720v1"
         },
-        "match_score": 75,
-        "read_minutes": 43,
+        "match_score": 76,
+        "read_minutes": 8,
         "source": "arXiv",
         "digest": {
-          "verdict": "Highly recommended for AI researchers.",
-          "hook": "A memory update mechanism that sharpens LLM agents' long-term reasoning.",
-          "problem": "LLM agents struggle with updating long-term memory to adapt to changing contexts.",
+          "verdict": "Swipe right for dynamic memory refinement.",
+          "hook": "A smart memory update that adapts to changing user preferences over time.",
+          "problem": "Existing agents lack mechanisms for **dynamically refining preference memory representations** in response to evolving user behaviors.",
           "novelty": [
-            "Proposes a **Preference-Aware Memory Update Mechanism (PAMU)**.",
-            "Combines **sliding window averages** and **exponential moving averages**.",
-            "Improves LLM output quality in long-term conversations."
+            "Integrates **sliding window averages** with exponential moving averages.",
+            "Constructs a **fused preference-aware representation**.",
+            "Captures both **short-term fluctuations** and long-term tendencies."
           ],
-          "method": "Develops a mechanism for dynamic and personalized memory refinement.",
-          "result": "Significant improvement in LLM output quality in long-term conversations.",
-          "audience": "AI researchers and developers of LLM agents.",
-          "why_keep": "Addresses a critical gap in LLM memory updating.",
-          "reading_focus": "PAMU mechanism and its impact on long-term conversations."
+          "method": "Proposes a **Preference-Aware Memory Update Mechanism (PAMU)** that fuses SW and EMA to track evolving user preferences.",
+          "result": "Significantly improves **output quality** of LLMs across five baselines on the LoCoMo dataset.",
+          "audience": "Researchers building personalized, long-term conversational agents.",
+          "why_keep": "It addresses the critical gap of memory updating, ensuring agents stay relevant as users change.",
+          "reading_focus": "The PAMU fusion mechanism."
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T16:40:51.013686Z"
+      "updated_at": "2026-07-24T11:49:57.192994Z"
     },
     "arxiv:2606.17328v1": {
       "paper": {
@@ -460,26 +460,25 @@
           "ArXiv": "2606.24322v1"
         },
         "match_score": 74,
-        "read_minutes": 49,
+        "read_minutes": 11,
         "source": "arXiv",
         "digest": {
-          "verdict": "Essential for security experts in AI.",
-          "hook": "A defense against memory poisoning in LLM agents with 0% attack success.",
-          "problem": "Memory poisoning in LLM agents allows adversaries to manipulate future actions.",
+          "verdict": "Essential read for secure agent deployment.",
+          "hook": "A security shield that stops memory poisoning attacks cold.",
+          "problem": "Adversaries can store untrusted content in one session to steer **consequential actions** like payments in future sessions.",
           "novelty": [
-            "Introduces **TMA-NM (Tamper-evident Memory Authority, Non-Malleable)**.",
-            "Formalizes malleability for the memory pipeline.",
-            "Achieves 0% attack success across all models and channels."
+            "Identifies **three laundering channels** (summarization, echo, corroboration) that bypass current defenses.",
+            "Proves **write-time origin binding** is necessary for security."
           ],
-          "method": "Constructs non-malleable information-flow control for LLM-agent memory.",
-          "result": "0% attack success on both direct and laundering attacks.",
-          "audience": "Security experts and AI developers.",
-          "why_keep": "Protects LLM agents from memory poisoning attacks.",
-          "reading_focus": "TMA-NM and its effectiveness against laundering attacks."
+          "method": "Proposes **TMA-NM**, a non-malleable information-flow control construction enforcing origin-bound authority.",
+          "result": "Achieves **0% attack success** on all models and channels while maintaining full legitimate utility.",
+          "audience": "Security researchers and LLM system architects.",
+          "why_keep": "Provides the first rigorous, machine-checked defense against critical memory poisoning vulnerabilities.",
+          "reading_focus": "The TMA-NM construction."
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-24T16:40:55.589512Z"
+      "action": "priority",
+      "updated_at": "2026-07-24T11:29:45.439306Z"
     },
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
@@ -528,6 +527,119 @@
       },
       "action": "dismiss",
       "updated_at": "2026-07-24T15:05:00.055234Z"
+    },
+    "demo:evidence-ranking": {
+      "paper": {
+        "id": "demo:evidence-ranking",
+        "title": "离线示例：用证据强度排序研究候选",
+        "abstract": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality. It presents a compact evidence score and shows how transparent ranking cues can reduce screening time. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Information Retrieval",
+          "Human-Computer Interaction"
+        ],
+        "match_score": 84,
+        "read_minutes": 7,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "A novel 离线示例：用证据强度排序研究候选 that the demo contains no claim about a real publication.",
+          "problem": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality.",
+          "novelty": [
+            "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time."
+          ],
+          "method": "It presents a compact evidence score and shows how transparent ranking cues can reduce screening time.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in Information Retrieval / Human-Computer Interaction",
+          "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T16:04:34.391338Z"
+    },
+    "demo:memory-architecture": {
+      "paper": {
+        "id": "demo:memory-architecture",
+        "title": "离线示例：面向复杂任务的长期记忆架构",
+        "abstract": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent systems. It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Artificial Intelligence",
+          "Information Retrieval"
+        ],
+        "match_score": 91,
+        "read_minutes": 9,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Strong match — save and verify with priority",
+          "hook": "A novel 离线示例：面向复杂任务的长期记忆架构 that the demo contains no claim about a real publication.",
+          "problem": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent systems.",
+          "novelty": [
+            "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity."
+          ],
+          "method": "It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in Artificial Intelligence / Information Retrieval",
+          "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T16:04:33.358104Z"
+    },
+    "demo:research-interface": {
+      "paper": {
+        "id": "demo:research-interface",
+        "title": "离线示例：适合移动端的论文筛选交互",
+        "abstract": "This offline demo explores swipe-based triage for research discovery. It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Human-Computer Interaction"
+        ],
+        "match_score": 76,
+        "read_minutes": 6,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "A novel 离线示例：适合移动端的论文筛选交互 that the demo contains no claim about a real publication.",
+          "problem": "This offline demo explores swipe-based triage for research discovery.",
+          "novelty": [
+            "It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification."
+          ],
+          "method": "It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification.",
+          "result": "The demo contains no claim about a real publication.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in Human-Computer Interaction",
+          "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T16:04:35.366197Z"
     },
     "openalex:W4391116828": {
       "paper": {
@@ -826,17 +938,13 @@
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T16:23:35.427539Z"
+      "updated_at": "2026-07-24T15:38:04.450023Z"
     }
   },
   "recent_searches": [
     {
-      "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-24T16:42:36.892171Z"
-    },
-    {
       "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-24T16:21:24.136272Z"
+      "created_at": "2026-07-24T16:11:46.074755Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update complex task performance",
