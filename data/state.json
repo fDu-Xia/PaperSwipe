@@ -103,6 +103,159 @@
       "action": "save",
       "updated_at": "2026-07-23T14:32:43.872062Z"
     },
+    "openalex:W4255723140": {
+      "paper": {
+        "id": "openalex:W4255723140",
+        "title": "机械设计制造及其自动化中计算机技术的应用",
+        "abstract": "在最近的几年时间里，在我国综合国力的不断增强的影响下，使得各个领域都得到了良好的发展。机械设计制造领域最为突出的特点就是复杂性和繁琐性，就以往陈旧模式的机械制造情况来说，工作持续时间长，质量差，工作量大的特点十分明显，但是将计算机技术引用到机械制造之中能够有效的提升机械制造的效率和准确性，从而能够为社会的稳定和谐发展创造良好的基础。这篇文章主要绕围绕机械设计制造以及其自动化中计算机技术的切实运用展开深入的分析研究，并针对性的对其未来发展趋势进行了探究，希望能够对机械设计制造行业的稳定发展有所帮助。",
+        "authors": [
+          {
+            "name": "龙 张"
+          }
+        ],
+        "year": 2020,
+        "publication_date": "2020-02-29",
+        "venue": "建筑工程与管理",
+        "citation_count": 6,
+        "influential_citation_count": 0,
+        "fields": [
+          "Military Technology and Strategies",
+          "Aerospace Engineering",
+          "Engineering"
+        ],
+        "url": "https://doi.org/10.33142/aem.v2i2.1612",
+        "pdf_url": "https://journals.viserdata.com/index.php/aem/article/download/1612/1629",
+        "external_ids": {
+          "DOI": "10.33142/aem.v2i2.1612",
+          "OpenAlex": "https://openalex.org/W4255723140"
+        },
+        "match_score": 56,
+        "read_minutes": 6,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "���篇文章主要绕围绕机械设计制造以及其自动化中计算机技术的切实运��.",
+          "problem": "在最近的几年时间里，在我国综合国力的不断增强的影响下，使得各个领域都得到了良好的发展。",
+          "novelty": [
+            "机械设计制造领域最为突出的特点就是复杂性和繁琐性，就以往陈旧模式的机械制造情况来说，工作持续时间长，质量差，工作量大的特点十分明显，但是将计算机技术引用到机械制造之中能够有效的提升机械制造的效率和准确性，从而能够为社会的稳定和谐发展创造良好的基础。"
+          ],
+          "method": "机械设计制造领域最为突出的特点就是复杂性和繁琐性，就以往陈旧模式的机械制造情况来说，工作持续时间长，质量差，工作量大的特点十分明显，但是将计算机技术引用到机械制造之中能够有效的提升机械制造的效率和准确性，从而能够为社会的稳定和谐发展创造良好的基础。",
+          "result": "这篇文章主要绕围绕机械设计制造以及其自动化中计算机技术的切实运用展开深入的分析研究，并针对性的对其未来发展趋势进行了探究，希望能够对机械设计制造行业的稳定发展有所帮助。",
+          "audience": "Researchers interested in 计算机的未来发展趋势, especially in Military Technology and Strategies / Aerospace Engineering",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T12:12:58.5887479Z"
+    },
+    "openalex:W4312421904": {
+      "paper": {
+        "id": "openalex:W4312421904",
+        "title": "计算机科学与技术的应用现状与未来趋势",
+        "abstract": "我国科学技术水平在当前社会经济的快速发展之下得到了很大程度的提升，计算机科学与技术经过好几 代的发展在当前这一时代已经被应用到了社会的方方面面，且计算机科学与技术在新时代的发展和应用还给人们的生 活和工作等带来了非常大的改变，所以计算机科学与技术在未来的发展趋势及应用范畴等受到了社会各界人士的广泛 关注。因此，本篇文章所写的主要内容就是探究计算机科学与技术在当前这一时代的应用现状及未来的发展方向。",
+        "authors": [
+          {
+            "name": "张维嘉"
+          }
+        ],
+        "year": 2022,
+        "publication_date": "2022-01-01",
+        "venue": "电子通信与计算机科学",
+        "citation_count": 2,
+        "influential_citation_count": 0,
+        "fields": [
+          "Military Technology and Strategies",
+          "Aerospace Engineering",
+          "Engineering"
+        ],
+        "url": "https://doi.org/10.37155/2717-5170-0404-42",
+        "pdf_url": "http://ojs.omniscient.sg/index.php/eccs/article/download/9595/8643",
+        "external_ids": {
+          "DOI": "10.37155/2717-5170-0404-42",
+          "OpenAlex": "https://openalex.org/W4312421904"
+        },
+        "match_score": 57,
+        "read_minutes": 6,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "���此，本篇文章所写的主要内容就是探究计算机科学与技术在当前这一��.",
+          "problem": "我国科学技术水平在当前社会经济的快速发展之下得到了很大程度的提升，计算机科学与技术经过好几 代的发展在当前这一时代已经被应用到了社会的方方面面，且计算机科学与技术在新时代的发展和应用还给人们的生 活和工作等带来了非常大的改变，所以计算机科学与技术在未来的发展趋势及应用范畴等受到了社会各界人士的广泛 关注。",
+          "novelty": [
+            "因此，本篇文章所写的主要内容就是探究计算机科学与技术在当前这一时代的应用现状及未来的发展方向。"
+          ],
+          "method": "因此，本篇文章所写的主要内容就是探究计算机科学与技术在当前这一时代的应用现状及未来的发展方向。",
+          "result": "因此，本篇文章所写的主要内容就是探究计算机科学与技术在当前这一时代的应用现状及未来的发展方向。",
+          "audience": "Researchers interested in 计算机的未来发展趋势, especially in Military Technology and Strategies / Aerospace Engineering",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T12:12:57.8296506Z"
+    },
+    "openalex:W4361990313": {
+      "paper": {
+        "id": "openalex:W4361990313",
+        "title": "光计算的发展趋势：模拟或数字？",
+        "abstract": "受益于光子独特的优势，光计算技术在构建高速、高算力和高能效比的专用计算加速器方面被寄予厚望，目前已经涌现出了许多极具吸引力的方案。特别是对于涉及运算量巨大的二维矩阵-矩阵乘加操作的专用场景，光计算有望在算力和能效比等方面实现超越当前最先进电子计算机几个数量级的性能提升。不同于电子计算通过构建逻辑门实现通用数字计算，主要受深度学习驱动而复兴的光计算更倾向于模拟计算。本文从模拟和数字光计算的角度出发对主流的光计算架构进行分析和讨论，指出了目前光计算技术发展面临的瓶颈，并对光计算未来的发展趋势进行了展望。",
+        "authors": [
+          {
+            "name": "马国庆 Ma Guoqing"
+          },
+          {
+            "name": "周常河 Zhou Changhe"
+          },
+          {
+            "name": "朱镕威 Zhu Rongwei"
+          },
+          {
+            "name": "郑奉禄 Zheng Fenglu"
+          },
+          {
+            "name": "Junjie Yu"
+          },
+          {
+            "name": "Guohai Situ"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-01-01",
+        "venue": "Chinese Journal of Lasers",
+        "citation_count": 7,
+        "influential_citation_count": 0,
+        "fields": [
+          "Neural Networks and Reservoir Computing",
+          "Artificial Intelligence",
+          "Computer Science"
+        ],
+        "url": "https://doi.org/10.3788/cjl221209",
+        "pdf_url": "https://www.opticsjournal.net/Articles/GetArticlePDF/OJ5d246459d2608242",
+        "external_ids": {
+          "DOI": "10.3788/cjl221209",
+          "OpenAlex": "https://openalex.org/W4361990313"
+        },
+        "match_score": 59,
+        "read_minutes": 6,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "���文从模拟和数字光计算的角度出发对主流的光计算架构进行分析和讨��.",
+          "problem": "受益于光子独特的优势，光计算技术在构建高速、高算力和高能效比的专用计算加速器方面被寄予厚望，目前已经涌现出了许多极具吸引力的方案。",
+          "novelty": [
+            "特别是对于涉及运算量巨大的二维矩阵-矩阵乘加操作的专用场景，光计算有望在算力和能效比等方面实现超越当前最先进电子计算机几个数量级的性能提升。"
+          ],
+          "method": "特别是对于涉及运算量巨大的二维矩阵-矩阵乘加操作的专用场景，光计算有望在算力和能效比等方面实现超越当前最先进电子计算机几个数量级的性能提升。",
+          "result": "本文从模拟和数字光计算的角度出发对主流的光计算架构进行分析和讨论，指出了目前光计算技术发展面临的瓶颈，并对光计算未来的发展趋势进行了展望。",
+          "audience": "Researchers interested in 计算机的未来发展趋势, especially in Neural Networks and Reservoir Computing / Artificial Intelligence",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T12:12:55.3174553Z"
+    },
     "openalex:W4391116828": {
       "paper": {
         "id": "openalex:W4391116828",
@@ -322,7 +475,7 @@
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-24T08:53:19.0022268Z"
+      "updated_at": "2026-07-24T12:12:49.9891578Z"
     },
     "openalex:W4412203333": {
       "paper": {
@@ -395,7 +548,15 @@
   "recent_searches": [
     {
       "query": "计算机的未来发展趋势",
-      "created_at": "2026-07-24T12:06:34.0331342Z"
+      "created_at": "2026-07-24T12:20:37.5590185Z"
+    },
+    {
+      "query": "历史‘",
+      "created_at": "2026-07-24T12:09:39.9020072Z"
+    },
+    {
+      "query": "计算机",
+      "created_at": "2026-07-24T12:09:34.6229232Z"
     },
     {
       "query": "AI",

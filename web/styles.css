@@ -1577,33 +1577,38 @@ html[data-theme="system"] .hl-item p strong, html[data-theme="system"] .detail-b
 .flip-hint-back svg { width: 12px; height: 12px; }
 
 /* ── Source links on back ── */
-.source-links {
-  display: flex; gap: 8px; margin-top: auto; padding-top: 10px;
-  flex-shrink: 0;
+.card-back-footer {
+  margin-top: auto; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;
 }
+.source-links { display: flex; gap: 6px; }
+.source-links.card-stats-row { gap: 8px; }
+.source-links.card-links-row { gap: 6px; }
+
 .source-link {
-  flex: 1; min-height: 42px;
-  padding: 0 12px;
-  border: 1px solid #e0e0f0; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1; min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid #d8d8f0; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
   background: #f8f8fc; color: #5c45d0;
   text-decoration: none;
-  font-size: 11px; font-weight: 700;
+  font-size: 10px; font-weight: 700;
   cursor: pointer;
-  transition: all 160ms ease;
+  transition: all 140ms ease;
 }
-.source-link:hover { background: #f0edff; border-color: #c8bff5; transform: translateY(-1px); }
+.source-link:hover { background: #f0edff; border-color: #c8bff5; }
 .source-link:active { transform: scale(.96); }
-.source-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+.source-link svg { width: 13px; height: 13px; flex-shrink: 0; }
+
 .source-stat {
-  flex: 1.5; min-height: 42px;
-  padding: 0 16px;
+  flex: 1; height: 52px;
+  padding: 0 8px;
   border: 1px solid #e5e5f2; border-radius: 10px;
-  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   background: #fbfaff; color: #6a6580;
-  font-size: 11px; font-weight: 600;
+  font-size: 14px; font-weight: 700;
   white-space: nowrap;
 }
+.source-stat-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 16px; line-height: 1; }
 .source-stat-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 11px; line-height: 1; }
 
 /* ── Stamp overlays (only on front) ── */

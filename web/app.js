@@ -58,6 +58,15 @@ document.addEventListener("DOMContentLoaded", () => {
   applyAppearance(state.appearance);
   bindEvents();
   refreshIcons();
+  // Show notif badge dot immediately
+  const notifBadge = document.querySelector("#notif-badge");
+  if (notifBadge) notifBadge.classList.add("has-dot");
+  // Pre-fetch library count so bottom nav shows real number
+  fetch("/api/library").then(r => r.json()).then(p => {
+    const count = (p.papers || []).length;
+    const el = document.querySelector("#bottom-library-count");
+    if (el) el.textContent = String(count);
+  }).catch(() => {});
 
   const savedProfile = loadOnboardingProfile();
   const forceOnboarding = new URLSearchParams(window.location.search).get("onboarding") === "1";
@@ -1112,17 +1121,21 @@ function renderCard() {
               </div>
             </div>
 
-            <div class="source-links">
-              <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
-              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${c.citation_count} cites</span>
-              ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                Original
-              </a>` : ""}
-              ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                PDF
-              </a>` : ""}
+            <div class="card-back-footer">
+              <div class="source-links card-stats-row">
+                <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
+                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${c.citation_count} cites</span>
+              </div>
+              <div class="source-links card-links-row">
+                ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Original
+                </a>` : ""}
+                ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  PDF
+                </a>` : ""}
+              </div>
             </div>
 
             <div class="flip-hint-back">
