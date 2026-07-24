@@ -1,13 +1,13 @@
 // Mock roadmap data for PaperSwipe AI Bot. Replace with real LLM output later.
 window.__PAPERSWIPE_ROADMAP__ = {
-  title: "LLM Agent 长期记忆 · 学习路线图",
-  subtitle: "从综述打基础，到经典夯实原理，再到最新前沿追踪",
+  title: "LLM Agent Long-Term Memory · Learning Roadmap",
+  subtitle: "Build a foundation with surveys, harden the theory with classics, then track the latest frontier",
   stages: [
     {
       id: "survey",
-      tag: "综述",
-      title: "打地基 · 综述扫盲",
-      hint: "先建立整体认知，明确子问题、关键流派、评测口径",
+      tag: "Survey",
+      title: "Foundation · Survey the landscape",
+      hint: "Build the big picture first — subproblems, main lineages, and evaluation conventions",
       accent: "violet",
       icon: "book-open-text",
       papers: [
@@ -17,7 +17,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2024,
           venue: "arXiv preprint",
           minutes: 45,
-          tldr: "系统梳理 LLM 智能体的短期 / 长期记忆分类、检索与更新策略。",
+          tldr: "A systematic map of short- and long-term memory categories, retrieval, and update strategies in LLM agents.",
         },
         {
           title: "Retrieval-Augmented Generation: A Survey",
@@ -25,15 +25,15 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2024,
           venue: "ACM Comput. Surv.",
           minutes: 38,
-          tldr: "覆盖 RAG 的核心组件、评测基准与开源框架，可作为记忆检索的先导阅读。",
+          tldr: "Covers RAG's core components, benchmarks, and open-source frameworks — a natural lead-in to memory retrieval.",
         },
       ],
     },
     {
       id: "classic",
-      tag: "经典",
-      title: "夯实原理 · 经典论文",
-      hint: "读懂被反复引用的方法，摸清评价框架和常见 trick",
+      tag: "Classic",
+      title: "Fundamentals · Classic papers",
+      hint: "Read the heavily-cited methods to grasp the evaluation frames and common tricks",
       accent: "coral",
       icon: "landmark",
       papers: [
@@ -43,7 +43,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2023,
           venue: "arXiv",
           minutes: 32,
-          tldr: "把上下文当分层内存管理，可按需换入换出会话历史。",
+          tldr: "Treats the context window as tiered memory that can page conversation history in and out on demand.",
         },
         {
           title: "Generative Agents: Interactive Simulacra of Human Behavior",
@@ -51,7 +51,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2023,
           venue: "UIST",
           minutes: 40,
-          tldr: "提出反思 + 回忆 + 计划三段式记忆架构，是 agent 记忆的原型工作。",
+          tldr: "Proposes the reflect + recall + plan three-stage memory architecture — the prototype for agent memory work.",
         },
         {
           title: "REALM: Retrieval-Augmented Language Model Pretraining",
@@ -59,15 +59,15 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2020,
           venue: "ICML",
           minutes: 28,
-          tldr: "端到端可训练的检索式语言模型，为后续 RAG 系列奠基。",
+          tldr: "End-to-end trainable retrieval-augmented language model — the foundation of the later RAG line of work.",
         },
       ],
     },
     {
       id: "recent",
-      tag: "最新",
-      title: "追踪前沿 · 最新进展",
-      hint: "跟上最近半年的 SOTA，挑一两条方向深入",
+      tag: "Latest",
+      title: "Frontier · Latest advances",
+      hint: "Catch up on the last six months of SOTA and pick one or two threads to dig into",
       accent: "teal",
       icon: "sparkles",
       papers: [
@@ -77,7 +77,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2025,
           venue: "ICLR",
           minutes: 30,
-          tldr: "引入可编辑的情景记忆模块，支持知识更新与遗忘。",
+          tldr: "Introduces an editable episodic memory module supporting knowledge updates and forgetting.",
         },
         {
           title: "A-Mem: Adaptive Memory for Long-Horizon Agents",
@@ -85,7 +85,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2025,
           venue: "NeurIPS",
           minutes: 34,
-          tldr: "自适应决定何时写入 / 检索 / 摘要，长时任务表现显著提升。",
+          tldr: "Adaptively decides when to write, retrieve, and summarize — a large gain on long-horizon tasks.",
         },
         {
           title: "MemoryBank: Reflective Long-Term Memory for LLMs",
@@ -93,7 +93,7 @@ window.__PAPERSWIPE_ROADMAP__ = {
           year: 2024,
           venue: "AAAI",
           minutes: 26,
-          tldr: "受艾宾浩斯遗忘曲线启发，按重要性做记忆巩固与召回。",
+          tldr: "Inspired by the Ebbinghaus forgetting curve — consolidates and recalls memory by importance.",
         },
       ],
     },

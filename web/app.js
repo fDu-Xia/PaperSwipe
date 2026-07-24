@@ -23,14 +23,11 @@ const state = {
   libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
-  networkTab: "friends",
   aiModel: "",
   imageEnabled: false,
   imageModel: "",
   paperImages: new Map(),
   generatingImage: "",
-  connectedPeople: new Set(),
-  userForumPosts: [],
   stats: { saved: 0, priority: 0, read: 0, dismissed: 0 },
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
   todos: [],
@@ -161,19 +158,15 @@ function cacheElements() {
     discoverView: document.querySelector("#discover-view"),
     libraryView: document.querySelector("#library-view"),
     networkView: document.querySelector("#network-view"),
-    profileView: document.querySelector("#profile-view"),
-    profileSettingsButton: document.querySelector("#profile-settings-button"),
-    profileIdentity: document.querySelector("#profile-identity"),
     settingsPage: document.querySelector("#settings-page"),
     settingsClose: document.querySelector("#settings-close"),
     todoList: null,
     todoForm: null,
     todoInput: null,
     searchToggle: document.querySelector("#search-toggle"),
-    todosToggle: document.querySelector("#todos-toggle"),
-    todosToggleBadge: document.querySelector("#todos-toggle-badge"),
+    settingsToggle: document.querySelector("#settings-toggle"),
+    todosToggleBadge: document.querySelector("#bottom-todos-count"),
     todosView: document.querySelector("#todos-view"),
-    todosBack: document.querySelector("#todos-back"),
     weekPlanGrid: document.querySelector("#week-plan-grid"),
     weekPlanSummary: document.querySelector("#week-plan-summary"),
     searchPanel: document.querySelector("#search-panel"),
@@ -267,10 +260,12 @@ function bindEvents() {
   });
   document.querySelector("#onboarding-finish").addEventListener("click", finishOnboarding);
 
-  elements.searchToggle.addEventListener("click", () => {
-    elements.searchPanel.hidden = !elements.searchPanel.hidden;
-    if (!elements.searchPanel.hidden) elements.searchInput.focus();
-  });
+  if (elements.searchToggle) {
+    elements.searchToggle.addEventListener("click", () => {
+      elements.searchPanel.hidden = !elements.searchPanel.hidden;
+      if (!elements.searchPanel.hidden) elements.searchInput.focus();
+    });
+  }
   elements.searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     elements.searchPanel.hidden = true;
@@ -287,6 +282,27 @@ function bindEvents() {
     if (viewButton) {
       event.preventDefault();
       switchView(viewButton.dataset.view);
+      return;
+    }
+    const trendTab = event.target.closest("[data-trend-scope]");
+    if (trendTab) {
+      event.preventDefault();
+      setTrendScope(trendTab.dataset.trendScope);
+      return;
+    }
+    const trendPaperRow = event.target.closest("[data-trend-paper]");
+    if (trendPaperRow) {
+      event.preventDefault();
+      event.stopPropagation();
+      const topicId = trendPaperRow.dataset.trendPaper;
+      const idx = Number(trendPaperRow.dataset.trendPaperIndex);
+      openTrendPaperOverlay(topicId, idx);
+      return;
+    }
+    const trendExpand = event.target.closest("[data-trend-expand]");
+    if (trendExpand) {
+      event.preventDefault();
+      toggleTrendExpand(trendExpand.dataset.trendExpand);
       return;
     }
     const weekplanExport = event.target.closest("[data-weekplan-export]");
@@ -447,21 +463,6 @@ function bindEvents() {
       removeSettingsTopic(topicRemove.dataset.settingsTopicRemove);
       return;
     }
-    const connectButton = event.target.closest("[data-connect-person]");
-    if (connectButton) {
-      toggleConnection(connectButton);
-      return;
-    }
-    const forumPost = event.target.closest("[data-forum-post-id]");
-    if (forumPost) {
-      openForumPost(forumPost.dataset.forumPostId);
-      return;
-    }
-    const chatButton = event.target.closest("[data-chat-person]");
-    if (chatButton) {
-      showToast(`已打开与 ${chatButton.dataset.chatPerson} 的研究对话`);
-      return;
-    }
     const forumItem = event.target.closest(".forum-list button");
     if (forumItem) {
       elements.forumDialog.close();
@@ -563,42 +564,6 @@ function bindEvents() {
     });
   });
 
-  const forumsBtn = document.querySelector("#forums-button");
-  if (forumsBtn && elements.forumDialog) forumsBtn.addEventListener("click", () => elements.forumDialog.showModal());
-  document.querySelectorAll("[data-network-tab]").forEach((button) => {
-    button.addEventListener("click", () => switchNetworkTab(button.dataset.networkTab));
-  });
-  document.querySelectorAll("[data-compose-type]").forEach((button) => {
-    button.addEventListener("click", () => {
-      composeType = button.dataset.composeType;
-      document.querySelectorAll("[data-compose-type]").forEach((b) => b.classList.toggle("is-active", b.dataset.composeType === composeType));
-    });
-  });
-  const composeFab = document.querySelector("#compose-fab");
-  if (composeFab) composeFab.addEventListener("click", openCompose);
-  const composeSubmit = document.querySelector("#compose-submit");
-  if (composeSubmit) composeSubmit.addEventListener("click", submitComposePost);
-  const friendsSearchInput = document.querySelector("#friends-search-input");
-  if (friendsSearchInput) friendsSearchInput.addEventListener("input", renderPeople);
-  const trendingCard = document.querySelector("#trending-card");
-  if (trendingCard) {
-    const flip = () => trendingCard.classList.toggle("is-flipped");
-    trendingCard.addEventListener("click", flip);
-    trendingCard.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
-    });
-  }
-  const forumReplyForm = document.querySelector("#forum-detail-reply-form");
-  if (forumReplyForm) {
-    forumReplyForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const input = document.querySelector("#forum-reply-input");
-      if (!input) return;
-      submitForumReply(input.value);
-      input.value = "";
-    });
-  }
-
   document.querySelector("#save-topics-button").addEventListener("click", saveSettingsTopics);
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     button.addEventListener("click", () => selectAppearance(button.dataset.appearance));
@@ -634,15 +599,9 @@ function bindEvents() {
   if (zoteroTestBtn) zoteroTestBtn.addEventListener("click", testZoteroConnection);
   if (zoteroClearBtn) zoteroClearBtn.addEventListener("click", clearZoteroCredentials);
 
-  if (elements.profileSettingsButton) elements.profileSettingsButton.addEventListener("click", openSettingsPage);
+  if (elements.settingsToggle) elements.settingsToggle.addEventListener("click", openSettingsPage);
   if (elements.settingsClose) elements.settingsClose.addEventListener("click", closeSettingsPage);
 
-  if (elements.todosToggle && elements.todosView) {
-    elements.todosToggle.addEventListener("click", () => switchView("todos"));
-  }
-  if (elements.todosBack) {
-    elements.todosBack.addEventListener("click", () => switchView("discover"));
-  }
   bindWeekPlanSwipe();
 
   document.addEventListener("keydown", (event) => {
@@ -942,7 +901,7 @@ function startApp(profile) {
   elements.searchInput.value = state.query;
   document.body.classList.remove("is-onboarding");
   elements.onboarding.hidden = true;
-  renderPeople();
+  renderTrendBoard();
   renderSettings();
   refreshHealth();
   refreshLibrary();
@@ -1932,25 +1891,25 @@ const AI_BOT_PROMPTS = [
     id: "daily",
     icon: "calendar-check-2",
     theme: "violet",
-    title: "帮我安排每日任务",
-    subtitle: "结合 DDL 和空闲时间，从 Library 派发今日阅读",
-    prefill: "我最近的目标是……（DDL：___；每天可读 ___ 分钟）。请从 Library 里帮我安排今日阅读任务，尽量按重要性和阅读时长排。",
+    title: "Plan today's reading",
+    subtitle: "Turn your deadline and free time into a Library reading list",
+    prefill: "My current goal is …  (Deadline: ___;  ___ minutes/day). Please plan today's reading from my Library, sorted by importance and time.",
   },
   {
     id: "today",
     icon: "sparkles",
     theme: "coral",
-    title: "今天最该读哪一篇？",
-    subtitle: "描述你的当前目标，让 AI 挑最相关的一篇",
-    prefill: "我目前在做……。请从 Library 里推荐今天最应该读的那一篇论文，并告诉我为什么。",
+    title: "Which one should I read today?",
+    subtitle: "Tell me your current focus, I'll pick the most relevant one",
+    prefill: "I'm currently working on …  Please recommend the single paper in my Library I should read today, and explain why.",
   },
   {
     id: "roadmap",
     icon: "route",
     theme: "teal",
-    title: "论文太多，给我一条 Roadmap",
-    subtitle: "按主题聚类并生成分阶段学习路径",
-    prefill: "Library 里论文太多了，请给我一条从综述到经典再到最新的学习 roadmap。",
+    title: "Too many papers — give me a roadmap",
+    subtitle: "Cluster by topic and produce a staged reading path",
+    prefill: "My Library has too many papers. Please give me a learning roadmap going from surveys to classics to the latest work.",
     autoSend: true,
   },
 ];
@@ -1963,16 +1922,16 @@ function renderBotGreeting() {
   hero.className = "ai-bot-hero";
   hero.innerHTML = `
     <span class="ai-bot-hero-avatar"><i data-lucide="sparkles"></i></span>
-    <p class="ai-bot-hero-title">Hi，我是你的论文助手</p>
+    <p class="ai-bot-hero-title">Hi, I'm your paper assistant</p>
     <p class="ai-bot-hero-sub">${count
-      ? `你的 Library 里已经有 <b>${count}</b> 篇论文${intent ? `，围绕「${escapeHTML(shorten(intent, 24))}」` : ""}。告诉我你的目标，我来帮你规划。`
-      : "先去 Explore 划几篇论文到 Library，我就能帮你做阅读规划。"}</p>
+      ? `You have <b>${count}</b> papers in your Library${intent ? ` around "${escapeHTML(shorten(intent, 24))}"` : ""}. Tell me your goal and I'll help you plan.`
+      : "Swipe a few papers into your Library from Explore, then I can help you plan your reading."}</p>
   `;
   elements.aiBotMessages.appendChild(hero);
 
   const suggestions = document.createElement("div");
   suggestions.className = "ai-bot-suggestions";
-  suggestions.setAttribute("aria-label", "推荐提问");
+  suggestions.setAttribute("aria-label", "Suggested prompts");
   suggestions.innerHTML = AI_BOT_PROMPTS.map((prompt) => `
     <button type="button" class="ai-bot-suggestion theme-${prompt.theme}" data-bot-prompt="${prompt.id}">
       <span class="ai-bot-suggestion-icon"><i data-lucide="${prompt.icon}"></i></span>
@@ -2036,31 +1995,31 @@ function buildBotReply(query) {
   const q = query.toLowerCase();
   const papers = libraryPapersForBot();
   if (!papers.length) {
-    return "你的 Library 还是空的。先回到 Explore 划几篇感兴趣的论文，再回来让我帮你规划。";
+    return "Your Library is empty. Head back to Explore, swipe a few papers you're interested in, and I'll help you plan from there.";
   }
-  if (/(每周|一周|按周|week|周计划|排一周|一周内)/i.test(query) ||
-      (/(ddl|deadline|截止)/i.test(query) && /(每天.*分钟|每日.*分钟|min\/day|分钟\/?天)/i.test(query))) {
+  if (/(每周|一周|按周|week|周计划|排一周|一周内|weekly|weekplan|per week)/i.test(query) ||
+      (/(ddl|deadline|截止)/i.test(query) && /(每天.*分钟|每日.*分钟|min\/day|分钟\/?天|minutes?\s*\/?\s*day)/i.test(query))) {
     return buildWeekPlanReply(papers, query);
   }
-  if (/(每日|每天|今日安排|任务|schedule|daily|ddl|deadline|空闲|计划)/i.test(query)) {
+  if (/(每日|每天|今日安排|任务|schedule|daily|ddl|deadline|空闲|计划|plan today)/i.test(query)) {
     return buildDailyPlanReply(papers, query);
   }
-  if (/(今天.*读|该读|最应该读|优先读|priority|top pick|哪一篇)/i.test(query)) {
+  if (/(今天.*读|该读|最应该读|优先读|priority|top pick|哪一篇|which.*read|read today)/i.test(query)) {
     return buildTopPickReply(papers, query);
   }
-  if (/(roadmap|路线|路径|学习顺序|入门到进阶|阶段|分阶段|太多|从综述|综述.*经典|经典.*最新)/i.test(query)) {
+  if (/(roadmap|路线|路径|学习顺序|入门到进阶|阶段|分阶段|太多|从综述|综述.*经典|经典.*最新|learning path|too many)/i.test(query)) {
     return { type: "roadmap", data: window.__PAPERSWIPE_ROADMAP__ };
   }
-  if (/(主题|方向|topic|领域)/i.test(query)) {
+  if (/(主题|方向|topic|领域|themes?)/i.test(query)) {
     const tags = {};
     papers.forEach((p) => deriveTags(p).forEach((t) => { if (t) tags[t] = (tags[t] || 0) + 1; }));
     const top = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    if (!top.length) return "我暂时没能从你的论文里总结出明确主题，先多收藏几篇吧。";
-    return "你 Library 里的主要主题：\n" + top.map(([t, n]) => `• ${t}（${n} 篇）`).join("\n");
+    if (!top.length) return "I couldn't pull out clear themes from your papers yet — save a few more first.";
+    return "The main themes in your Library:\n" + top.map(([t, n]) => `• ${t} (${n} papers)`).join("\n");
   }
-  if (/(排序|顺序|order)/i.test(query)) {
+  if (/(排序|顺序|order|sort)/i.test(query)) {
     const sorted = [...papers].sort((a, b) => (a.read_minutes || 99) - (b.read_minutes || 99));
-    return "按阅读时长从短到长的顺序：\n" + sorted.slice(0, 8).map((p, i) => `${i + 1}. ${p.title}（约 ${p.read_minutes || "?"} 分钟）`).join("\n");
+    return "Sorted from shortest to longest read time:\n" + sorted.slice(0, 8).map((p, i) => `${i + 1}. ${p.title} (~${p.read_minutes || "?"} min)`).join("\n");
   }
   const cleaned = q.replace(/[?？。.,、\s]/g, "");
   if (cleaned.length >= 2) {
@@ -2070,12 +2029,12 @@ function buildBotReply(query) {
     );
     if (matched.length) {
       const p = matched[0];
-      const tldr = p.digest?.tldr || p.abstract || "（暂无摘要）";
-      const authors = (p.authors || []).slice(0, 3).map((a) => a.name || a).join("、") || "未知";
-      return `找到《${p.title}》：\n${tldr}\n\n作者：${authors}`;
+      const tldr = p.digest?.tldr || p.abstract || "(no abstract available)";
+      const authors = (p.authors || []).slice(0, 3).map((a) => a.name || a).join(", ") || "Unknown";
+      return `Found "${p.title}":\n${tldr}\n\nAuthors: ${authors}`;
     }
   }
-  return "我可以帮你：\n• 结合 DDL / 空闲时间安排每日任务\n• 挑出今天最该读的那一篇\n• 生成一条学习 roadmap\n\n把你的目标告诉我就行。";
+  return "I can help you:\n• Plan daily tasks around your deadline and free time\n• Pick the single paper you should read today\n• Generate a learning roadmap\n\nJust tell me your goal.";
 }
 
 function pickBestForToday(papers) {
@@ -2099,9 +2058,9 @@ function buildDailyPlanReply(papers, query) {
     if (plan.length >= 4) break;
   }
   if (!plan.length) plan.push(ordered[0]);
-  const header = `按你 ~${budget} 分钟的时间预算，今天可以安排：`;
-  const body = plan.map((p, i) => `${i + 1}. ${p.title}（约 ${p.read_minutes || 20} 分钟｜相关度 ${p.match_score || "?"}）`).join("\n");
-  return `${header}\n${body}\n\n建议先看方法框架和主实验，把它当作 30 分钟一段的番茄工作。如果告诉我 DDL 我可以给你分到未来几天。`;
+  const header = `Based on your ~${budget}-minute budget, here's today's plan:`;
+  const body = plan.map((p, i) => `${i + 1}. ${p.title} (~${p.read_minutes || 20} min · relevance ${p.match_score || "?"})`).join("\n");
+  return `${header}\n${body}\n\nStart with the method framework and main experiments; treat each paper as a 30-minute pomodoro block. If you tell me your deadline, I can spread these across multiple days.`;
 }
 
 function parseDailyMinutes(query) {
@@ -2137,11 +2096,11 @@ function stagePriorityFor(paper) {
   const abstract = (paper.abstract || "").toLowerCase();
   const title = (paper.title || "").toLowerCase();
   if (/survey|综述|review/.test(title) || /survey|comprehensive review/.test(abstract)) {
-    return { order: 0, tag: "综述", accent: "violet" };
+    return { order: 0, tag: "Survey", accent: "violet" };
   }
   const year = Number(paper.year || paper.published_year || 0);
-  if (year && year >= new Date().getFullYear() - 1) return { order: 2, tag: "最新", accent: "teal" };
-  return { order: 1, tag: "经典", accent: "coral" };
+  if (year && year >= new Date().getFullYear() - 1) return { order: 2, tag: "Latest", accent: "teal" };
+  return { order: 1, tag: "Classic", accent: "coral" };
 }
 
 function buildWeekPlanReply(papers, query) {
@@ -2184,10 +2143,10 @@ function buildWeekPlanReply(papers, query) {
   return {
     type: "weekplan",
     data: {
-      title: `按 ${dailyBudget} 分钟/天为你排好了 ${totalDays} 天阅读计划`,
+      title: `Your ${totalDays}-day reading plan at ${dailyBudget} min/day`,
       subtitle: ddl
-        ? `DDL：${ddl.getFullYear()}/${ddl.getMonth() + 1}/${ddl.getDate()}｜共 ${enriched.length - overflow.length} 篇入表`
-        : `共 ${enriched.length - overflow.length} 篇入表，按 综述 → 经典 → 最新 顺序推进`,
+        ? `Deadline: ${ddl.getFullYear()}/${ddl.getMonth() + 1}/${ddl.getDate()} · ${enriched.length - overflow.length} papers scheduled`
+        : `${enriched.length - overflow.length} papers scheduled — Survey → Classic → Latest order`,
       dailyBudget,
       ddl: ddl ? ddl.toISOString() : null,
       days,
@@ -2198,10 +2157,10 @@ function buildWeekPlanReply(papers, query) {
 
 function buildTopPickReply(papers, query) {
   const pick = pickBestForToday(papers);
-  if (!pick) return "我暂时没找到候选论文，可以先去 Library 加几篇。";
+  if (!pick) return "I couldn't find a candidate right now. Try saving a few papers to your Library first.";
   const digest = pick.digest || {};
-  const reason = digest.why_keep || digest.tldr || digest.verdict || "与你 Library 里的主线方向相关度最高";
-  const focus = digest.reading_focus || "先看方法框架、主实验与局限性";
+  const reason = digest.why_keep || digest.tldr || digest.verdict || "Highest relevance to your Library's main direction";
+  const focus = digest.reading_focus || "Start with the method framework, main experiments, and limitations";
   return {
     type: "toppick",
     data: {
@@ -2219,7 +2178,7 @@ function buildRoadmapReply(papers) {
 
 function appendBotRoadmap(data) {
   if (!data || !Array.isArray(data.stages) || !data.stages.length) {
-    appendBotMessage("我暂时没能生成 roadmap，请稍后再试。");
+    appendBotMessage("I couldn't generate a roadmap right now — please try again later.");
     return;
   }
   const container = document.createElement("div");
@@ -2228,7 +2187,7 @@ function appendBotRoadmap(data) {
     <header class="ai-bot-roadmap-head">
       <span class="ai-bot-roadmap-badge"><i data-lucide="route"></i></span>
       <div>
-        <strong>${escapeHTML(data.title || "为你生成的学习 roadmap")}</strong>
+        <strong>${escapeHTML(data.title || "Your learning roadmap")}</strong>
         ${data.subtitle ? `<small>${escapeHTML(data.subtitle)}</small>` : ""}
       </div>
     </header>
@@ -2248,7 +2207,7 @@ function appendBotRoadmap(data) {
                       <span class="ai-bot-roadmap-chip">${escapeHTML(stage.tag || "")}</span>
                       ${paper.year ? `<small>${escapeHTML(String(paper.year))}</small>` : ""}
                       ${paper.venue ? `<small>· ${escapeHTML(paper.venue)}</small>` : ""}
-                      ${paper.minutes ? `<small class="ai-bot-roadmap-time"><i data-lucide="clock-3"></i>${escapeHTML(String(paper.minutes))} 分钟</small>` : ""}
+                      ${paper.minutes ? `<small class="ai-bot-roadmap-time"><i data-lucide="clock-3"></i>${escapeHTML(String(paper.minutes))} min</small>` : ""}
                     </div>
                     <h4>${escapeHTML(paper.title || "")}</h4>
                     ${paper.authors ? `<small class="ai-bot-roadmap-authors">${escapeHTML(paper.authors)}</small>` : ""}
@@ -2267,12 +2226,12 @@ function appendBotRoadmap(data) {
   requestAnimationFrame(() => container.classList.add("is-visible"));
 }
 
-const WEEKDAY_LABEL = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+const WEEKDAY_LABEL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 let __weekPlanCounter = 0;
 
 function appendBotWeekPlan(data) {
   if (!data || !Array.isArray(data.days) || !data.days.length) {
-    appendBotMessage("我暂时没能生成周计划，请稍后再试。");
+    appendBotMessage("I couldn't generate a week plan right now — please try again later.");
     return;
   }
   const planId = `wp${++__weekPlanCounter}${Date.now().toString(36)}`;
@@ -2286,7 +2245,7 @@ function appendBotWeekPlan(data) {
     <header class="ai-bot-weekplan-head">
       <span class="ai-bot-weekplan-badge"><i data-lucide="calendar-check-2"></i></span>
       <div>
-        <strong>${escapeHTML(data.title || "本周阅读计划")}</strong>
+        <strong>${escapeHTML(data.title || "This week's reading plan")}</strong>
         ${data.subtitle ? `<small>${escapeHTML(data.subtitle)}</small>` : ""}
       </div>
     </header>
@@ -2298,7 +2257,7 @@ function appendBotWeekPlan(data) {
           <li class="ai-bot-weekplan-day" style="--day-index: ${index};">
             <div class="ai-bot-weekplan-day-head">
               <span class="ai-bot-weekplan-date">${escapeHTML(dateLabel)}</span>
-              <span class="ai-bot-weekplan-day-sum"><i data-lucide="clock-3"></i>${day.minutes} 分钟</span>
+              <span class="ai-bot-weekplan-day-sum"><i data-lucide="clock-3"></i>${day.minutes} min</span>
             </div>
             <ul class="ai-bot-weekplan-items">
               ${day.items.map((it) => `
@@ -2306,7 +2265,7 @@ function appendBotWeekPlan(data) {
                   <span class="ai-bot-weekplan-chip">${escapeHTML(it.prio.tag || "")}</span>
                   <div class="ai-bot-weekplan-item-body">
                     <h5>${escapeHTML(it.paper.title || "")}</h5>
-                    <small>约 ${it.minutes} 分钟</small>
+                    <small>~${it.minutes} min</small>
                   </div>
                 </li>
               `).join("")}
@@ -2316,14 +2275,14 @@ function appendBotWeekPlan(data) {
       }).join("")}
     </ol>
     ${data.overflow && data.overflow.length ? `
-      <p class="ai-bot-weekplan-overflow">还有 ${data.overflow.length} 篇没排进日程，DDL 之后可继续跟进。</p>
+      <p class="ai-bot-weekplan-overflow">${data.overflow.length} more papers didn't fit — you can revisit them after the deadline.</p>
     ` : ""}
     <footer class="ai-bot-weekplan-foot">
       <button type="button" class="ai-bot-weekplan-cta" data-weekplan-export="${planId}">
         <i data-lucide="calendar-plus"></i>
-        <span>一键加到我的日历</span>
+        <span>Add to my calendar</span>
       </button>
-      <small>会下载一个 .ics 文件，双击即可导入 Apple / Google / Outlook 日历</small>
+      <small>Downloads a .ics file — double-click to import into Apple / Google / Outlook Calendar</small>
     </footer>
   `;
   elements.aiBotMessages.appendChild(container);
@@ -2344,14 +2303,14 @@ function icsEscape(text) {
 
 function exportWeekPlanIcs(planId) {
   const data = window.__PAPERSWIPE_WEEKPLANS__ && window.__PAPERSWIPE_WEEKPLANS__[planId];
-  if (!data) { showToast("找不到这份计划，可能已过期"); return; }
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PaperSwipe//AI Bot//CN", "CALSCALE:GREGORIAN"];
+  if (!data) { showToast("Plan not found — it may have expired"); return; }
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PaperSwipe//AI Bot//EN", "CALSCALE:GREGORIAN"];
   const stamp = icsDateTime(new Date());
   data.days.filter((day) => day.items.length).forEach((day, i) => {
     const start = new Date(day.date); start.setHours(20, 0, 0, 0);
     const end = new Date(start.getTime() + day.minutes * 60000);
-    const summary = `PaperSwipe · ${day.items.length} 篇 · ${day.minutes}min`;
-    const desc = day.items.map((it, idx) => `${idx + 1}. [${it.prio.tag}] ${it.paper.title}（约 ${it.minutes} 分钟）`).join("\n");
+    const summary = `PaperSwipe · ${day.items.length} papers · ${day.minutes}min`;
+    const desc = day.items.map((it, idx) => `${idx + 1}. [${it.prio.tag}] ${it.paper.title} (~${it.minutes} min)`).join("\n");
     lines.push("BEGIN:VEVENT",
       `UID:${planId}-${i}@paperswipe`,
       `DTSTAMP:${stamp}`,
@@ -2371,12 +2330,12 @@ function exportWeekPlanIcs(planId) {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1500);
-  showToast("已生成 .ics 文件，双击导入你的日历");
+  showToast(".ics file generated — double-click to import into your calendar");
 }
 
 function appendBotTopPick(data) {
   if (!data || !data.paper) {
-    appendBotMessage("我暂时没找到候选论文，可以先去 Library 加几篇。");
+    appendBotMessage("I couldn't find a candidate right now. Try saving a few papers to your Library first.");
     return;
   }
   const paper = data.paper;
@@ -2389,13 +2348,13 @@ function appendBotTopPick(data) {
   const paperLink = safeURL(paper.url) ? `<a href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Original</a>` : "";
   const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
   const highlights = [
-    { label: "研究问题", icon: "search", text: digest.problem || "摘要未提供明确的研究问题" },
-    { label: "核心方法", icon: "book-open", text: digest.method || (Array.isArray(digest.novelty) ? digest.novelty.join(" ") : digest.novelty) || "摘要未提供明确的方法说明" },
-    { label: "主要结果", icon: "sparkles", text: digest.result || "摘要未提供可核验的研究结果" },
+    { label: "Research question", icon: "search", text: digest.problem || "The abstract doesn't state the research question clearly." },
+    { label: "Core method", icon: "book-open", text: digest.method || (Array.isArray(digest.novelty) ? digest.novelty.join(" ") : digest.novelty) || "The abstract doesn't spell out the method in detail." },
+    { label: "Main results", icon: "sparkles", text: digest.result || "The abstract doesn't report verifiable results." },
   ];
   const minutes = Number(paper.read_minutes) || 0;
   const needsReproduction = /复现|repro|reproduc/i.test(digest.reading_focus || "") || /代码|code|开源/i.test(digest.audience || "");
-  const focusText = digest.reading_focus || "先看方法框架、主实验与局限性";
+  const focusText = digest.reading_focus || "Start with the method framework, main experiments, and limitations";
 
   const container = document.createElement("div");
   container.className = "ai-bot-toppick";
@@ -2409,20 +2368,20 @@ function appendBotTopPick(data) {
             </div>
             <div class="front-main">
               <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
-              <p class="front-tldr">${escapeHTML(digest.tldr || digest.verdict || "点击卡片查看详细分析")}</p>
+              <p class="front-tldr">${escapeHTML(digest.tldr || digest.verdict || "Tap the card for the full analysis")}</p>
             </div>
             <div class="knowledge-byline">
               <span class="author-avatar">${escapeHTML(authorInitials)}</span>
               <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
             </div>
             <span class="match-pill">${numberOrZero(paper.match_score)}</span>
-            <button class="flip-hint" type="button" data-bot-flip-btn aria-label="翻到详情"><i data-lucide="repeat"></i><span>轻点卡片查看要点</span></button>
+            <button class="flip-hint" type="button" data-bot-flip-btn aria-label="Flip to details"><i data-lucide="repeat"></i><span>Tap the card for highlights</span></button>
           </header>
         </div>
         <div class="card-face card-back">
           <div class="card-scroll">
             <div class="back-topbar">
-              <button class="flip-back-button" type="button" data-bot-flip-btn aria-label="返回一句话总结"><i data-lucide="arrow-left"></i><span>返回</span></button>
+              <button class="flip-back-button" type="button" data-bot-flip-btn aria-label="Back to summary"><i data-lucide="arrow-left"></i><span>Back</span></button>
               <strong>${escapeHTML(paper.title)}</strong>
             </div>
             <div class="knowledge-body">
@@ -2442,7 +2401,7 @@ function appendBotTopPick(data) {
               </section>
               <section class="knowledge-section">
                 <h3>Why it matters?</h3>
-                <p class="insight-copy">${escapeHTML(digest.why_keep || digest.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
+                <p class="insight-copy">${escapeHTML(digest.why_keep || digest.result || "Highly relevant to your current research direction and worth a deeper read next.")}</p>
               </section>
               <div class="paper-meta">
                 <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
@@ -2458,8 +2417,8 @@ function appendBotTopPick(data) {
     <div class="ai-bot-toppick-brief">
       <p class="ai-bot-toppick-reason">${escapeHTML(data.reason)}</p>
       <ul class="ai-bot-toppick-facts">
-        <li><i data-lucide="target"></i><span><strong>阅读重点：</strong>${escapeHTML(focusText)}${needsReproduction ? "（建议动手复现）" : ""}</span></li>
-        ${minutes ? `<li><i data-lucide="clock-3"></i><span><strong>所需时间：</strong>约 ${minutes} 分钟</span></li>` : ""}
+        <li><i data-lucide="target"></i><span><strong>Reading focus:</strong> ${escapeHTML(focusText)}${needsReproduction ? " (worth reproducing hands-on)" : ""}</span></li>
+        ${minutes ? `<li><i data-lucide="clock-3"></i><span><strong>Time needed:</strong> ~${minutes} min</span></li>` : ""}
       </ul>
     </div>
   `;
@@ -2881,7 +2840,7 @@ async function refreshSearches() {
 }
 
 function switchView(view) {
-  const validViews = ["discover", "library", "network", "profile", "todos"];
+  const validViews = ["discover", "library", "network", "todos"];
   state.activeView = validViews.includes(view) ? view : "discover";
   closeAiBotPage();
   closeSettingsPage();
@@ -2889,10 +2848,10 @@ function switchView(view) {
     discover: elements.discoverView,
     library: elements.libraryView,
     network: elements.networkView,
-    profile: elements.profileView,
     todos: elements.todosView,
   };
   Object.entries(views).forEach(([name, panel]) => {
+    if (!panel) return;
     const active = name === state.activeView;
     panel.hidden = !active;
     panel.classList.toggle("is-active", active);
@@ -2900,18 +2859,7 @@ function switchView(view) {
   document.querySelectorAll(".bottom-nav [data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === state.activeView));
   elements.searchPanel.hidden = true;
   if (state.activeView === "library") refreshLibrary();
-  if (state.activeView === "network") {
-    renderPeople();
-    renderForumPosts();
-    // Sync panel visibility to current tab
-    const friendsPanel = document.querySelector("#network-friends");
-    const forumPanel = document.querySelector("#network-forum");
-    if (friendsPanel) friendsPanel.hidden = state.networkTab !== "friends";
-    if (forumPanel) forumPanel.hidden = state.networkTab !== "forum";
-    const fab = document.querySelector("#compose-fab");
-    if (fab) fab.hidden = state.networkTab !== "forum";
-  }
-  if (state.activeView === "profile") renderProfile();
+  if (state.activeView === "network") renderTrendBoard();
   if (state.activeView === "todos") {
     state.weekPlanOffset = 0;
     refreshLibrary().finally(() => {
@@ -2920,17 +2868,6 @@ function switchView(view) {
     });
     renderWeekPlan();
   }
-}
-
-function switchNetworkTab(tab) {
-  state.networkTab = tab === "forum" ? "forum" : "friends";
-  const friendsPanel = document.querySelector("#network-friends");
-  const forumPanel = document.querySelector("#network-forum");
-  if (friendsPanel) friendsPanel.hidden = state.networkTab !== "friends";
-  if (forumPanel) forumPanel.hidden = state.networkTab !== "forum";
-  document.querySelectorAll("[data-network-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.networkTab === state.networkTab));
-  const fab = document.querySelector("#compose-fab");
-  if (fab) fab.hidden = state.networkTab !== "forum";
 }
 
 function openAiBotPage() {
@@ -2948,297 +2885,547 @@ function closeAiBotPage() {
   document.body.classList.remove("is-ai-bot-open");
 }
 
-/* ── Friends (Network) ── */
+/* ── Global Trending (Network tab) ── */
 
-const MOCK_FRIENDS_NETWORK = [
-  { id: "chen",  initials: "JC", name: "J. Chen",     bio: "Explainable AI Agents",         avatar: "fa1" },
-  { id: "maya",  initials: "MG", name: "Maya Garcia", bio: "Deep Reinforcement Learning",   avatar: "fa2" },
-  { id: "alex",  initials: "AL", name: "Alex Lin",    bio: "Multimodal Computer Vision",    avatar: "fa3" },
-  { id: "yuki",  initials: "YT", name: "Yuki Tanaka", bio: "Long-term Memory in LLM Agents", avatar: "fa4" },
-  { id: "priya", initials: "PS", name: "Priya Shah",  bio: "Medical Imaging & Few-shot",    avatar: "fa5" },
+const MOCK_TRENDING_GLOBAL = [
+  { topic: "Large Language Model Agents",             count: 18420, pct: 100, delta: 42, tint: 265, keywords: ["Tool use", "Planning", "Memory", "Autonomy"] },
+  { topic: "Diffusion & Generative Models",           count: 15840, pct: 88,  delta: 18, tint: 320, keywords: ["Latent diffusion", "Consistency models", "Video gen", "Flow matching"] },
+  { topic: "Retrieval-Augmented Generation",          count: 12930, pct: 74,  delta: 12, tint: 200, keywords: ["Hybrid search", "Reranking", "Long-term memory", "Grounding"] },
+  { topic: "Vision–Language Foundation Models",       count: 10160, pct: 62,  delta: 8,  tint: 235, keywords: ["CLIP", "SigLIP", "Multimodal", "Zero-shot"] },
+  { topic: "Reinforcement Learning from Human Feedback", count: 9410, pct: 54, delta: -3, tint: 355, keywords: ["DPO", "PPO", "Reward model", "Alignment"] },
+  { topic: "Long-Context & Efficient Attention",      count: 8320,  pct: 48,  delta: 21, tint: 155, keywords: ["Mamba", "Ring attention", "KV cache", "SSMs"] },
+  { topic: "Robotics & Embodied AI",                  count: 7180,  pct: 42,  delta: 14, tint: 40,  keywords: ["Manipulation", "Sim2Real", "VLA models", "Locomotion"] },
+  { topic: "Interpretability & Mechanistic Analysis", count: 5940,  pct: 34,  delta: 6,  tint: 120, keywords: ["Circuits", "SAEs", "Probing", "Attribution"] },
 ];
 
-const MOCK_FRIENDS_ACTIVITY = [
-  {
-    id: "act-1",
-    friendId: "chen",
-    kind: "reading",
-    when: "2h ago",
-    body: "Currently reading",
-    paper: "Reflexion: Language Agents with Verbal Reinforcement Learning",
-    meta: "arXiv 2303.11366 · 32 min read",
-  },
-  {
-    id: "act-2",
-    friendId: "yuki",
-    kind: "post",
-    when: "4h ago",
-    body: "Posted in Q&A",
-    paper: "How to keep long-term memory stable across multi-step web browsing agents?",
-    meta: "4 replies · 12 upvotes",
-    postId: "p1",
-  },
-  {
-    id: "act-3",
-    friendId: "maya",
-    kind: "save",
-    when: "6h ago",
-    body: "Saved to library",
-    paper: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
-    meta: "NeurIPS 2023 · Priority",
-  },
-  {
-    id: "act-4",
-    friendId: "priya",
-    kind: "reading",
-    when: "yesterday",
-    body: "Currently reading",
-    paper: "Segment Anything Model 2: Unified Segmentation across Images and Videos",
-    meta: "Meta AI · 48 min read",
-  },
-  {
-    id: "act-5",
-    friendId: "alex",
-    kind: "post",
-    when: "yesterday",
-    body: "Recommended in 论文速递",
-    paper: "Vision Transformers Need Registers",
-    meta: "ICLR 2024 · +28 likes",
-    postId: "p3",
-  },
-  {
-    id: "act-6",
-    friendId: "chen",
-    kind: "reflect",
-    when: "2 days ago",
-    body: "Left a reflection",
-    paper: '"Thinking out loud consistently helps small models — surprised how well 7B can plan multi-step tasks once given verbal traces."',
-    meta: "on Chain-of-Thought Prompting",
-  },
+const MOCK_TRENDING_MINE = [
+  { id: "llm-agent-memory", topic: "LLM Agent Long-Term Memory", count: 1240, pct: 100, delta: 58, tint: 265, keywords: ["Episodic memory", "Consolidation", "Retrieval", "MemGPT"] },
+  { topic: "Tool-Using & Function-Calling Agents",    count:  980, pct: 82,  delta: 34, tint: 245, keywords: ["Function calls", "ReAct", "Toolformer", "API planning"] },
+  { topic: "Retrieval-Augmented Reasoning",           count:  760, pct: 68,  delta: 22, tint: 200, keywords: ["RAG", "Multi-hop QA", "Chain-of-thought", "Reranking"] },
+  { topic: "Agent Evaluation & Benchmarks",           count:  610, pct: 54,  delta: 15, tint: 155, keywords: ["AgentBench", "WebArena", "Success rate", "Cost metrics"] },
+  { topic: "Self-Reflection & Self-Correction",       count:  480, pct: 44,  delta: 9,  tint: 300, keywords: ["Reflexion", "Self-refine", "Critic models", "Verifiers"] },
+  { topic: "Multi-Agent Collaboration",               count:  390, pct: 36,  delta: -4, tint: 355, keywords: ["Role-play", "Debate", "AutoGen", "Coordination"] },
+  { topic: "Agent Safety & Guardrails",               count:  320, pct: 30,  delta: 7,  tint: 20,  keywords: ["Prompt injection", "Sandboxing", "Refusal", "Red-teaming"] },
 ];
 
-function friendAvatarClass(friendId) {
-  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
-  return f ? f.avatar : "fa1";
-}
-function friendInitials(friendId) {
-  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
-  return f ? f.initials : "?";
-}
-function friendName(friendId) {
-  const f = MOCK_FRIENDS_NETWORK.find((x) => x.id === friendId);
-  return f ? f.name : "Friend";
-}
+const TRENDING_DATA = { mine: MOCK_TRENDING_MINE, global: MOCK_TRENDING_GLOBAL };
+let trendScope = "mine";
+let expandedTrendId = null;
 
-function activityKindIcon(kind) {
-  if (kind === "reading") return "📖";
-  if (kind === "save") return "🔖";
-  if (kind === "reflect") return "💭";
-  return "💬";
-}
+const TRENDING_TOPIC_PAPERS = {
+  "llm-agent-memory": [
+    {
+      id: "trend-mem-1",
+      title: "MemGPT: Towards LLMs as Operating Systems",
+      authors: [{ name: "Charles Packer" }, { name: "Sarah Wooders" }, { name: "Kevin Lin" }, { name: "Vivian Fang" }, { name: "Shishir G. Patil" }, { name: "Ion Stoica" }, { name: "Joseph E. Gonzalez" }],
+      year: 2023,
+      venue: "arXiv",
+      source: "arXiv",
+      abstract: "MemGPT introduces a hierarchical memory system that lets an LLM manage its own context window like an operating system manages physical memory, paging conversation history and documents in and out as needed. This unlocks tasks that far exceed the model's native context length, such as coherent multi-session dialogue and analysis of long documents.",
+      citation_count: 1420,
+      influential_citation_count: 210,
+      fields: ["LLM Agents", "Memory"],
+      url: "https://arxiv.org/abs/2310.08560",
+      pdf_url: "https://arxiv.org/pdf/2310.08560",
+      match_score: 96,
+      read_minutes: 32,
+      digest: {
+        hook: "A hierarchical memory OS that lets an LLM page its own context in and out — unlocking effectively unbounded conversations.",
+        verdict: "Foundational read on LLM long-term memory — save and study the paging protocol.",
+        problem: "LLMs have a **fixed context window** that caps how much history or document text they can reason over at once.",
+        novelty: [
+          "Treats the context window as **RAM** and external stores as **disk**, with the LLM issuing its own paging calls.",
+          "Introduces a **function-calling protocol** letting the model self-manage memory operations.",
+          "Demonstrates coherent conversations spanning **thousands of turns** without losing key facts.",
+        ],
+        method: "A tiered memory hierarchy (main context, recall storage, archival storage) mediated by tool calls the model itself issues to swap information in and out.",
+        result: "Sustained coherence across **10× longer** conversations and materially better long-document QA than context-only baselines.",
+        audience: "Researchers and engineers building agentic systems that must remember across many turns or documents.",
+        why_keep: "This is the reference design for LLM long-term memory — most later work builds on or contrasts with it.",
+        reading_focus: "The memory-management function schema and eviction/recall policies in Sections 3–4.",
+      },
+    },
+    {
+      id: "trend-mem-2",
+      title: "Generative Agents: Interactive Simulacra of Human Behavior",
+      authors: [{ name: "Joon Sung Park" }, { name: "Joseph C. O'Brien" }, { name: "Carrie J. Cai" }, { name: "Meredith Ringel Morris" }, { name: "Percy Liang" }, { name: "Michael S. Bernstein" }],
+      year: 2023,
+      venue: "UIST",
+      source: "ACM UIST",
+      abstract: "Generative Agents builds believable human simulacra by combining an observation stream, a retrieval-augmented long-term memory, periodic reflection to distill higher-level insights, and a planning module. Twenty-five such agents were deployed in a sandbox town and produced emergent social behaviors like planning a Valentine's Day party without human scripting.",
+      citation_count: 2380,
+      influential_citation_count: 340,
+      fields: ["LLM Agents", "HCI"],
+      url: "https://arxiv.org/abs/2304.03442",
+      pdf_url: "https://arxiv.org/pdf/2304.03442",
+      match_score: 94,
+      read_minutes: 40,
+      digest: {
+        hook: "Twenty-five LLM townspeople with reflect-recall-plan memory spontaneously organized a Valentine's Day party — no scripting.",
+        verdict: "Essential read on memory architecture for social agents — study the reflection loop closely.",
+        problem: "LLM agents forget prior interactions and can't sustain **believable long-horizon behavior** in an open world.",
+        novelty: [
+          "Adds a **reflection step** that periodically distills raw memories into higher-level abstractions.",
+          "Ranks memory retrieval by a blend of **recency, importance, and relevance** rather than similarity alone.",
+          "Shows that **planning grounded in retrieved memories** produces emergent social coordination.",
+        ],
+        method: "An observation stream feeds a vector store; retrieval is scored by recency×importance×relevance; reflection turns clusters of memories into insights; planning consumes both.",
+        result: "Emergent behaviors including autonomous **party planning**, information diffusion, and consistent daily routines across 25 agents.",
+        audience: "Anyone designing multi-turn, multi-agent, or persona-grounded LLM systems.",
+        why_keep: "Defines the reflect + recall + plan pattern that most subsequent agent-memory papers cite as their baseline.",
+        reading_focus: "Retrieval scoring formula (Section 4) and reflection-tree construction (Section 5).",
+      },
+    },
+    {
+      id: "trend-mem-3",
+      title: "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      authors: [{ name: "Noah Shinn" }, { name: "Federico Cassano" }, { name: "Ashwin Gopinath" }, { name: "Karthik R. Narasimhan" }, { name: "Shunyu Yao" }],
+      year: 2023,
+      venue: "NeurIPS",
+      source: "NeurIPS",
+      abstract: "Reflexion equips language agents with a verbal self-critique loop: after each trial the agent writes a natural-language reflection about what went wrong, stores it in an episodic memory, and consults it on the next attempt. This lightweight, gradient-free feedback drives large gains on HumanEval, HotpotQA, and AlfWorld.",
+      citation_count: 1810,
+      influential_citation_count: 260,
+      fields: ["LLM Agents", "Reinforcement Learning"],
+      url: "https://arxiv.org/abs/2303.11366",
+      pdf_url: "https://arxiv.org/pdf/2303.11366",
+      match_score: 92,
+      read_minutes: 28,
+      digest: {
+        hook: "Instead of gradients, the agent writes down what went wrong — and reads its own notes next time.",
+        verdict: "Compact, gradient-free improvement loop — read for the memory-as-training-signal idea.",
+        problem: "Improving language agents typically needs **gradient updates** or heavy RL, both expensive at LLM scale.",
+        novelty: [
+          "Uses **verbal self-reflection** as the update signal — no weight changes.",
+          "Persists reflections in an **episodic memory** consulted on retries.",
+          "Works on decision-making, coding, and QA tasks with a **single, prompt-only** design.",
+        ],
+        method: "Actor–evaluator–reflector triple: an LLM acts, an evaluator scores the trajectory, a reflector produces a natural-language critique that's stored and retrieved on subsequent attempts.",
+        result: "Absolute gains of **+22% on HumanEval**, +20% on HotpotQA, +14% on AlfWorld over strong ReAct baselines.",
+        audience: "Anyone building agents where fine-tuning is off the table and inference-time improvement is the only lever.",
+        why_keep: "Shows episodic memory can carry a learning signal on its own — a template many later self-improving agents follow.",
+        reading_focus: "The reflection prompt template and the memory-injection point in the actor loop.",
+      },
+    },
+    {
+      id: "trend-mem-4",
+      title: "A-Mem: Adaptive Memory for Long-Horizon LLM Agents",
+      authors: [{ name: "Yifan Wu" }, { name: "Zhiyuan Liu" }, { name: "Maosong Sun" }],
+      year: 2025,
+      venue: "NeurIPS",
+      source: "NeurIPS",
+      abstract: "A-Mem learns when to write, when to retrieve, and when to summarize, replacing hand-tuned memory heuristics with an adaptive controller. On the LoCoMo long-conversation benchmark it beats fixed-policy baselines while using 40% fewer memory tokens, thanks to a lightweight scheduler that gates each memory operation.",
+      citation_count: 180,
+      influential_citation_count: 32,
+      fields: ["LLM Agents", "Memory"],
+      url: "https://arxiv.org/abs/2502.12110",
+      pdf_url: "https://arxiv.org/pdf/2502.12110",
+      match_score: 90,
+      read_minutes: 34,
+      digest: {
+        hook: "Instead of hard-coded memory rules, A-Mem learns when to remember, forget, and recall — with 40% fewer tokens.",
+        verdict: "Read for the adaptive controller — a fresh take on the memory-policy design question.",
+        problem: "Existing agent memories rely on **hand-tuned heuristics** for writing and retrieving, and don't scale to varied tasks.",
+        novelty: [
+          "A **lightweight scheduler** decides whether each turn triggers write, retrieve, summarize, or skip.",
+          "Trained with a **cost-aware objective** that penalizes wasted memory ops.",
+          "Generalizes across dialogue, tool use, and code tasks **without task-specific tuning**.",
+        ],
+        method: "A small policy network sits above the LLM and, given the current state, emits a discrete memory action; the LLM then executes it and returns to reasoning.",
+        result: "Beats MemGPT and Reflexion on **LoCoMo** by 6–11 points while cutting memory-token usage by **~40%**.",
+        audience: "Practitioners building production agents where memory cost matters as much as memory recall.",
+        why_keep: "One of the first end-to-end learned memory controllers — likely a template for the next generation.",
+        reading_focus: "Scheduler architecture (Section 3) and the ablation on cost-aware vs. accuracy-only objectives.",
+      },
+    },
+    {
+      id: "trend-mem-5",
+      title: "MemoryBank: Reflective Long-Term Memory Inspired by the Ebbinghaus Forgetting Curve",
+      authors: [{ name: "Wanjun Zhong" }, { name: "Lianghong Guo" }, { name: "Qiqi Gao" }, { name: "He Ye" }, { name: "Yanlin Wang" }],
+      year: 2024,
+      venue: "AAAI",
+      source: "AAAI",
+      abstract: "MemoryBank stores agent experiences with importance scores and applies an Ebbinghaus-style decay function so that unrehearsed memories fade while frequently accessed ones consolidate. The design supports personalization across long-running dialogues and shows sharper recall of user preferences than fixed-window baselines.",
+      citation_count: 640,
+      influential_citation_count: 88,
+      fields: ["LLM Agents", "Memory", "Personalization"],
+      url: "https://arxiv.org/abs/2305.10250",
+      pdf_url: "https://arxiv.org/pdf/2305.10250",
+      match_score: 88,
+      read_minutes: 26,
+      digest: {
+        hook: "Borrowing from human forgetting curves, MemoryBank lets less-used memories fade so important ones stay sharp.",
+        verdict: "Elegant, biologically inspired take — worth reading before designing your own consolidation policy.",
+        problem: "Fixed-window or FIFO memories either **overflow** or **discard** important information indiscriminately.",
+        novelty: [
+          "Applies an **Ebbinghaus-inspired decay** curve to memory strength over time.",
+          "**Rehearsal via retrieval** consolidates useful memories, mimicking human recall.",
+          "Enables **personalization** by preserving user-specific facts across sessions.",
+        ],
+        method: "Each memory has an importance score; a decay function reduces strength over time, but successful retrieval boosts it. Retrieval is a blend of relevance and current strength.",
+        result: "Higher fidelity of long-range user-preference recall than sliding-window and vanilla vector-store baselines.",
+        audience: "Builders of long-running personal-assistant agents where user memory must persist across sessions.",
+        why_keep: "A clean bridge between cognitive science and agent memory — good source of ideas for principled forgetting.",
+        reading_focus: "The decay-and-rehearsal equations (Section 3) and the personalization evaluation setup.",
+      },
+    },
+  ],
+};
 
-function renderPeople() {
-  const listEl = document.querySelector("#friends-activity");
-  if (!listEl) return;
-  const query = String((document.querySelector("#friends-search-input") || {}).value || "").trim().toLowerCase();
-  const filtered = query
-    ? MOCK_FRIENDS_ACTIVITY.filter((a) =>
-        friendName(a.friendId).toLowerCase().includes(query) ||
-        (a.paper || "").toLowerCase().includes(query) ||
-        (a.body || "").toLowerCase().includes(query))
-    : MOCK_FRIENDS_ACTIVITY;
-  if (!filtered.length) {
-    listEl.innerHTML = `<div class="wp-empty" style="text-align:center;padding:20px 0;">No activity matches "${escapeHTML(query)}".</div>`;
-    return;
+function fmtCount(n) {
+  if (n >= 1000) {
+    const v = n / 1000;
+    return `${v.toFixed(v >= 10 ? 0 : 1)}k`;
   }
-  listEl.innerHTML = filtered.map((a, idx) => `
-    <article class="activity-item" style="--activity-index:${idx}" ${a.postId ? `data-forum-post-id="${escapeAttribute(a.postId)}"` : ""}>
-      <span class="friend-avatar ${friendAvatarClass(a.friendId)}">${escapeHTML(friendInitials(a.friendId))}</span>
-      <div class="activity-body">
-        <div class="activity-meta">
-          <strong>${escapeHTML(friendName(a.friendId))}</strong>
-          <span class="activity-kind">${activityKindIcon(a.kind)} ${escapeHTML(a.body)}</span>
-          <span class="activity-when">· ${escapeHTML(a.when)}</span>
+  return String(n);
+}
+
+function renderTrendBoard() {
+  const board = document.querySelector("#trend-board");
+  if (!board) return;
+  document.querySelectorAll(".trend-tab").forEach((btn) => {
+    const active = btn.dataset.trendScope === trendScope;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-selected", String(active));
+  });
+  const rows = TRENDING_DATA[trendScope] || MOCK_TRENDING_GLOBAL;
+  board.innerHTML = rows.map((t, i) => {
+    const rank = i + 1;
+    const deltaClass = t.delta > 0 ? "up" : (t.delta < 0 ? "down" : "flat");
+    const deltaArrow = t.delta > 0 ? "▲" : (t.delta < 0 ? "▼" : "—");
+    const deltaText = `${deltaArrow} ${Math.abs(t.delta)}%`;
+    const keywordChips = (t.keywords || []).map((k) => `<span class="trend-keyword">${escapeHTML(k)}</span>`).join("");
+    const expandable = Boolean(t.id && TRENDING_TOPIC_PAPERS[t.id]);
+    const isExpanded = expandable && expandedTrendId === t.id;
+    const papers = expandable ? TRENDING_TOPIC_PAPERS[t.id] : [];
+    const paperList = expandable ? `
+      <ol class="trend-papers" ${isExpanded ? "" : "hidden"}>
+        ${papers.map((p, pi) => `
+          <li class="trend-paper-row" data-trend-paper="${escapeAttribute(t.id)}" data-trend-paper-index="${pi}" style="--pi:${pi}">
+            <span class="trend-paper-rank">${pi + 1}</span>
+            <div class="trend-paper-body">
+              <div class="trend-paper-title">${escapeHTML(p.title)}</div>
+              <div class="trend-paper-meta">
+                <span>${escapeHTML((p.authors && p.authors[0] && p.authors[0].name) || "Unknown")}${p.authors && p.authors.length > 1 ? " et al." : ""}</span>
+                <span>·</span>
+                <span>${escapeHTML(String(p.year || ""))}</span>
+                <span>·</span>
+                <span>${fmtCount(p.citation_count || 0)} cites</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="trend-paper-arrow"></i>
+          </li>
+        `).join("")}
+      </ol>
+    ` : "";
+    return `
+      <li class="trend-row${expandable ? " is-expandable" : ""}${isExpanded ? " is-expanded" : ""}"
+          style="--i:${i};--pct:${t.pct};--tint:${t.tint}"
+          ${expandable ? `data-trend-expand="${escapeAttribute(t.id)}"` : ""}>
+        <div class="trend-row-main">
+          <span class="trend-rank-badge">${rank}</span>
+          <div class="trend-body">
+            <div class="trend-row-topic">${escapeHTML(t.topic)}</div>
+            <div class="trend-row-keywords">${keywordChips}</div>
+            <div class="trend-bar"><span></span></div>
+          </div>
+          <span class="trend-delta ${deltaClass}">${deltaText}</span>
         </div>
-        <div class="activity-paper">${escapeHTML(a.paper)}</div>
-        ${a.meta ? `<div class="activity-sub">${escapeHTML(a.meta)}</div>` : ""}
-      </div>
-    </article>`).join("");
+        ${paperList}
+      </li>`;
+  }).join("");
   refreshIcons();
 }
 
-// Kept as a no-op stub for legacy callers.
-function toggleConnection(_button) {}
-
-/* ── Forum ── */
-
-const MOCK_FORUM_POSTS = [
-  {
-    id: "p1", type: "qa", avatar: "av1", author: "Alice L.", when: "2 小时前",
-    title: "如何让 LLM agent 在长任务中保持稳定的长期记忆？",
-    body: "我在做一个 web 浏览 agent，多步之后经常忘掉早期的 subgoal。看过 MemGPT 但集成太复杂，大家有没有更轻量的方案？",
-    tags: ["LLM Agents", "Long-term Memory"],
-    likes: 12, replies: 4, saved: false, liked: false,
-    repliesList: [
-      { author: "J. Chen", when: "1 小时前", body: "可以试试 hierarchical summary：把每 N 步压缩成一段记忆，塞回 context。简单但意外好用。" },
-      { author: "Maya G.", when: "45 分钟前", body: "推荐读一下 RETRO 和 ReadAgent，都是把 memory 外挂到 retrieval 的思路。" },
-    ],
-  },
-  {
-    id: "p2", type: "discuss", avatar: "av2", author: "Bob Y.", when: "5 小时前",
-    title: "Chain-of-Thought 到底是学到的还是模式匹配？",
-    body: "最近有几篇论文说小模型也能 CoT，但同样有反驳的证据。你怎么看这个问题？",
-    tags: ["Reasoning", "LLMs"],
-    likes: 34, replies: 12, saved: true, liked: true,
-    repliesList: [
-      { author: "Priya S.", when: "3 小时前", body: "我倾向于说是 pattern。真正的推理会在 few-shot 之外仍然稳定，但目前没有这个。" },
-    ],
-  },
-  {
-    id: "p3", type: "rec", avatar: "av3", author: "Yuki T.", when: "1 天前",
-    title: "推荐一篇最近很喜欢的论文：Reflexion",
-    body: "让 agent 在每次失败后写一段自省，再重新尝试。简单粗暴但在 HumanEval 上有惊喜的提升。",
-    tags: ["Agents", "Self-improvement"],
-    likes: 28, replies: 6, saved: false, liked: false,
-    repliesList: [],
-  },
-];
-
-let composeType = "qa";
-
-// Post-type label helpers — the type still exists as a small tag on each card,
-// but is no longer used to filter the list.
-function forumTypeLabel(t) {
-  if (t === "qa") return "Q&A";
-  if (t === "discuss") return "Discussion";
-  if (t === "rec") return "Rec";
-  return t;
+function toggleTrendExpand(id) {
+  if (!TRENDING_TOPIC_PAPERS[id]) return;
+  expandedTrendId = (expandedTrendId === id) ? null : id;
+  renderTrendBoard();
 }
 
-function renderForumPosts() {
-  const listEl = document.querySelector("#forum-posts");
-  if (!listEl) return;
-  const posts = (state.userForumPosts || []).concat(MOCK_FORUM_POSTS);
-  if (!posts.length) {
-    listEl.innerHTML = `<div class="wp-empty" style="text-align:center;padding:24px 0;">还没有帖子。用右下角的按钮发一条吧。</div>`;
-    return;
-  }
-  listEl.innerHTML = posts.map((p) => `
-    <article class="forum-post" data-forum-post-id="${escapeAttribute(p.id)}">
-      <div class="forum-post-header">
-        <span class="forum-post-avatar ${p.avatar}">${escapeHTML((p.author || "?").slice(0, 2).toUpperCase())}</span>
-        <div class="forum-post-meta">
-          <strong>${escapeHTML(p.author)}</strong>
-          <span>${escapeHTML(p.when)}</span>
-        </div>
-        <span class="forum-post-type-tag ${p.type}">${escapeHTML(forumTypeLabel(p.type))}</span>
-      </div>
-      <div class="forum-post-title">${escapeHTML(p.title)}</div>
-      <div class="forum-post-body">${escapeHTML(p.body)}</div>
-      ${p.tags && p.tags.length ? `<div class="forum-post-tags">${p.tags.map((t) => `<span class="forum-post-tag">#${escapeHTML(t)}</span>`).join("")}</div>` : ""}
-      <div class="forum-post-stats">
-        <span class="${p.liked ? "liked" : ""}"><i data-lucide="heart"></i> ${p.likes || 0}</span>
-        <span><i data-lucide="message-circle"></i> ${p.replies || (p.repliesList ? p.repliesList.length : 0)}</span>
-        <span class="${p.saved ? "saved" : ""}"><i data-lucide="bookmark"></i> ${p.saved ? "已收藏" : "收藏"}</span>
-      </div>
-    </article>`).join("");
-  refreshIcons();
+/* ── Trend paper overlay — reuses the home-card CSS but with its own,
+   non-persisting state. Swiping cycles through the topic's papers instead
+   of firing /api/actions. ── */
+const trendOverlayState = { topicId: null, index: 0, flipped: false };
+let trendOverlayBound = false;
+
+function openTrendPaperOverlay(topicId, startIndex) {
+  const papers = TRENDING_TOPIC_PAPERS[topicId];
+  if (!papers || !papers.length) return;
+  trendOverlayState.topicId = topicId;
+  trendOverlayState.index = Math.max(0, Math.min(papers.length - 1, startIndex || 0));
+  trendOverlayState.flipped = false;
+  const overlay = document.querySelector("#trend-overlay");
+  overlay.hidden = false;
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("is-trend-overlay-open");
+  bindTrendOverlayOnce();
+  renderTrendOverlayCard();
 }
 
-function openForumPost(id) {
-  const post = MOCK_FORUM_POSTS.concat(state.userForumPosts || []).find((p) => p.id === id);
-  if (!post) return;
-  const bodyEl = document.querySelector("#forum-detail-body");
-  const typeEl = document.querySelector("#forum-detail-type");
-  const dialog = document.querySelector("#forum-detail-dialog");
-  if (!bodyEl || !dialog) return;
-  if (typeEl) typeEl.textContent = post.type === "qa" ? "Q&A 求助" : (post.type === "discuss" ? "观点讨论" : "论文速递");
-  const repliesHTML = (post.repliesList || []).map((r) => `
-    <div class="reply-item">
-      <span class="reply-avatar">${escapeHTML((r.author || "?").slice(0, 2).toUpperCase())}</span>
-      <div class="reply-body">
-        <strong>${escapeHTML(r.author)}</strong>
-        <time>${escapeHTML(r.when)}</time>
-        <p>${escapeHTML(r.body)}</p>
-      </div>
-    </div>`).join("");
-  bodyEl.innerHTML = `
-    <article class="forum-post">
-      <div class="forum-post-header">
-        <span class="forum-post-avatar ${post.avatar}">${escapeHTML((post.author || "?").slice(0, 2).toUpperCase())}</span>
-        <div class="forum-post-meta">
-          <strong>${escapeHTML(post.author)}</strong>
-          <span>${escapeHTML(post.when)}</span>
-        </div>
-        <span class="forum-post-type-tag ${post.type}">${post.type === "qa" ? "Q&A" : (post.type === "discuss" ? "讨论" : "速递")}</span>
-      </div>
-      <div class="forum-post-title">${escapeHTML(post.title)}</div>
-      <div class="forum-post-body">${escapeHTML(post.body)}</div>
-      ${post.tags && post.tags.length ? `<div class="forum-post-tags">${post.tags.map((t) => `<span class="forum-post-tag">#${escapeHTML(t)}</span>`).join("")}</div>` : ""}
-    </article>
-    <div class="forum-detail-replies">
-      <h3>回复 <small>${(post.repliesList || []).length} 条</small></h3>
-      ${repliesHTML || `<p style="color:var(--muted);font-size:11px;">还没有回复。来说两句 →</p>`}
-    </div>`;
-  dialog.dataset.postId = id;
-  if (typeof dialog.showModal === "function") dialog.showModal();
-  refreshIcons();
+function closeTrendOverlay() {
+  const overlay = document.querySelector("#trend-overlay");
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("is-trend-overlay-open");
+  trendOverlayState.topicId = null;
 }
 
-function submitForumReply(text) {
-  const dialog = document.querySelector("#forum-detail-dialog");
-  const id = dialog && dialog.dataset.postId;
-  if (!id || !text.trim()) return;
-  const post = MOCK_FORUM_POSTS.concat(state.userForumPosts || []).find((p) => p.id === id);
-  if (!post) return;
-  post.repliesList = post.repliesList || [];
-  post.repliesList.push({ author: "你", when: "刚刚", body: text.trim() });
-  post.replies = (post.replies || 0) + 1;
-  openForumPost(id);
-  renderForumPosts();
+function currentTrendPaper() {
+  const papers = TRENDING_TOPIC_PAPERS[trendOverlayState.topicId] || [];
+  return papers[trendOverlayState.index] || null;
 }
 
-/* ── Compose ── */
+function renderTrendOverlayCard() {
+  const paper = currentTrendPaper();
+  const papers = TRENDING_TOPIC_PAPERS[trendOverlayState.topicId] || [];
+  const topic = (TRENDING_DATA.mine.concat(TRENDING_DATA.global)).find((t) => t.id === trendOverlayState.topicId);
+  const topicLabel = document.querySelector("#trend-overlay-topic");
+  const progress = document.querySelector("#trend-overlay-progress");
+  if (topicLabel) topicLabel.textContent = topic ? topic.topic : "";
+  if (progress) progress.textContent = `${trendOverlayState.index + 1} / ${papers.length}`;
+  if (!paper) return;
 
-function openCompose() {
-  // Default new post to Q&A; the compose dialog still lets user pick type.
-  composeType = composeType || "qa";
-  document.querySelectorAll("[data-compose-type]").forEach((b) => b.classList.toggle("is-active", b.dataset.composeType === composeType));
-  const dialog = document.querySelector("#compose-dialog");
-  const titleEl = document.querySelector("#compose-title");
-  const bodyEl = document.querySelector("#compose-body");
-  if (titleEl) titleEl.value = "";
-  if (bodyEl) bodyEl.value = "";
-  if (dialog && typeof dialog.showModal === "function") dialog.showModal();
-  setTimeout(() => titleEl && titleEl.focus(), 80);
-}
+  const card = document.querySelector("#trend-overlay-card");
+  card.className = "card " + paperTheme(paper);
+  card.style.transform = "";
+  card.style.opacity = "";
+  trendOverlayState.flipped = false;
 
-function submitComposePost() {
-  const titleEl = document.querySelector("#compose-title");
-  const bodyEl = document.querySelector("#compose-body");
-  const title = (titleEl && titleEl.value || "").trim();
-  const body = (bodyEl && bodyEl.value || "").trim();
-  if (!title) {
-    showToast("请输入标题");
-    return;
-  }
-  const post = {
-    id: `user-${Date.now()}`,
-    type: composeType,
-    avatar: "av1",
-    author: "你",
-    when: "刚刚",
-    title, body,
-    tags: [],
-    likes: 0, replies: 0, saved: false, liked: false,
-    repliesList: [],
+  const venueName = paper.venue || paper.source || "";
+  const venueYear = paper.year || "";
+  const venueFull = [venueName, venueYear].filter(Boolean).join(" · ") || "Publication pending";
+  const venueBadge = venueYear ? venueName + " " + venueYear : venueName || "Publication";
+  const c = {
+    title: paper.title,
+    subtitle: pickSubtitle(paper),
+    initials: getInitials(paper.authors?.[0]?.name || "PS"),
+    author: formatAuthors(paper.authors),
+    venueFull, venueBadge,
+    problem: paper.digest?.problem || "Check the introduction for the research question.",
+    method: paper.digest?.method || firstNoveltyBullet(paper) || "Core method details need verification from the full text.",
+    result: paper.digest?.result || "Key results not available in the abstract.",
+    noveltyBullets: noveltyBullets(paper),
+    whyImportant: paper.digest?.why_keep || "Highly relevant to this trending topic.",
+    whyRead: paper.digest?.audience || paper.digest?.reading_focus || "Relevant for researchers in this area.",
+    fields: deriveTags(paper),
+    bestFor: deriveBestFor(paper),
+    url: paper.url || "",
+    pdf_url: paper.pdf_url || "",
+    read_minutes: mockReadMinutes(paper.read_minutes, paper.id),
+    citation_count: mockCitationCount(paper.citation_count),
   };
-  if (!Array.isArray(state.userForumPosts)) state.userForumPosts = [];
-  state.userForumPosts.unshift(post);
-  const dialog = document.querySelector("#compose-dialog");
-  if (dialog) dialog.close();
-  renderForumPosts();
-  showToast("已发布");
+
+  card.innerHTML = `
+    <div class="stamp dismiss">NOPE</div>
+    <div class="stamp save">YES</div>
+    <div class="stamp priority">TOP</div>
+    <div class="stamp read">DONE</div>
+    <div class="card-inner" id="trendOverlayInner">
+      <div class="card-face card-front">
+        <div class="card-hero">
+          <div class="card-top-wrap">
+            <div class="card-topline">
+              <span class="card-badge">${escapeHTML(c.venueBadge)}</span>
+            </div>
+            <div class="card-fields">${c.fields.map(escapeHTML).join(" · ")}</div>
+          </div>
+          <div class="flip-hint-front"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>Tap to flip</div>
+          <div class="card-body">
+            <p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
+            <h2 class="card-title">${escapeHTML(c.title)}</h2>
+          </div>
+          <div class="card-byline">
+            <span class="avatar">${escapeHTML(c.initials)}</span>
+            <div class="byline-text"><strong>${escapeHTML(c.author)}</strong>${escapeHTML(c.venueFull)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-back-face">
+          <div class="back-hero">
+            <div class="back-topline"><span class="card-badge">${escapeHTML(c.venueBadge)}</span></div>
+            <h2 class="back-title">${escapeHTML(c.title)}</h2>
+            <div class="back-byline">${escapeHTML(c.author)}</div>
+          </div>
+          <div class="back-details">
+            <div class="detail-section">
+              <div class="detail-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Highlights</div>
+              <div class="highlight-list">
+                <div class="hl-item"><span class="hl-badge problem">Problem</span><p>${boldMarkup(escapeHTML(truncateText(c.problem)))}</p></div>
+                <div class="hl-item"><span class="hl-badge method">Method</span><p>${boldMarkup(escapeHTML(truncateText(c.method)))}</p></div>
+                <div class="hl-item"><span class="hl-badge result">Results</span><p>${boldMarkup(escapeHTML(truncateText(c.result)))}</p></div>
+              </div>
+            </div>
+            <div class="back-divider"></div>
+            <div class="detail-section">
+              <div class="detail-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>What's New</div>
+              <ul class="detail-bullets">${(c.noveltyBullets || []).map((b) => `<li>${boldMarkup(escapeHTML(b))}</li>`).join("")}</ul>
+            </div>
+            <div class="back-divider"></div>
+            <div class="detail-section">
+              <div class="detail-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Why It Matters</div>
+              <div class="why-grid">
+                <div class="why-col"><span class="why-tag">For the field</span><p>${escapeHTML(c.whyImportant)}</p></div>
+                <div class="why-col"><span class="why-tag">For you</span><p>${escapeHTML(c.whyRead)}</p></div>
+              </div>
+            </div>
+            <div class="source-links">
+              <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
+              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
+              ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Original</a>` : ""}
+              ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>PDF</a>` : ""}
+            </div>
+            <div class="flip-hint-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>Tap to flip back</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  refreshIcons();
+
+  /* Entrance animation */
+  card.style.transition = "none";
+  card.style.transform = "translateY(38px) scale(.93)";
+  card.style.opacity = "0";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    card.style.transition = "transform 440ms cubic-bezier(.25,.8,.25,1.2), opacity 360ms ease";
+    card.style.transform = "";
+    card.style.opacity = "";
+  }));
+}
+
+function trendOverlayFly(action, velocity) {
+  const card = document.querySelector("#trend-overlay-card");
+  const papers = TRENDING_TOPIC_PAPERS[trendOverlayState.topicId] || [];
+  const paper = papers[trendOverlayState.index];
+  if (!paper) return;
+  card.style.transition = "transform 340ms cubic-bezier(.4,0,1,1), opacity 300ms ease";
+  const boost = Math.min(1.6, 1 + (velocity || 0) * 0.7);
+  let tx = 0, ty = 0, rx = 0, ry = 0;
+  if (action === "dismiss")  { tx = -130 * boost; ty = 20;  rx = -3;  ry = -18; }
+  if (action === "save")     { tx = 130 * boost;  ty = 20;  rx = -3;  ry = 18; }
+  if (action === "priority") { tx = 10;           ty = -140 * boost; rx = -18; ry = 2; }
+  if (action === "read")     { tx = -5;           ty = 140 * boost;  rx = 18;  ry = -2; }
+  card.style.transform = `translate(${tx}vw, ${ty}px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  card.style.opacity = ".15";
+  updateOverlayStamps(0, 0, 0);
+
+  const labels = { dismiss: "Skipped", save: "Saved!", priority: "Marked Key!", read: "Marked Read" };
+  showToast(labels[action] || action);
+
+  /* Persist to Library for save/priority/read — same as home decide(). Dismiss just advances. */
+  if (action !== "dismiss") {
+    fetch("/api/actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paper, action }),
+    }).then((r) => {
+      if (r.ok) { refreshLibrary(); refreshStats(); }
+    }).catch((err) => console.warn("[trend] action failed", err));
+  }
+
+  setTimeout(() => {
+    if (trendOverlayState.index < papers.length - 1) {
+      trendOverlayState.index += 1;
+      renderTrendOverlayCard();
+    } else {
+      closeTrendOverlay();
+    }
+  }, 320);
+}
+
+function updateOverlayStamps(dx, dy, strength) {
+  const card = document.querySelector("#trend-overlay-card");
+  if (!card) return;
+  const nls = Math.pow(strength, .65);
+  const s = {
+    dismiss: card.querySelector(".stamp.dismiss"),
+    save: card.querySelector(".stamp.save"),
+    priority: card.querySelector(".stamp.priority"),
+    read: card.querySelector(".stamp.read"),
+  };
+  if (!s.dismiss) return;
+  s.dismiss.style.opacity  = dx < -10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
+  s.save.style.opacity     = dx >  10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
+  s.priority.style.opacity = dy < -10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
+  s.read.style.opacity     = dy >  10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
+}
+
+function bindTrendOverlayOnce() {
+  if (trendOverlayBound) return;
+  trendOverlayBound = true;
+  const overlay = document.querySelector("#trend-overlay");
+  const card = document.querySelector("#trend-overlay-card");
+  overlay.querySelector(".trend-overlay-close").addEventListener("click", closeTrendOverlay);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeTrendOverlay(); });
+  document.addEventListener("keydown", (e) => {
+    if (document.body.classList.contains("is-trend-overlay-open")) {
+      if (e.key === "Escape") closeTrendOverlay();
+      if (e.key === "ArrowLeft") trendOverlayFly("dismiss");
+      if (e.key === "ArrowRight") trendOverlayFly("save");
+      if (e.key === "ArrowUp") trendOverlayFly("priority");
+      if (e.key === "ArrowDown") trendOverlayFly("read");
+      if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); toggleTrendOverlayFlip(); }
+    }
+  });
+
+  let dx = 0, dy = 0, startX = 0, startY = 0, startT = 0, active = false;
+  card.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button, a, [data-stop-click]")) return;
+    if (trendOverlayState.flipped && e.target.closest(".back-details")) return;
+    active = true; dx = 0; dy = 0;
+    startX = e.clientX; startY = e.clientY; startT = Date.now();
+    card.classList.add("is-dragging");
+    card.setPointerCapture(e.pointerId);
+  });
+  card.addEventListener("pointermove", (e) => {
+    if (!active) return;
+    dx = e.clientX - startX; dy = e.clientY - startY;
+    const rx = (dy / 300) * 16, ry = (dx / 200) * 12;
+    card.style.transform = `translate(${dx}px, ${dy}px) rotateX(${-rx}deg) rotateY(${ry}deg)`;
+    const strength = Math.min(1, Math.max(Math.abs(dx), Math.abs(dy)) / 110);
+    updateOverlayStamps(dx, dy, strength);
+  });
+  const finish = () => {
+    if (!active) return;
+    active = false;
+    card.classList.remove("is-dragging");
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dt = Date.now() - startT;
+    if (dist < 8 && dt < 300) {
+      card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4)";
+      card.style.transform = "";
+      updateOverlayStamps(0, 0, 0);
+      toggleTrendOverlayFlip();
+      return;
+    }
+    const fast = dt > 0 && dist / dt > 0.65;
+    const tx = fast ? 50 : 95, ty = fast ? 42 : 85;
+    const velocity = dt > 0 ? dist / dt : 0;
+    if (dx < -tx && Math.abs(dx) > Math.abs(dy)) return trendOverlayFly("dismiss", velocity);
+    if (dx >  tx && Math.abs(dx) > Math.abs(dy)) return trendOverlayFly("save", velocity);
+    if (dy < -ty && Math.abs(dy) > Math.abs(dx) * .8) return trendOverlayFly("priority", velocity);
+    if (dy >  ty && Math.abs(dy) > Math.abs(dx) * .8) return trendOverlayFly("read", velocity);
+    card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4)";
+    card.style.transform = "";
+    updateOverlayStamps(0, 0, 0);
+  };
+  card.addEventListener("pointerup", finish);
+  card.addEventListener("pointercancel", finish);
+}
+
+function toggleTrendOverlayFlip() {
+  const inner = document.querySelector("#trend-overlay-card .card-inner");
+  if (!inner) return;
+  trendOverlayState.flipped = !trendOverlayState.flipped;
+  inner.classList.toggle("is-flipped", trendOverlayState.flipped);
+}
+
+function setTrendScope(scope) {
+  if (scope !== "mine" && scope !== "global") return;
+  if (trendScope === scope) return;
+  trendScope = scope;
+  renderTrendBoard();
 }
 
 function renderSettings() {
@@ -3264,13 +3451,6 @@ const TODO_STORAGE_KEY = "paperswipe_todos"; // legacy — cleared on next boot
 
 function scopeLabel(scope) {
   return scope === "day" ? "Today" : scope === "week" ? "This week" : "This month";
-}
-
-function renderProfile() {
-  const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
-  const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
-  if (elements.profileIdentity) elements.profileIdentity.textContent = `${identities[onboardingProfile.identity] || "研究者"} · ${styleLabel}`;
-  refreshIcons();
 }
 
 const WEEK_PLAN_DAY_TARGET_MIN = 120;
@@ -3421,7 +3601,6 @@ function renderWeekPlan() {
         <button type="button" class="wp-action wp-action--remove" data-week-plan-action="remove" data-id="${escapeAttribute(t.id)}" aria-label="Delete" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
       </div>
       <button type="button" class="wp-item wp-item--${t.action} wp-priority-${t.priority || "medium"}${t.done ? " is-done" : ""}" data-week-plan-card data-id="${escapeAttribute(t.id)}">
-        <span class="wp-priority-flag" aria-hidden="true"></span>
         <span class="wp-item-title">${escapeHTML(t.title)}</span>
         <span class="wp-item-row">
           <span class="wp-item-meta">${t.minutes} min</span>

@@ -145,13 +145,11 @@
     <main class="main-stage">
       <section id="discover-view" class="view discover-view is-active" aria-labelledby="discover-title">
         <header class="app-topbar">
-          <button id="search-toggle" class="topbar-button" type="button" aria-label="搜索研究方向" title="搜索"><i data-lucide="search"></i></button>
+          <button id="settings-toggle" class="topbar-button" type="button" aria-label="打开设置" title="设置"><i data-lucide="settings"></i></button>
           <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
             <span><i data-lucide="layers-3"></i></span><strong>PaperSwipe</strong>
           </button>
-          <div class="topbar-right">
-            <button id="ai-bot-button" class="topbar-button ai-bot-topbar-button" type="button" aria-label="打开 AI 助手对话" title="AI 助手"><i data-lucide="bot"></i></button>
-          </div>
+          <span class="topbar-spacer"></span>
         </header>
 
         <div id="search-panel" class="search-panel" hidden>
@@ -213,18 +211,6 @@
           <button id="library-export-toggle" class="topbar-button" type="button" aria-label="导出到 BibTeX / Zotero" title="导出"><i data-lucide="download"></i></button>
           <h1 id="library-title">Library</h1>
           <div class="topbar-actions">
-            <button id="todos-toggle" class="topbar-button todos-button" type="button" aria-label="打开阅读计划" title="阅读计划">
-              <svg class="todos-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="3" y="4.5" width="18" height="16" rx="2.5"/>
-                <path d="M3 9h18"/>
-                <path d="M8 3v3M16 3v3"/>
-                <circle cx="8.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
-                <circle cx="12.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
-                <circle cx="16.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
-                <circle cx="8.5" cy="17" r="1" fill="currentColor" stroke="none"/>
-              </svg>
-              <span id="todos-toggle-badge" class="todos-badge" hidden></span>
-            </button>
           </div>
         </header>
 
@@ -255,247 +241,49 @@
         <div id="library-list" class="library-list"></div>
       </section>
 
-      <section id="network-view" class="view network-view" aria-labelledby="network-title" hidden>
-        <header class="page-topbar">
-          <span class="topbar-spacer"></span>
-          <h1 id="network-title">Your Network</h1>
-          <span class="topbar-spacer"></span>
-        </header>
 
-        <div class="network-tabs" role="tablist" aria-label="Network 页面">
-          <button class="is-active" type="button" data-network-tab="friends" role="tab"><i data-lucide="users-round"></i> 好友圈</button>
-          <button type="button" data-network-tab="forum" role="tab"><i data-lucide="messages-square"></i> 论坛<b id="forum-badge" class="tab-badge"></b></button>
-        </div>
-
-        <div class="network-scroll" id="network-scroll">
-          <!-- FRIENDS PANEL -->
-          <div id="network-friends" class="network-panel is-active">
-            <div class="friends-search">
-              <i data-lucide="search"></i>
-              <input type="search" id="friends-search-input" placeholder="搜索研究者姓名或研究领域…" autocomplete="off">
+      <section id="network-view" class="view trend-view" aria-labelledby="network-title" hidden>
+        <div class="trend-scroll">
+          <header class="trend-hero">
+            <div class="trend-kicker">
+              <span class="trend-live-dot" aria-hidden="true"></span>
+              <span>LIVE · Updated 2 min ago</span>
             </div>
-
-            <div class="trending-card" id="trending-card" role="button" tabindex="0" aria-label="Trending research topics (tap to flip)">
-              <div class="trending-inner">
-                <!-- FRONT: Global -->
-                <div class="trending-face trending-face--front">
-                  <header class="trending-head">
-                    <div class="trending-title">
-                      <span class="trending-icon">🌍</span>
-                      <div>
-                        <strong>Trending globally</strong>
-                        <small>Top 5 research topics this week</small>
-                      </div>
-                    </div>
-                    <div class="trending-toggle" aria-hidden="true">
-                      <span class="is-active">Global</span><span>Friends</span>
-                    </div>
-                  </header>
-                  <ol class="trending-list">
-                    <li class="trending-item" style="--rank:1;--pct:100;--tint:265">
-                      <span class="trending-rank">1</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Large Language Model Agents</span>
-                          <span class="trending-metric">18.4k</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 42%</span>
-                    </li>
-                    <li class="trending-item" style="--rank:2;--pct:86;--tint:200">
-                      <span class="trending-rank">2</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Diffusion Models</span>
-                          <span class="trending-metric">15.8k</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 18%</span>
-                    </li>
-                    <li class="trending-item" style="--rank:3;--pct:70;--tint:145">
-                      <span class="trending-rank">3</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Retrieval-Augmented Generation</span>
-                          <span class="trending-metric">12.9k</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 9%</span>
-                    </li>
-                    <li class="trending-item" style="--rank:4;--pct:55;--tint:35">
-                      <span class="trending-rank">4</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Vision-Language Models</span>
-                          <span class="trending-metric">10.1k</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta flat">— 2%</span>
-                    </li>
-                    <li class="trending-item" style="--rank:5;--pct:42;--tint:320">
-                      <span class="trending-rank">5</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Reinforcement Learning from Human Feedback</span>
-                          <span class="trending-metric">7.7k</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta down">▼ 4%</span>
-                    </li>
-                  </ol>
-                  <footer class="trending-foot">
-                    <span>Papers indexed last 7 days</span>
-                    <span class="trending-flip-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4"/><path d="M12 3v18"/></svg> Tap to see friends</span>
-                  </footer>
-                </div>
-
-                <!-- BACK: Friends -->
-                <div class="trending-face trending-face--back">
-                  <header class="trending-head">
-                    <div class="trending-title">
-                      <span class="trending-icon">👥</span>
-                      <div>
-                        <strong>Trending in your circle</strong>
-                        <small>What 27 friends are reading</small>
-                      </div>
-                    </div>
-                    <div class="trending-toggle" aria-hidden="true">
-                      <span>Global</span><span class="is-active">Friends</span>
-                    </div>
-                  </header>
-                  <ol class="trending-list">
-                    <li class="trending-item" style="--rank:1;--pct:100;--tint:265">
-                      <span class="trending-rank">1</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Long-term Memory in LLM Agents</span>
-                          <span class="trending-metric">14 friends</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 5</span>
-                    </li>
-                    <li class="trending-item" style="--rank:2;--pct:88;--tint:145">
-                      <span class="trending-rank">2</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Explainable AI</span>
-                          <span class="trending-metric">12 friends</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 3</span>
-                    </li>
-                    <li class="trending-item" style="--rank:3;--pct:68;--tint:200">
-                      <span class="trending-rank">3</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Medical Image Segmentation</span>
-                          <span class="trending-metric">9 friends</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta up">▲ 2</span>
-                    </li>
-                    <li class="trending-item" style="--rank:4;--pct:52;--tint:35">
-                      <span class="trending-rank">4</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Few-shot Learning</span>
-                          <span class="trending-metric">7 friends</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta flat">— 0</span>
-                    </li>
-                    <li class="trending-item" style="--rank:5;--pct:38;--tint:320">
-                      <span class="trending-rank">5</span>
-                      <div class="trending-body">
-                        <div class="trending-topic-row">
-                          <span class="trending-topic">Graph Neural Networks</span>
-                          <span class="trending-metric">5 friends</span>
-                        </div>
-                        <div class="trending-bar"><span></span></div>
-                      </div>
-                      <span class="trending-delta down">▼ 1</span>
-                    </li>
-                  </ol>
-                  <footer class="trending-foot">
-                    <span>Based on what your friends saved</span>
-                    <span class="trending-flip-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4"/><path d="M12 3v18"/></svg> Tap to see global</span>
-                  </footer>
-                </div>
+            <h1 id="network-title" class="trend-title">Global Trending</h1>
+            <p class="trend-sub">The research topics moving the field this week</p>
+            <div class="trend-stat-row">
+              <div class="trend-stat">
+                <span class="trend-stat-num" id="trend-total-papers">128.4k</span>
+                <span class="trend-stat-lbl">papers indexed</span>
+              </div>
+              <div class="trend-stat">
+                <span class="trend-stat-num">7d</span>
+                <span class="trend-stat-lbl">rolling window</span>
+              </div>
+              <div class="trend-stat">
+                <span class="trend-stat-num">42</span>
+                <span class="trend-stat-lbl">countries</span>
               </div>
             </div>
+          </header>
 
-            <div class="section-header">Friends' Activity <small>What your circle has been up to</small></div>
-            <div id="friends-activity" class="friends-activity"></div>
+          <div class="trend-tabs" role="tablist" aria-label="Trending scope">
+            <button type="button" role="tab" class="trend-tab is-active" data-trend-scope="mine">
+              <i data-lucide="sparkles"></i><span>My Fields</span>
+            </button>
+            <button type="button" role="tab" class="trend-tab" data-trend-scope="global">
+              <i data-lucide="globe-2"></i><span>Global</span>
+            </button>
           </div>
 
-          <!-- FORUM PANEL -->
-          <div id="network-forum" class="network-panel" hidden>
-            <div class="forum-posts" id="forum-posts"></div>
-          </div>
+          <ol class="trend-board" id="trend-board"></ol>
+
+          <footer class="trend-foot">
+            <span>Signals: paper submissions, citations, saves &amp; social mentions</span>
+          </footer>
         </div>
-
-        <button class="compose-fab" id="compose-fab" type="button" aria-label="发布新帖" hidden>+</button>
       </section>
 
-      <dialog id="compose-dialog" class="app-dialog compose-dialog">
-        <div class="dialog-header">
-          <strong>发布新帖</strong>
-          <button class="icon-button" type="button" data-close-dialog="compose-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
-        </div>
-        <div class="compose-body">
-          <label class="compose-label">帖子类型</label>
-          <div class="compose-type-picker">
-            <button class="is-active" type="button" data-compose-type="qa"><i data-lucide="help-circle"></i>求助 Q&amp;A</button>
-            <button type="button" data-compose-type="discuss"><i data-lucide="message-circle"></i>观点讨论</button>
-            <button type="button" data-compose-type="rec"><i data-lucide="star"></i>论文速递</button>
-          </div>
-          <label class="compose-label" for="compose-title">标题</label>
-          <input id="compose-title" type="text" placeholder="用一句话概括你的帖子…" maxlength="120">
-          <label class="compose-label" for="compose-body">内容</label>
-          <textarea id="compose-body" rows="4" placeholder="详细描述你的问题、观点或推荐理由…" maxlength="2000"></textarea>
-          <button class="compose-submit" type="button" id="compose-submit">
-            <i data-lucide="plus"></i> 发布
-          </button>
-        </div>
-      </dialog>
-
-      <dialog id="forum-detail-dialog" class="app-dialog forum-detail-dialog">
-        <div class="forum-detail-dialog-inner">
-          <div class="dialog-header">
-            <strong id="forum-detail-type">帖子详情</strong>
-            <button class="icon-button" type="button" data-close-dialog="forum-detail-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
-          </div>
-          <div class="forum-detail-body" id="forum-detail-body"></div>
-          <form class="forum-detail-reply-form" id="forum-detail-reply-form">
-            <input type="text" id="forum-reply-input" placeholder="写下你的回复…" maxlength="500" autocomplete="off">
-            <button type="submit" aria-label="发送回复"><i data-lucide="send"></i></button>
-          </form>
-        </div>
-      </dialog>
-
-      <section id="profile-view" class="view profile-view" aria-labelledby="profile-title" hidden>
-        <header class="page-topbar">
-          <span class="topbar-spacer"></span>
-          <h1 id="profile-title">Profile</h1>
-          <button id="profile-settings-button" class="topbar-button" type="button" aria-label="打开设置" title="设置"><i data-lucide="settings"></i></button>
-        </header>
-
-        <div class="profile-scroll">
-          <section class="profile-summary">
-            <span class="profile-avatar"><i data-lucide="circle-user-round"></i></span>
-            <div><strong>PaperSwipe Researcher</strong><small id="profile-identity">Graduate / PhD · Focused discovery</small></div>
-          </section>
-        </div>
-      </section>
 
       <section id="settings-page" class="settings-page" aria-labelledby="settings-title" hidden>
         <header class="page-topbar">
@@ -551,11 +339,7 @@
       </section>
 
       <section id="todos-view" class="view todos-view" aria-labelledby="todos-title" hidden>
-        <header class="page-topbar">
-          <button id="todos-back" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
-          <h1 id="todos-title">Reading Week</h1>
-          <span class="topbar-spacer"></span>
-        </header>
+        <h1 id="todos-title" class="sr-only">Reading Week</h1>
         <div class="todos-scroll">
           <section class="week-plan-section" aria-labelledby="week-plan-title">
             <div class="week-plan-head">
@@ -567,23 +351,24 @@
             <div id="week-plan-grid" class="week-plan-grid" role="list"></div>
           </section>
         </div>
+        <button id="ai-bot-button" class="ai-bot-fab" type="button" aria-label="Open AI assistant" title="AI assistant"><i data-lucide="bot"></i></button>
       </section>
     </main>
 
     <section id="ai-bot-page" class="ai-bot-page" aria-labelledby="ai-bot-title" hidden>
       <header class="ai-bot-page-header">
-        <button id="ai-bot-close" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+        <button id="ai-bot-close" class="topbar-button" type="button" aria-label="Back" title="Back"><i data-lucide="arrow-left"></i></button>
         <div class="ai-bot-page-id">
           <span class="ai-bot-avatar"><i data-lucide="sparkles"></i></span>
           <strong id="ai-bot-title">PaperSwipe AI</strong>
         </div>
-        <button id="ai-bot-reset" class="topbar-button" type="button" aria-label="清空对话" title="清空对话"><i data-lucide="rotate-ccw"></i></button>
+        <button id="ai-bot-reset" class="topbar-button" type="button" aria-label="Clear conversation" title="Clear conversation"><i data-lucide="rotate-ccw"></i></button>
       </header>
       <div id="ai-bot-messages" class="ai-bot-messages" aria-live="polite"></div>
       <form id="ai-bot-form" class="ai-bot-form">
         <div class="ai-bot-form-inner">
-          <textarea id="ai-bot-input" rows="1" placeholder="告诉我你的目标，或问我今天读什么…" aria-label="向 AI 助手提问" maxlength="600"></textarea>
-          <button id="ai-bot-send" type="submit" class="ai-bot-send" aria-label="发送" title="发送"><i data-lucide="arrow-up"></i></button>
+          <textarea id="ai-bot-input" rows="1" placeholder="Tell me your goal, or ask what to read today…" aria-label="Ask the AI assistant" maxlength="600"></textarea>
+          <button id="ai-bot-send" type="submit" class="ai-bot-send" aria-label="Send" title="Send"><i data-lucide="arrow-up"></i></button>
         </div>
       </form>
     </section>
@@ -591,9 +376,26 @@
     <nav class="bottom-nav" aria-label="主导航">
       <button class="is-active" type="button" data-view="discover"><i data-lucide="compass"></i><span>Explore</span></button>
       <button type="button" data-view="library"><i data-lucide="library"></i><span>Library</span><b id="bottom-library-count">0</b></button>
-      <button type="button" data-view="network"><i data-lucide="users-round"></i><span>Network</span></button>
-      <button type="button" data-view="profile"><i data-lucide="user"></i><span>Profile</span></button>
+      <button type="button" data-view="todos"><i data-lucide="calendar-days"></i><span>Calendar</span><b id="bottom-todos-count" hidden>0</b></button>
+      <button type="button" data-view="network"><i data-lucide="trending-up"></i><span>Trending</span></button>
     </nav>
+
+    <div id="trend-overlay" class="trend-overlay" hidden aria-hidden="true">
+      <button class="trend-overlay-close" type="button" aria-label="Close" title="Close"><i data-lucide="x"></i></button>
+      <div class="trend-overlay-meta">
+        <span id="trend-overlay-topic"></span>
+        <b id="trend-overlay-progress"></b>
+      </div>
+      <div class="trend-overlay-stage" id="trend-overlay-stage">
+        <div class="trend-overlay-stage-inner">
+          <div class="stack-layer stack-1"></div>
+          <div class="stack-layer stack-2"></div>
+          <div class="card theme-violet" id="trend-overlay-card">
+            <div class="card-inner" id="trendOverlayInner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <dialog id="paper-dialog" class="app-dialog paper-dialog">
