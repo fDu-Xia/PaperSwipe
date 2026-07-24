@@ -249,39 +249,119 @@
         <header class="page-topbar">
           <span class="topbar-spacer"></span>
           <h1 id="network-title">Your Network</h1>
-          <button id="forums-button" class="topbar-button forum-button" type="button" aria-label="打开研究论坛" title="研究论坛"><i data-lucide="messages-square"></i><b></b></button>
+          <button id="forums-button" class="topbar-button forum-button" type="button" aria-label="通知" title="通知"><i data-lucide="bell"></i><b></b></button>
         </header>
 
         <div class="network-tabs" role="tablist" aria-label="Network 页面">
-          <button class="is-active" type="button" data-network-tab="heatmap" role="tab">Network Heatmap</button>
-          <button type="button" data-network-tab="connections" role="tab">Connections <b id="connection-count">3</b></button>
+          <button class="is-active" type="button" data-network-tab="friends" role="tab"><i data-lucide="users-round"></i> 好友圈</button>
+          <button type="button" data-network-tab="forum" role="tab"><i data-lucide="messages-square"></i> 论坛<b id="forum-badge" class="tab-badge"></b></button>
         </div>
 
-        <div id="network-heatmap" class="network-panel">
-          <div class="heatmap-stage" aria-label="研究兴趣关系热力图">
-            <div class="hex-grid" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
-              <span></span><span class="warm"></span><span class="active"></span><span></span><span></span>
-              <span></span><span class="active"></span><span class="core">+12</span><span class="warm"></span><span></span>
-              <span></span><span></span><span class="warm"></span><span></span><span></span>
+        <div class="network-scroll" id="network-scroll">
+
+          <!-- ═══ FRIENDS PANEL ═══ -->
+          <div id="network-friends" class="network-panel is-active">
+            <div class="friends-search">
+              <i data-lucide="search"></i>
+              <input type="search" id="friends-search-input" placeholder="搜索研究者姓名或研究领域…" autocomplete="off">
             </div>
-            <div class="heatmap-person person-one"><span>JC</span><b>J. Chen, PhD</b><small>Explainable Agents</small></div>
-            <div class="heatmap-person person-two"><span>MG</span><b>+12 connections</b></div>
-            <div class="heatmap-person person-three"><span>AL</span><b>Computer Vision</b></div>
+
+            <div class="heatmap-stage" aria-label="研究兴趣关系热力图">
+              <div class="hex-grid" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span class="warm"></span><span class="active"></span><span></span><span></span>
+                <span></span><span class="active"></span><span class="core">+12</span><span class="warm"></span><span></span>
+                <span></span><span></span><span class="warm"></span><span></span><span></span>
+              </div>
+              <div class="heatmap-person hp1"><span>JC</span><div><b>J. Chen</b><small>Explainable Agents</small></div></div>
+              <div class="heatmap-person hp2"><span>MG</span><div><b>Maya Garcia</b><small>Deep RL</small></div></div>
+              <div class="heatmap-person hp3"><span>AL</span><div><b>+8 more</b><small>Computer Vision</small></div></div>
+            </div>
+            <div class="network-overlap overlap-highlight">
+              🔥 你和 <strong>J. Chen</strong> 在 <strong>Explainable AI Agents</strong> 上有 12 篇共同兴趣论文 · 重叠度 87%
+            </div>
+
+            <div class="section-header">你可能认识 <small>基于共同研究兴趣</small></div>
+            <div id="friends-list" class="friends-list"></div>
           </div>
-          <p id="network-overlap" class="network-overlap">Your interests overlap most with AI agents and computer vision.</p>
+
+          <!-- ═══ FORUM PANEL ═══ -->
+          <div id="network-forum" class="network-panel" hidden>
+            <div class="forum-type-tabs">
+              <button class="is-active" data-forum-type="qa"><span class="ft-dot qa"></span> Q&A 求助</button>
+              <button data-forum-type="discuss"><span class="ft-dot discuss"></span> 观点讨论</button>
+              <button data-forum-type="rec"><span class="ft-dot rec"></span> 论文速递</button>
+            </div>
+
+            <div class="forum-posts" id="forum-posts"></div>
+          </div>
+
         </div>
 
-        <div id="network-connections" class="network-panel connections-panel" hidden>
-          <div class="connection-stat"><strong>3</strong><span>active research connections</span></div>
-          <div class="shared-topics"><span>AI Agents</span><span>Computer Vision</span><span>HCI</span></div>
-        </div>
-
-        <section class="people-section" aria-labelledby="people-title">
-          <h2 id="people-title">Recommended People <small>Based on swipe activity</small></h2>
-          <div id="people-list" class="people-list"></div>
-        </section>
+        <!-- Compose FAB -->
+        <button class="compose-fab" id="compose-fab" type="button" aria-label="发布新帖" hidden>+</button>
       </section>
+
+      <!-- Compose Modal -->
+      <dialog id="compose-dialog" class="app-dialog compose-dialog">
+        <div class="dialog-header">
+          <strong>发布新帖</strong>
+          <button class="icon-button" type="button" data-close-dialog="compose-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
+        </div>
+        <div class="compose-body">
+          <label class="compose-label">帖子类型</label>
+          <div class="compose-type-picker">
+            <button class="is-active" data-compose-type="qa"><i data-lucide="help-circle"></i>求助 Q&A</button>
+            <button data-compose-type="discuss"><i data-lucide="message-circle"></i>观点讨论</button>
+            <button data-compose-type="rec"><i data-lucide="star"></i>论文速递</button>
+          </div>
+
+          <label class="compose-label" for="compose-title">标题</label>
+          <input id="compose-title" type="text" placeholder="用一句话概括你的帖子…" maxlength="120">
+
+          <label class="compose-label" for="compose-body">内容</label>
+          <textarea id="compose-body" rows="4" placeholder="详细描述你的问题、观点或推荐理由…" maxlength="2000"></textarea>
+
+          <label class="compose-label">引用论文 <small>（可选，从收藏中选择）</small></label>
+          <button class="compose-ref-pick" type="button" id="compose-ref-pick">
+            <i data-lucide="file-text"></i> 从收藏中添加引用论文
+          </button>
+
+          <button class="compose-submit" type="button" id="compose-submit">
+            <i data-lucide="plus"></i> 发布
+          </button>
+        </div>
+      </dialog>
+
+      <!-- Forum Post Detail Dialog -->
+      <dialog id="forum-detail-dialog" class="app-dialog forum-detail-dialog">
+        <div class="forum-detail-dialog-inner">
+          <div class="dialog-header">
+            <strong id="forum-detail-type">帖子详情</strong>
+            <button class="icon-button" type="button" data-close-dialog="forum-detail-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
+          </div>
+          <div class="forum-detail-body" id="forum-detail-body"></div>
+          <form class="forum-detail-reply-form" id="forum-detail-reply-form">
+            <input type="text" id="forum-reply-input" placeholder="写下你的回复…" maxlength="500" autocomplete="off">
+            <button type="submit" aria-label="发送回复"><i data-lucide="send"></i></button>
+          </form>
+        </div>
+      </dialog>
+
+      <!-- Paper Ref Card Dialog -->
+      <dialog id="ref-card-dialog" class="app-dialog ref-card-dialog">
+        <div class="dialog-header">
+          <strong>📄 引用论文</strong>
+          <button class="icon-button" type="button" data-close-dialog="ref-card-dialog" aria-label="关闭"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ref-card-body" id="ref-card-body"></div>
+      </dialog>
+
+      <!-- Paper Ref Picker Dialog -->
+      <dialog id="ref-picker-dialog" class="app-dialog compact-dialog">
+        <div class="dialog-header"><strong>选择引用论文</strong><button class="icon-button" type="button" data-close-dialog="ref-picker-dialog" aria-label="关闭"><i data-lucide="x"></i></button></div>
+        <div class="ref-picker-list" id="ref-picker-list"></div>
+      </dialog>
 
       <section id="profile-view" class="view profile-view" aria-labelledby="profile-title" hidden>
         <header class="page-topbar">

@@ -23,7 +23,7 @@ const state = {
   libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
-  networkTab: "heatmap",
+  networkTab: "friends",
   aiModel: "",
   imageEnabled: false,
   imageModel: "",
@@ -144,6 +144,18 @@ function cacheElements() {
     settingsTopicInput: document.querySelector("#settings-topic-input"),
     settingsComplexity: document.querySelector("#settings-complexity"),
     settingsComplexityLabel: document.querySelector("#settings-complexity-label"),
+    networkScroll: document.querySelector("#network-scroll"),
+    networkHeatmap: document.querySelector("#network-heatmap"),
+    networkFriends: document.querySelector("#network-friends"),
+    networkForum: document.querySelector("#network-forum"),
+    forumPosts: document.querySelector("#forum-posts"),
+    friendsList: document.querySelector("#friends-list"),
+    composeFab: document.querySelector("#compose-fab"),
+    composeDialog: document.querySelector("#compose-dialog"),
+    composeTitle: document.querySelector("#compose-title"),
+    composeBody: document.querySelector("#compose-body"),
+    composeSubmit: document.querySelector("#compose-submit"),
+    composeRefPick: document.querySelector("#compose-ref-pick"),
   });
 }
 
@@ -426,6 +438,28 @@ function bindEvents() {
   document.querySelector("#forums-button").addEventListener("click", () => elements.forumDialog.showModal());
   document.querySelectorAll("[data-network-tab]").forEach((button) => {
     button.addEventListener("click", () => switchNetworkTab(button.dataset.networkTab));
+  });
+
+  document.querySelectorAll("[data-forum-type]").forEach((button) => {
+    button.addEventListener("click", () => switchForumType(button.dataset.forumType));
+  });
+
+  if (elements.composeFab) {
+    elements.composeFab.addEventListener("click", () => openCompose());
+  }
+  if (elements.composeSubmit) {
+    elements.composeSubmit.addEventListener("click", submitComposePost);
+  }
+  if (elements.composeRefPick) {
+    elements.composeRefPick.addEventListener("click", openRefPicker);
+  }
+  document.querySelectorAll("[data-compose-type]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      composeTypeState = btn.dataset.composeType;
+      document.querySelectorAll("[data-compose-type]").forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.composeType === composeTypeState);
+      });
+    });
   });
 
   document.querySelector("#save-topics-button").addEventListener("click", saveSettingsTopics);
@@ -2618,15 +2652,40 @@ function switchView(view) {
   elements.searchPanel.classList.remove("is-closing");
   elements.searchToggle.classList.remove("is-search-open");
   if (state.activeView === "library") refreshLibrary();
-  if (state.activeView === "network") renderPeople();
+  if (state.activeView === "network") { renderFriends(); renderForumPosts(); }
   if (state.activeView === "profile") renderProfile();
 }
 
 function switchNetworkTab(tab) {
-  state.networkTab = tab === "connections" ? "connections" : "heatmap";
-  document.querySelector("#network-heatmap").hidden = state.networkTab !== "heatmap";
-  document.querySelector("#network-connections").hidden = state.networkTab !== "connections";
+  state.networkTab = tab;
   document.querySelectorAll("[data-network-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.networkTab === state.networkTab));
+
+  const fab = elements.composeFab;
+
+  if (tab === "friends") {
+    if (elements.networkFriends) elements.networkFriends.hidden = false;
+    if (elements.networkForum) elements.networkForum.hidden = true;
+    if (fab) fab.hidden = true;
+    renderFriends();
+  } else {
+    // forum
+    if (elements.networkFriends) elements.networkFriends.hidden = true;
+    if (elements.networkForum) elements.networkForum.hidden = false;
+    if (fab) fab.hidden = false;
+    renderForumPosts();
+  }
+
+  if (elements.networkScroll) elements.networkScroll.scrollTop = 0;
+}
+
+let forumActiveType = "qa";
+
+function switchForumType(type) {
+  forumActiveType = type;
+  document.querySelectorAll("[data-forum-type]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.forumType === type);
+  });
+  renderForumPosts();
 }
 
 function openAiBotPage() {
@@ -2671,6 +2730,478 @@ function toggleConnection(button) {
   else state.connectedPeople.add(id);
   renderPeople();
   showToast(state.connectedPeople.has(id) ? "已建立研究连接" : "已取消连接");
+}
+
+/* ── Friends list ── */
+const FRIENDS_DATA = [
+  { id: "sandra", initials: "SW", name: "Sandra Wei", role: "Ph.D. Candidate · Stanford · HCI + LLMs", mutual: "你和 Sandra 都在关注 AI Agents 和 HCI", state: "none", avatar: "fa1" },
+  { id: "kobayashi", initials: "TK", name: "T. Kobayashi", role: "Associate Prof. · UTokyo · NLP & Knowledge Graphs", mutual: "共同好友: J. Chen · Maya Garcia", state: "following", avatar: "fa2" },
+  { id: "lina", initials: "LN", name: "Li Na", role: "Research Scientist · DeepMind · RL & Agents", mutual: "你和 Li Na 在 8 个话题上有交集", state: "mutual", avatar: "fa3" },
+  { id: "david", initials: "DP", name: "David P.", role: "ML Engineer · OpenAI · Safety & Alignment", mutual: "", state: "none", avatar: "fa4" },
+  { id: "yuki", initials: "YR", name: "Yuki R.", role: "Master's Student · ETH · Computer Vision", mutual: "", state: "none", avatar: "fa5" },
+];
+
+function renderFriends() {
+  if (!elements.friendsList) return;
+  elements.friendsList.innerHTML = FRIENDS_DATA.map((friend) => `
+    <article class="friend-card">
+      <span class="friend-avatar ${friend.avatar}">${friend.initials}</span>
+      <div class="friend-info">
+        <strong>${escapeHTML(friend.name)}</strong>
+        <span>${escapeHTML(friend.role)}</span>
+        ${friend.mutual ? `<div class="mutual">🔗 ${escapeHTML(friend.mutual)}</div>` : ""}
+      </div>
+      <button class="follow-btn ${friend.state === "mutual" ? "is-mutual" : friend.state === "following" ? "is-following" : ""}" type="button" data-follow-id="${friend.id}">${friend.state === "mutual" ? "Mutual" : friend.state === "following" ? "Following" : "Follow"}</button>
+    </article>
+  `).join("");
+
+  elements.friendsList.querySelectorAll("[data-follow-id]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFriendFollow(btn);
+    });
+  });
+}
+
+function toggleFriendFollow(btn) {
+  const id = btn.dataset.followId;
+  const friend = FRIENDS_DATA.find((f) => f.id === id);
+  if (!friend) return;
+
+  if (friend.state === "mutual") {
+    friend.state = "following";
+    btn.classList.remove("is-mutual");
+    btn.classList.add("is-following");
+    btn.textContent = "Following";
+    showToast("已取消互相关注");
+  } else if (friend.state === "following") {
+    friend.state = "none";
+    btn.classList.remove("is-following");
+    btn.textContent = "Follow";
+    showToast("已取消关注");
+  } else {
+    friend.state = "following";
+    btn.classList.add("is-following");
+    btn.textContent = "Following";
+    showToast("✅ 已关注");
+  }
+}
+
+/* ── Forum posts ── */
+const FORUM_POSTS = {
+  qa: [
+    {
+      type: "qa", resolved: false, avatar: "av1", initials: "RL", name: "Ryan L.", meta: "Ph.D. Student · 3 小时前",
+      title: "怎么处理 LLM Agent 在 multi-turn tool use 时的 context 膨胀问题？",
+      body: "我的 agent 在调用 5+ 轮工具后 context window 就快炸了。目前试过 sliding window truncation 但会丢关键信息。有没有更优雅的方案？特别是有没有 paper 讨论过 selective context compression for tool-calling agents?",
+      tags: [{ label: "LLM Agents", cls: "purple" }, { label: "Context Management", cls: "green" }, { label: "Tool Use", cls: "amber" }],
+      stats: [{ label: "12 回复", icon: "message-circle" }, { label: "引用 1 篇论文", icon: "file-text" }],
+    },
+    {
+      type: "qa", resolved: true, avatar: "av2", initials: "MG", name: "Maya Garcia", meta: "Postdoc · 昨天",
+      title: "Evaluation protocol for long-form text generation — 除了 ROUGE/BLEU 还有什么？",
+      body: "在做一个 narrative generation 项目，传统自动指标完全不够用。想请教大家有没有好的 human eval protocol 或者更 semantic 的自动指标推荐？",
+      ref: { title: "G-Eval: NLG Evaluation using GPT-4", meta: "Liu et al., EMNLP 2023 · 来自我的收藏" },
+      tags: [],
+      stats: [{ label: "已解决", icon: "check", cls: "resolved" }, { label: "18 回复", icon: "message-circle" }],
+    },
+  ],
+  discuss: [
+    {
+      type: "discuss", avatar: "av3", initials: "AL", name: "Alex Lin", meta: "Researcher · 5 小时前",
+      title: "多模态大模型真的「理解」了视觉吗，还是只是在做 pattern matching？",
+      body: "最近读了 GPT-4V 和 LLaVA 几篇论文的系统评测，发现很多所谓的 'visual reasoning' 其实可以被纯文本 + OCR 替代。这是不是说明当前的 vision-language alignment 还停留在很浅的层面？",
+      ref: { title: "Eyes Wide Shut? Exploring the Visual Shortcomings of Multimodal LLMs", meta: "Tong et al., CVPR 2024" },
+      tags: [{ label: "Vision-Language", cls: "purple" }, { label: "Critical Analysis", cls: "amber" }],
+      stats: [{ label: "引用 1 篇论文", icon: "file-text" }, { label: "34 讨论", icon: "message-circle" }, { label: "89", icon: "heart" }],
+    },
+    {
+      type: "discuss", avatar: "av1", initials: "ZH", name: "Zhiwei H.", meta: "ML Engineer · 昨天",
+      title: "Open-source LLMs are closing the gap faster than expected — time to rethink proprietary API dependencies?",
+      body: "从 Llama 3 到 DeepSeek-V3，开源模型的进步速度比我预想的快太多了。我们团队正在认真考虑把部分 pipeline 从 GPT-4 迁移到自部署模型。大家怎么看？主要是 latency 和 reliability 的 tradeoff。",
+      tags: [],
+      stats: [{ label: "56 讨论", icon: "message-circle" }, { label: "142", icon: "heart" }],
+    },
+  ],
+  rec: [
+    {
+      type: "rec", avatar: "av2", initials: "R4", name: "精选读者 #42", meta: "速递 · 30 分钟前",
+      title: "本周最值得读的 Agent 安全论文",
+      body: "社区投票选出本周最值得关注的 3 篇 Agent Safety 论文，滑动投票 ↓",
+      tags: [],
+      stats: [],
+      swipeCards: [
+        { bg: "linear-gradient(135deg,#2d1b69 0%,#4b2d9e 55%,#7c54d0 100%)", badge: "NeurIPS 2024", title: "R-Judge: Benchmarking Safety Risk Awareness for LLM Agents", sub: "Yuan et al. · 评估 LLM Agent 在风险场景中的安全判断能力" },
+        { bg: "linear-gradient(135deg,#0d3d3a 0%,#14776e 55%,#2aada0 100%)", badge: "arXiv 2025", title: "AgentPoison: Red-teaming LLM Agents via Memory Poisoning", sub: "Chen et al. · 通过污染 agent 记忆来实现红队攻击的新方法" },
+      ],
+    },
+  ],
+};
+
+function renderForumPosts() {
+  if (!elements.forumPosts) return;
+  const type = forumActiveType;
+  const posts = FORUM_POSTS[type] || [];
+
+  elements.forumPosts.innerHTML = posts.map((post, pi) => {
+    let html = `<article class="forum-post" data-post-index="${pi}">
+      <div class="forum-post-header">
+        <span class="forum-post-avatar ${post.avatar}">${post.initials}</span>
+        <div class="forum-post-meta"><strong>${escapeHTML(post.name)}</strong><span>${escapeHTML(post.meta)}</span></div>
+        <span class="forum-post-type-tag ${post.type}${post.resolved ? " resolved" : ""}">${post.type === "qa" ? (post.resolved ? "已解决" : "Q&A") : post.type === "discuss" ? "观点" : "速递"}</span>
+      </div>
+      <div class="forum-post-title">${escapeHTML(post.title)}</div>
+      ${post.body ? `<div class="forum-post-body">${escapeHTML(post.body)}</div>` : ""}`;
+
+    if (post.ref) {
+      html += `<div class="forum-post-ref" data-ref-click>
+        <span class="ref-icon"><i data-lucide="file-text"></i></span>
+        <div><strong>${escapeHTML(post.ref.title)}</strong><br><span>${escapeHTML(post.ref.meta)}</span></div>
+      </div>`;
+    }
+
+    if (post.tags && post.tags.length) {
+      html += `<div class="forum-post-tags">${post.tags.map((t) => `<span class="forum-tag-chip ${t.cls}">${escapeHTML(t.label)}</span>`).join("")}</div>`;
+    }
+
+    if (post.stats && post.stats.length) {
+      html += `<div class="forum-post-stats">${post.stats.map((s, si) => `<span class="${s.cls || ""}" data-stat-index="${si}"><i data-lucide="${s.icon}"></i> ${escapeHTML(s.label)}</span>`).join("")}</div>`;
+    }
+
+    html += `</article>`;
+
+    // Swipe cards for rec type
+    if (post.swipeCards && post.swipeCards.length) {
+      post.swipeCards.forEach((card) => {
+        html += `
+        <div class="swipe-card" style="background:${card.bg}">
+          <div class="swipe-card-inner">
+            <span class="swipe-card-badge">${escapeHTML(card.badge)}</span>
+            <div class="swipe-card-title">${escapeHTML(card.title)}</div>
+            <div class="swipe-card-sub">${escapeHTML(card.sub)}</div>
+          </div>
+        </div>
+        <div class="swipe-actions">
+          <button class="swipe-pass" type="button" data-swipe-action="pass">✕</button>
+          <button class="swipe-like" type="button" data-swipe-action="like">♥</button>
+        </div>`;
+      });
+    }
+
+    return html;
+  }).join("");
+
+  // Bind: click post → open detail
+  elements.forumPosts.querySelectorAll(".forum-post").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      if (e.target.closest("[data-ref-click]")) return;
+      if (e.target.closest("[data-swipe-action]")) return;
+      if (e.target.closest(".forum-post-stats span")) return;
+      openForumDetail(forumActiveType, parseInt(el.dataset.postIndex));
+    });
+  });
+
+  // Bind: click paper ref → show paper info
+  elements.forumPosts.querySelectorAll("[data-ref-click]").forEach((ref) => {
+    ref.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const title = ref.querySelector("strong")?.textContent || "";
+      const meta = ref.querySelector("span")?.textContent || "";
+      showToast(`📄 ${title} — ${meta}`);
+    });
+  });
+
+  // Bind swipe actions
+  elements.forumPosts.querySelectorAll("[data-swipe-action]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showToast(btn.dataset.swipeAction === "like" ? "👍 推荐 +1" : "🙅 已跳过");
+    });
+  });
+
+  // Bind stat clicks — different behavior per icon type
+  elements.forumPosts.querySelectorAll(".forum-post-stats span").forEach((span) => {
+    span.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const iconEl = span.querySelector("svg");
+      // Detect icon type from lucide icon class
+      const isHeart = iconEl && iconEl.classList.contains("lucide-heart");
+      const isMessage = iconEl && iconEl.classList.contains("lucide-message-circle");
+      const isFile = iconEl && iconEl.classList.contains("lucide-file-text");
+
+      if (isHeart) {
+        span.classList.toggle("liked");
+        showToast(span.classList.contains("liked") ? "❤️ 已点赞" : "已取消点赞");
+      } else if (isMessage) {
+        // Open detail dialog to show replies
+        const postIdx = span.closest(".forum-post")?.dataset?.postIndex;
+        if (postIdx != null) openForumDetail(forumActiveType, parseInt(postIdx));
+      } else if (isFile) {
+        const refEl = span.closest(".forum-post")?.querySelector(".forum-post-ref");
+        const refTitle = refEl?.querySelector("strong")?.textContent || "论文";
+        const refMeta = refEl?.querySelector("span")?.textContent || "";
+        showRefCardDialog(refTitle, refMeta);
+      }
+      // "已解决" check icon — no action
+    });
+  });
+
+  refreshIcons();
+}
+
+/* ── Forum post detail ── */
+const FAKE_REPLIES = {
+  qa: [
+    [
+      { initials: "KW", name: "Kai W.", role: "ML Researcher · 2 小时前", body: "建议看看 MemGPT 的 paper，他们对 context 管理有一套很优雅的方案。核心思路是把 context 当作操作系统里的 virtual memory 来管理。", avatar: "ra1" },
+      { initials: "RL", name: "Ryan L. (楼主)", role: "Ph.D. Student", body: "@Kai W. 谢谢！MemGPT 的思路确实有意思，但他们的实现依赖 function calling，我在想要不要试一个更轻量的方案。", avatar: "ra2" },
+      { initials: "YC", name: "Y. Chen", role: "Postdoc · 1 小时前", body: "最近有篇新的 arXiv paper 叫 LongAgent，用 hierarchical summary + retrieval 的方式来处理长 context，实测效果比 sliding window 好很多。", avatar: "ra4" },
+    ],
+    [
+      { initials: "DP", name: "David P.", role: "ML Engineer · 昨天", body: "我觉得 G-Eval 是目前最靠谱的方案，GPT-4 作为 evaluator 和人类判断的相关性非常高。不过要注意 prompt 的设计，他们论文里有详细的 ablation。", avatar: "ra3" },
+      { initials: "MG", name: "Maya Garcia (楼主)", role: "Postdoc", body: "@David P. 确实，我们已经开始用 G-Eval 了。另外我们也试了 UniEval，多维度评估比单一分数有用很多。", avatar: "ra2" },
+    ],
+  ],
+  discuss: [
+    [
+      { initials: "ZH", name: "Zhiwei H.", role: "ML Engineer · 4 小时前", body: "我觉得现在的 VLM 确实主要是 pattern matching。真正的 visual reasoning 需要 spatial understanding 和 causal reasoning，这两块目前都没解决。", avatar: "ra1" },
+      { initials: "SW", name: "Sandra Wei", role: "Ph.D. Candidate", body: "我不同意'只是 pattern matching'这个说法。最近一些工作显示 VLM 确实能做一些零样本的空间推理，只是还不够稳健。问题在于 benchmark 太简单了。", avatar: "ra4" },
+      { initials: "AL", name: "Alex Lin (楼主)", role: "Researcher", body: "@Sandra Wei 你说得对，benchmark 是个大问题。我们需要更多像 VSR 和 SpatialRAG 这样的硬测试来区分真正的理解和表面匹配。", avatar: "ra3" },
+      { initials: "TK", name: "T. Kobayashi", role: "Associate Prof.", body: "推荐一篇 CVPR 2024 的 oral：他们用 counterfactual image editing 来测试 VLM 是否真的'看见'了物体之间的关系。相当有说服力。", avatar: "ra2" },
+    ],
+    [
+      { initials: "LN", name: "Li Na", role: "Research Scientist · 12 小时前", body: "我们团队刚做完迁移评估。结论是：自部署模型在 latency 上确实不如 GPT-4，但如果用 vLLM + AWQ 量化，差距已经缩小到可接受范围。reliability 方面没有明显差异。", avatar: "ra1" },
+      { initials: "DP", name: "David P.", role: "ML Engineer · 10 小时前", body: "成本才是决定性因素。我们跑了一个月的数据，自部署方案的总成本只有 API 调用的 1/4。而且数据不用离开自己的 infra，合规方面也更放心。", avatar: "ra3" },
+    ],
+  ],
+  rec: [
+    [
+      { initials: "JC", name: "J. Chen", role: "PhD · 25 分钟前", body: "R-Judge 这个 benchmark 太及时了。我们在做 agent safety 相关的工作，正好缺一个系统性的评估框架。已加入 reading list！", avatar: "ra2" },
+      { initials: "YR", name: "Yuki R.", role: "Master's Student · 18 分钟前", body: "AgentPoison 的方法让我有点担忧——如果记忆投毒这么容易，那 RAG-based agent 的安全假设就需要重新审视了。期待后续的 defense 工作。", avatar: "ra4" },
+    ],
+  ],
+};
+
+function openForumDetail(type, index) {
+  const dialog = document.querySelector("#forum-detail-dialog");
+  const body = document.querySelector("#forum-detail-body");
+  const typeLabel = document.querySelector("#forum-detail-type");
+  if (!dialog || !body) return;
+
+  const posts = FORUM_POSTS[type] || [];
+  const post = posts[index];
+  if (!post) return;
+
+  const typeLabels = { qa: "Q&A 求助", discuss: "观点讨论", rec: "论文速递" };
+  if (typeLabel) typeLabel.textContent = typeLabels[type] || "帖子详情";
+
+  let html = `<div class="forum-detail-full-post">
+    <article class="forum-post">
+      <div class="forum-post-header">
+        <span class="forum-post-avatar ${post.avatar}">${post.initials}</span>
+        <div class="forum-post-meta"><strong>${escapeHTML(post.name)}</strong><span>${escapeHTML(post.meta)}</span></div>
+        <span class="forum-post-type-tag ${post.type}${post.resolved ? " resolved" : ""}">${post.type === "qa" ? (post.resolved ? "已解决" : "Q&A") : post.type === "discuss" ? "观点" : "速递"}</span>
+      </div>
+      <div class="forum-post-title">${escapeHTML(post.title)}</div>
+      <div class="forum-post-body">${escapeHTML(post.body || "")}</div>`;
+
+  if (post.ref) {
+    html += `<div class="forum-post-ref" data-ref-detail-click>
+      <span class="ref-icon"><i data-lucide="file-text"></i></span>
+      <div><strong>${escapeHTML(post.ref.title)}</strong><br><span>${escapeHTML(post.ref.meta)}</span></div>
+    </div>`;
+  }
+
+  if (post.tags && post.tags.length) {
+    html += `<div class="forum-post-tags">${post.tags.map((t) => `<span class="forum-tag-chip ${t.cls}">${escapeHTML(t.label)}</span>`).join("")}</div>`;
+  }
+
+  html += `</article></div>`;
+
+  // Replies
+  const replies = (FAKE_REPLIES[type] && FAKE_REPLIES[type][index]) ? FAKE_REPLIES[type][index] : [];
+  html += `<div class="forum-detail-replies">
+    <h3><i data-lucide="messages-square"></i> ${replies.length} 条回复 <small>假数据演示</small></h3>`;
+  replies.forEach((r) => {
+    html += `<div class="forum-reply-item">
+      <div class="forum-reply-header">
+        <span class="forum-reply-avatar ${r.avatar}">${r.initials}</span>
+        <div class="forum-reply-meta"><strong>${escapeHTML(r.name)}</strong><span>${escapeHTML(r.role)}</span></div>
+      </div>
+      <p class="forum-reply-body">${escapeHTML(r.body)}</p>
+      <div class="forum-reply-actions">
+        <button type="button" data-reply-like><i data-lucide="heart"></i> 赞</button>
+        <button type="button" data-reply-reply><i data-lucide="corner-up-left"></i> 回复</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  body.innerHTML = html;
+  refreshIcons();
+
+  // Bind reply action buttons
+  body.querySelectorAll("[data-reply-like]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("liked");
+      showToast(btn.classList.contains("liked") ? "❤️ 已点赞" : "已取消点赞");
+    });
+  });
+  body.querySelectorAll("[data-reply-reply]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const replyInput = document.querySelector("#forum-reply-input");
+      if (replyInput) replyInput.focus();
+    });
+  });
+
+  // Paper ref click → show floating card dialog
+  body.querySelectorAll("[data-ref-detail-click]").forEach((ref) => {
+    ref.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const title = ref.querySelector("strong")?.textContent || "";
+      const meta = ref.querySelector("span")?.textContent || "";
+      showRefCardDialog(title, meta);
+    });
+  });
+
+  dialog.showModal();
+}
+
+// Ensure forum detail dialog can be closed via backdrop click
+const forumDetailDialog = document.querySelector("#forum-detail-dialog");
+if (forumDetailDialog) {
+  forumDetailDialog.addEventListener("click", (e) => {
+    // Close only when clicking the backdrop (dialog itself), not its children
+    if (e.target === forumDetailDialog) {
+      forumDetailDialog.close();
+    }
+  });
+  // Also handle Escape key properly
+  forumDetailDialog.addEventListener("cancel", (e) => {
+    // default behavior closes, just ensure it works
+    const input = document.querySelector("#forum-reply-input");
+    if (input) input.value = "";
+  });
+}
+
+// Bind reply form submit
+const replyForm = document.querySelector("#forum-detail-reply-form");
+const replyInput = document.querySelector("#forum-reply-input");
+if (replyForm && replyInput) {
+  replyForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = replyInput.value.trim();
+    if (!text) return;
+    showToast("✅ 回复已发布（假数据演示）");
+    replyInput.value = "";
+  });
+}
+
+/* ── Compose modal ── */
+let composeTypeState = "qa";
+
+function openCompose() {
+  if (!elements.composeDialog) return;
+  document.querySelectorAll("[data-compose-type]").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.composeType === composeTypeState);
+  });
+  elements.composeDialog.showModal();
+  setTimeout(() => elements.composeTitle && elements.composeTitle.focus(), 80);
+}
+
+function submitComposePost() {
+  const title = (elements.composeTitle?.value || "").trim();
+  const body = (elements.composeBody?.value || "").trim();
+  if (!title) { showToast("请填写帖子标题"); return; }
+  if (!body) { showToast("请填写帖子内容"); return; }
+
+  const type = composeTypeState;
+  const avatars = { qa: "av1", discuss: "av3", rec: "av2" };
+  const initials = { qa: "ME", discuss: "ME", rec: "ME" };
+
+  const newPost = {
+    type, resolved: false,
+    avatar: avatars[type] || "av1",
+    initials: initials[type] || "ME",
+    name: "我 (PaperSwipe Researcher)",
+    meta: "刚刚发布",
+    title, body,
+    tags: [],
+    stats: [{ label: "0 回复", icon: "message-circle" }, { label: "0", icon: "heart" }],
+  };
+
+  if (!FORUM_POSTS[type]) FORUM_POSTS[type] = [];
+  FORUM_POSTS[type].unshift(newPost);
+
+  const labels = { qa: "Q&A 求助", discuss: "观点讨论", rec: "论文速递" };
+  showToast(`✅ 已发布为「${labels[type] || "帖子"}」（假数据）`);
+  closeCompose();
+  renderForumPosts();
+}
+
+function closeCompose() {
+  if (elements.composeDialog) elements.composeDialog.close();
+  if (elements.composeTitle) elements.composeTitle.value = "";
+  if (elements.composeBody) elements.composeBody.value = "";
+}
+
+/* ── Paper ref card dialog ── */
+function showRefCardDialog(title, meta) {
+  const dialog = document.querySelector("#ref-card-dialog");
+  const body = document.querySelector("#ref-card-body");
+  if (!dialog || !body) return;
+
+  body.innerHTML = `
+    <h4>${escapeHTML(title)}</h4>
+    <p class="ref-card-meta">${escapeHTML(meta)}</p>
+    <p class="ref-card-abstract">这篇论文来自发帖者的 Library 收藏（假数据演示）。摘要内容将在接入 Semantic Scholar API 后实时获取。当前展示的是社区成员基于论文内容撰写的推荐理由和关键贡献总结。</p>
+    <div class="ref-card-tags">
+      <span>Agent Safety</span>
+      <span>Benchmark</span>
+      <span>LLM Evaluation</span>
+    </div>
+    <div class="ref-card-links">
+      <button class="ref-card-link" type="button" onclick="window.open('https://arxiv.org','_blank')"><i data-lucide="external-link"></i> arXiv</button>
+      <button class="ref-card-link" type="button" onclick="window.open('https://scholar.google.com','_blank')"><i data-lucide="search"></i> Google Scholar</button>
+      <button class="ref-card-link" type="button" data-close-dialog="ref-card-dialog"><i data-lucide="library"></i> 加入 Library</button>
+    </div>`;
+  refreshIcons();
+  dialog.showModal();
+}
+
+/* ── Paper ref picker ── */
+const FAKE_LIBRARY_PAPERS = [
+  { title: "MemGPT: Towards LLMs as Operating Systems", venue: "arXiv 2023", authors: "Packer et al." },
+  { title: "G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment", venue: "EMNLP 2023", authors: "Liu et al." },
+  { title: "Eyes Wide Shut? Exploring the Visual Shortcomings of Multimodal LLMs", venue: "CVPR 2024", authors: "Tong et al." },
+  { title: "R-Judge: Benchmarking Safety Risk Awareness for LLM Agents", venue: "NeurIPS 2024", authors: "Yuan et al." },
+  { title: "AgentPoison: Red-teaming LLM Agents via Memory Poisoning", venue: "arXiv 2025", authors: "Chen et al." },
+];
+
+function openRefPicker() {
+  const dialog = document.querySelector("#ref-picker-dialog");
+  const list = document.querySelector("#ref-picker-list");
+  if (!dialog || !list) return;
+
+  list.innerHTML = FAKE_LIBRARY_PAPERS.map((p, i) => `
+    <div class="ref-picker-item" data-ref-pick="${i}">
+      <span class="rp-icon"><i data-lucide="file-text"></i></span>
+      <div class="rp-info"><strong>${escapeHTML(p.title)}</strong><span>${escapeHTML(p.authors)} · ${escapeHTML(p.venue)}</span></div>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".ref-picker-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      item.classList.toggle("is-selected");
+      const paper = FAKE_LIBRARY_PAPERS[parseInt(item.dataset.refPick)];
+      showToast(item.classList.contains("is-selected")
+        ? `📎 已引用：${paper.title.slice(0, 40)}…`
+        : `已取消引用`);
+    });
+  });
+
+  refreshIcons();
+  dialog.showModal();
 }
 
 function renderSettings() {
