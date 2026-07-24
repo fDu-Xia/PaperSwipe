@@ -118,9 +118,18 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		limit = parsed
 	}
 
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		writeError(w, http.StatusInternalServerError, "streaming unsupported")
+		return
+	}
+
 	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 28*time.Second)
+	a.logger.Info("search start", "query", query, "limit", limit)
+	searchStart := time.Now()
 	papers, source, err := a.searcher.Search(searchCtx, query, limit)
 	cancelSearch()
+	a.logger.Info("search fetched", "query", query, "duration", time.Since(searchStart).Round(time.Millisecond), "papers", len(papers), "source", source, "err", err)
 	warning := ""
 	if err != nil {
 		a.logger.Warn("paper search failed; returning demo cards", "query", query, "error", err)
@@ -128,16 +137,55 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		source = "PaperSwipe Demo"
 		warning = "开放论文源暂时不可用，当前展示离线示例卡。稍后重试即可获取真实论文。"
 	}
-	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 55*time.Second)
-	papers, aiApplied := a.summarizer.Summarize(summaryCtx, query, papers)
-	cancelSummary()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.WriteHeader(http.StatusOK)
+
+	writeEvent := func(event string, payload any) bool {
+		data, err := json.Marshal(payload)
+		if err != nil {
+			a.logger.Warn("sse marshal", "event", event, "error", err)
+			return false
+		}
+		if _, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, data); err != nil {
+			return false
+		}
+		flusher.Flush()
+		return true
+	}
+
+	writeEvent("meta", map[string]any{
+		"query":         query,
+		"source":        source,
+		"total":         len(papers),
+		"warning":       warning,
+		"ai_enabled":    a.summarizer.Enabled(),
+		"image_enabled": a.images.Enabled(),
+		"generated_at":  time.Now().UTC(),
+	})
+
 	if err := a.store.RecordSearch(query); err != nil {
 		a.logger.Warn("record search", "error", err)
 	}
-	writeJSON(w, http.StatusOK, SearchResponse{
-		Query: query, Source: source, GeneratedAt: time.Now().UTC(), Total: len(papers),
-		Papers: papers, Warning: warning, AIEnabled: aiApplied, ImageEnabled: a.images.Enabled(),
+
+	if len(papers) == 0 {
+		writeEvent("done", map[string]any{"ai_applied": false})
+		return
+	}
+
+	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 300*time.Second)
+	defer cancelSummary()
+	summaryStart := time.Now()
+	a.logger.Info("summary start", "query", query, "papers", len(papers))
+	aiApplied := a.summarizer.SummarizeStream(summaryCtx, query, papers, func(batch []Paper) {
+		writeEvent("batch", map[string]any{"papers": batch})
 	})
+	a.logger.Info("summary done", "query", query, "duration", time.Since(summaryStart).Round(time.Millisecond), "ai_applied", aiApplied)
+
+	writeEvent("done", map[string]any{"ai_applied": aiApplied})
 }
 
 func (a *API) actions(w http.ResponseWriter, r *http.Request) {

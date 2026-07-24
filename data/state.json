@@ -1,6 +1,116 @@
 {
   "version": 1,
   "actions": {
+    "1d9c21a0fdb1cc16a32c5d490ebaf98436a23382": {
+      "paper": {
+        "id": "1d9c21a0fdb1cc16a32c5d490ebaf98436a23382",
+        "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+        "abstract": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues. We introduce Mem0, a scalable memory-centric architecture that addresses this issue by dynamically extracting, consolidating, and retrieving salient information from ongoing conversations. Building on this foundation, we further propose an enhanced variant that leverages graph-based memory representations to capture complex relational structures among conversational elements. Through comprehensive evaluations on LOCOMO benchmark, we systematically compare our approaches against six baseline categories: (i) established memory-augmented systems, (ii) retrieval-augmented generation (RAG) with varying chunk sizes and k-values, (iii) a full-context approach that processes the entire conversation history, (iv) an open-source memory solution, (v) a proprietary model system, and (vi) a dedicated memory management platform. Empirical results show that our methods consistently outperform all existing memory systems across four question categories: single-hop, temporal, multi-hop, and open-domain. Notably, Mem0 achieves 26% relative improvements in the LLM-as-a-Judge metric over OpenAI, while Mem0 with graph memory achieves around 2% higher overall score than the base configuration. Beyond accuracy gains, we also markedly reduce computational overhead compared to full-context method. In particular, Mem0 attains a 91% lower p95 latency and saves more than 90% token cost, offering a compelling balance between advanced reasoning capabilities and practical deployment constraints. Our findings highlight critical role of structured, persistent memory mechanisms for long-term conversational coherence, paving the way for more reliable and efficient LLM-driven AI agents.",
+        "authors": [
+          {
+            "name": "P. Chhikara"
+          },
+          {
+            "name": "Dev Khant"
+          },
+          {
+            "name": "Saket Aryan"
+          },
+          {
+            "name": "Taranjeet Singh"
+          },
+          {
+            "name": "Deshraj Yadav"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-04-28",
+        "venue": "European Conference on Artificial Intelligence",
+        "citation_count": 485,
+        "influential_citation_count": 91,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/1d9c21a0fdb1cc16a32c5d490ebaf98436a23382",
+        "external_ids": {
+          "ArXiv": "2504.19413",
+          "CorpusId": "2.78165315e+08",
+          "DBLP": "journals/corr/abs-2504-19413",
+          "DOI": "10.48550/arXiv.2504.19413"
+        },
+        "match_score": 84,
+        "read_minutes": 12,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually.",
+          "problem": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
+          "novelty": [
+            "We introduce Mem0, a scalable memory-centric architecture that addresses this issue by dynamically extracting, consolidating, and retrieving salient information from ongoing conversations."
+          ],
+          "method": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
+          "result": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in Computer Science",
+          "why_keep": "Matches the search direction well — already cited 485 times, serves as a mature reference",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T08:54:17.003803Z"
+    },
+    "arxiv:2312.05434v1": {
+      "paper": {
+        "id": "arxiv:2312.05434v1",
+        "title": "Beneath the Surface: Unveiling Harmful Memes with Multimodal Reasoning Distilled from Large Language Models",
+        "abstract": "The age of social media is rife with memes. Understanding and detecting harmful memes pose a significant challenge due to their implicit meaning that is not explicitly conveyed through the surface text and image. However, existing harmful meme detection approaches only recognize superficial harm-indicative signals in an end-to-end classification manner but ignore in-depth cognition of the meme text and image. In this paper, we attempt to detect harmful memes based on advanced reasoning over the interplay of multimodal information in memes. Inspired by the success of Large Language Models (LLMs) on complex reasoning, we first conduct abductive reasoning with LLMs. Then we propose a novel generative framework to learn reasonable thoughts from LLMs for better multimodal fusion and lightweight fine-tuning, which consists of two training stages: 1) Distill multimodal reasoning knowledge from LLMs; and 2) Fine-tune the generative framework to infer harmfulness. Extensive experiments conducted on three meme datasets demonstrate that our proposed approach achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
+        "authors": [
+          {
+            "name": "Hongzhan Lin"
+          },
+          {
+            "name": "Ziyang Luo"
+          },
+          {
+            "name": "Jing Ma"
+          },
+          {
+            "name": "Long Chen"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-12-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2312.05434v1",
+        "pdf_url": "https://arxiv.org/pdf/2312.05434v1",
+        "external_ids": {
+          "ArXiv": "2312.05434v1"
+        },
+        "match_score": 75,
+        "read_minutes": 8,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "A pioneering beneath the surface that achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
+          "problem": "Understanding and detecting harmful memes pose a significant challenge due to their implicit meaning that is not explicitly conveyed through the surface text and image.",
+          "novelty": [
+            "Inspired by the success of Large Language Models (LLMs) on complex reasoning, we first conduct abductive reasoning with LLMs.",
+            "Then we propose a novel generative framework to learn reasonable thoughts from LLMs for better multimodal fusion and lightweight fine-tuning, which consists of two training stages: 1) Distill multimo…"
+          ],
+          "method": "However, existing harmful meme detection approaches only recognize superficial harm-indicative signals in an end-to-end classification manner but ignore in-depth cognition of the meme text and image.",
+          "result": "Extensive experiments conducted on three meme datasets demonstrate that our proposed approach achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T08:20:59.281845Z"
+    },
     "arxiv:2402.11651v2": {
       "paper": {
         "id": "arxiv:2402.11651v2",
@@ -55,7 +165,72 @@
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-23T16:07:26.133568Z"
+      "updated_at": "2026-07-24T08:20:58.457391Z"
+    },
+    "arxiv:2402.14679v2": {
+      "paper": {
+        "id": "arxiv:2402.14679v2",
+        "title": "Is Self-knowledge and Action Consistent or Not: Investigating Large Language Model's Personality",
+        "abstract": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs). Our objective is to assess the congruence between the personality traits LLMs claim to possess and their demonstrated tendencies in real-world scenarios. By conducting an extensive examination of LLM outputs against observed human response patterns, we aim to understand the disjunction between self-knowledge and action in LLMs.",
+        "authors": [
+          {
+            "name": "Yiming Ai"
+          },
+          {
+            "name": "Zhiwei He"
+          },
+          {
+            "name": "Ziyin Zhang"
+          },
+          {
+            "name": "Wenhong Zhu"
+          },
+          {
+            "name": "Hongkun Hao"
+          },
+          {
+            "name": "Kai Yu"
+          },
+          {
+            "name": "Lingjun Chen"
+          },
+          {
+            "name": "Rui Wang"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-22",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.CY"
+        ],
+        "url": "http://arxiv.org/abs/2402.14679v2",
+        "pdf_url": "https://arxiv.org/pdf/2402.14679v2",
+        "external_ids": {
+          "ArXiv": "2402.14679v2"
+        },
+        "match_score": 75,
+        "read_minutes": 6,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "Our objective is to assess the congruence between the personality traits LLMs claim to possess.",
+          "problem": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs).",
+          "novelty": [
+            "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs)."
+          ],
+          "method": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs).",
+          "result": "Our objective is to assess the congruence between the personality traits LLMs claim to possess and their demonstrated tendencies in real-world scenarios.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.CY",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T08:07:41.56439Z"
     },
     "arxiv:2405.11357v3": {
       "paper": {
@@ -83,7 +258,7 @@
         "external_ids": {
           "ArXiv": "2405.11357v3"
         },
-        "match_score": 77,
+        "match_score": 75,
         "read_minutes": 6,
         "source": "arXiv",
         "digest": {
@@ -100,8 +275,377 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-23T14:32:43.872062Z"
+      "action": "priority",
+      "updated_at": "2026-07-24T08:02:43.467394Z"
+    },
+    "arxiv:2501.05032v2": {
+      "paper": {
+        "id": "arxiv:2501.05032v2",
+        "title": "Enhancing Human-Like Responses in Large Language Models",
+        "abstract": "This paper explores the advancements in making large language models (LLMs) more human-like. We focus on techniques that enhance natural language understanding, conversational coherence, and emotional intelligence in AI systems. The study evaluates various approaches, including fine-tuning with diverse datasets, incorporating psychological principles, and designing models that better mimic human reasoning patterns. Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains. Future work will address the ethical implications and potential biases introduced by these human-like attributes.",
+        "authors": [
+          {
+            "name": "Ethem Yağız Çalık"
+          },
+          {
+            "name": "Talha Rüzgar Akkuş"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-01-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2501.05032v2",
+        "pdf_url": "https://arxiv.org/pdf/2501.05032v2",
+        "external_ids": {
+          "ArXiv": "2501.05032v2"
+        },
+        "match_score": 74,
+        "read_minutes": 6,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "A novel enhancing human that improve user interactions but also open new possibilities for ai applications across different domains.",
+          "problem": "This paper explores the advancements in making large language models (LLMs) more human-like.",
+          "novelty": [
+            "Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains."
+          ],
+          "method": "This paper explores the advancements in making large language models (LLMs) more human-like.",
+          "result": "Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T08:05:23.048905Z"
+    },
+    "arxiv:2510.09720v1": {
+      "paper": {
+        "id": "arxiv:2510.09720v1",
+        "title": "Preference-Aware Memory Update for Long-Term LLM Agents",
+        "abstract": "One of the key factors influencing the reasoning capabilities of LLM-based agents is their ability to leverage long-term memory. Integrating long-term memory mechanisms allows agents to make informed decisions grounded in historical interactions. While recent advances have significantly improved the storage and retrieval components, by encoding memory into dense vectors for similarity search or organizing memory as structured knowledge graphs most existing approaches fall short in memory updating. In particular, they lack mechanisms for dynamically refining preference memory representations in response to evolving user behaviors and contexts. To address this gap, we propose a Preference-Aware Memory Update Mechanism (PAMU) that enables dynamic and personalized memory refinement. By integrating sliding window averages (SW) with exponential moving averages (EMA), PAMU constructs a fused preference-aware representation that captures both short-term fluctuations and long-term user tendencies. We conduct experiments on five task scenarios of the LoCoMo dataset, and the results show that our mechanism can significantly improve the output quality of LLM in five baselines, validating its effectiveness in long-term conversations.",
+        "authors": [
+          {
+            "name": "Haoran Sun"
+          },
+          {
+            "name": "Zekun Zhang"
+          },
+          {
+            "name": "Shaoning Zeng"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-10-10",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2510.09720v1",
+        "pdf_url": "https://arxiv.org/pdf/2510.09720v1",
+        "external_ids": {
+          "ArXiv": "2510.09720v1"
+        },
+        "match_score": 76,
+        "read_minutes": 8,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Swipe right for dynamic memory refinement.",
+          "hook": "A smart memory update that adapts to changing user preferences over time.",
+          "problem": "Existing agents lack mechanisms for **dynamically refining preference memory representations** in response to evolving user behaviors.",
+          "novelty": [
+            "Integrates **sliding window averages** with exponential moving averages.",
+            "Constructs a **fused preference-aware representation**.",
+            "Captures both **short-term fluctuations** and long-term tendencies."
+          ],
+          "method": "Proposes a **Preference-Aware Memory Update Mechanism (PAMU)** that fuses SW and EMA to track evolving user preferences.",
+          "result": "Significantly improves **output quality** of LLMs across five baselines on the LoCoMo dataset.",
+          "audience": "Researchers building personalized, long-term conversational agents.",
+          "why_keep": "It addresses the critical gap of memory updating, ensuring agents stay relevant as users change.",
+          "reading_focus": "The PAMU fusion mechanism."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T11:49:57.192994Z"
+    },
+    "arxiv:2606.17328v1": {
+      "paper": {
+        "id": "arxiv:2606.17328v1",
+        "title": "MemTrace: Probing What Final Accuracy Misses in Long-Term Memory",
+        "abstract": "LLM agents increasingly maintain long-term memory of user facts across sessions. Yet such memory is usually evaluated by aggregating accuracy over question rows or episodes. Because this approach scores question rows independently, even when several questions probe the same fact, it cannot show how that fact behaves as conditions change. We introduce MemTrace, a benchmark whose unit of measurement is the knowledge point: a single typed fact about the user, rather than an individual question. MemTrace probes each fact along three controlled dimensions: memory age, defined by how many sessions ago the fact appeared in the history; question type, covering current state, earlier state, and trajectory of change; and evidence condition, covering present, missing, and contradicted-by-false-premise settings. Evaluating 13 memory-system configurations across four paradigms, we find that similar pooled accuracy hides different failures: recovering a fact's current and earlier states does not imply tracking how it changed, and safe abstention does not imply correcting a false premise. The dominant bottleneck is evidence use, not retrieval: when systems fail, the evidence was retrievable 10 times more often than it was missing. These results suggest that improving long-term memory requires better use of reachable evidence, not simply more storage or retrieval.",
+        "authors": [
+          {
+            "name": "Xianxuan Long"
+          },
+          {
+            "name": "Zhikai Chen"
+          },
+          {
+            "name": "Shenglai Zeng"
+          },
+          {
+            "name": "Shouren Wang"
+          },
+          {
+            "name": "Kai Guo"
+          },
+          {
+            "name": "Jiliang Tang"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-06-15",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2606.17328v1",
+        "pdf_url": "https://arxiv.org/pdf/2606.17328v1",
+        "external_ids": {
+          "ArXiv": "2606.17328v1"
+        },
+        "match_score": 71,
+        "read_minutes": 10,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Swipe right to evaluate memory robustness.",
+          "hook": "A new benchmark that exposes hidden failures in agent memory.",
+          "problem": "Standard accuracy metrics hide how memory fails when conditions change, such as when facts are **contradicted-by-false-premise**.",
+          "novelty": [
+            "Introduces **MemTrace**, measuring performance at the knowledge point level rather than per question.",
+            "Identifies **evidence use** as the dominant bottleneck over retrieval."
+          ],
+          "method": "Probes facts along three dimensions: **memory age**, **question type**, and **evidence condition**.",
+          "result": "Finds evidence was retrievable **10 times more often** than it was missing when systems failed.",
+          "audience": "Benchmark designers and memory system evaluators.",
+          "why_keep": "Reveals that better reasoning with retrieved evidence is more critical than improving storage.",
+          "reading_focus": "The three probing dimensions."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T12:22:12.815438Z"
+    },
+    "arxiv:2606.24322v1": {
+      "paper": {
+        "id": "arxiv:2606.24322v1",
+        "title": "Securing LLM-Agent Long-Term Memory Against Poisoning: Non-Malleable, Origin-Bound Authority with Machine-Checked Guarantees",
+        "abstract": "LLM agents increasingly rely on persistent long-term memory, which creates a critical vulnerability that we study here: memory poisoning. An adversary can store untrusted content in one session that later steers a consequential action, such as a payment, a setting change, or data exfiltration, in a future session. Existing defenses base a memory item's authority to act on either its content (detection or trust-scoring) or its derivation history (lineage). We show that both signals are malleable. An attacker can launder an untrusted origin through three channels specific to LLM agents: the agent's own summarization, a trusted-tool echo, and manufactured corroboration. Each makes the content look benign and breaks or flips its derivation edge to ``trusted.'' We formalize malleability for the memory write-retrieve-act pipeline and prove a machine-checked separation theorem. No content- or lineage-based defense is sound under laundering (T1), write-time origin binding is necessary (T2), and non-malleable origin-bound authority with Sybil-resistant corroboration-gated elevation is sufficient (T3). Our construction, TMA-NM (Tamper-evident Memory Authority, Non-Malleable), instantiates non-malleable information-flow control (IFC) for LLM-agent memory. A cross-defense, cross-attack, and cross-model benchmark over eight frontier models shows that existing defenses fail exactly where the theory predicts (up to 68% laundering attack-success), while TMA-NM reaches 0% attack success on both direct and laundering attacks across all models and channels, at full legitimate utility. We release the benchmark, harness, and machine-checked TLA+ models to support reproducibility.",
+        "authors": [
+          {
+            "name": "Yedidel Louck"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-06-23",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CR"
+        ],
+        "url": "http://arxiv.org/abs/2606.24322v1",
+        "pdf_url": "https://arxiv.org/pdf/2606.24322v1",
+        "external_ids": {
+          "ArXiv": "2606.24322v1"
+        },
+        "match_score": 74,
+        "read_minutes": 11,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Essential read for secure agent deployment.",
+          "hook": "A security shield that stops memory poisoning attacks cold.",
+          "problem": "Adversaries can store untrusted content in one session to steer **consequential actions** like payments in future sessions.",
+          "novelty": [
+            "Identifies **three laundering channels** (summarization, echo, corroboration) that bypass current defenses.",
+            "Proves **write-time origin binding** is necessary for security."
+          ],
+          "method": "Proposes **TMA-NM**, a non-malleable information-flow control construction enforcing origin-bound authority.",
+          "result": "Achieves **0% attack success** on all models and channels while maintaining full legitimate utility.",
+          "audience": "Security researchers and LLM system architects.",
+          "why_keep": "Provides the first rigorous, machine-checked defense against critical memory poisoning vulnerabilities.",
+          "reading_focus": "The TMA-NM construction."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T11:29:45.439306Z"
+    },
+    "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
+      "paper": {
+        "id": "d38d84dda9b6dc944db84b067e6f931b1fe87707",
+        "title": "Cost and accuracy of long-term memory in Distributed Multi-Agent Systems based on Large Language Models",
+        "abstract": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks. Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS. These gaps are addressed with an independent reproducible testbed that evaluates accuracy, latency, CPU time, peak RAM, disk I/O and network usage in a simulated cloud-edge environment. Three venture capital-funded frameworks spanning vector, graph, and hybrid architectures, namely mem0, Graphiti, and cognee, are compared alongside retrieval-augmented generation (RAG) and full-context baselines on the LoCoMo benchmark under unconstrained and constrained network scenarios. Two clusters emerge: mem0, RAG, and full-context reach 77% to 81% accuracy, while Graphiti and cognee reach only 55% to 56%, a gap driven by retrieval incompleteness rather than reasoning failure. The RAG baseline matches the upper cluster at 8.4 times lower total cost of ownership (TCO) than mem0, and both are the only non-dominated backends on the Pareto frontier. Latency and bandwidth constraints as well as jitter leave retrieval quality unchanged for every backend, while vector-based LTM incurs a modest latency penalty of 4% to 5% under edge-cloud constraints. Compression precision rather than context volume determines LTM accuracy, as full-context forwarding underperforms mem0 despite supplying the entire conversation for each question.",
+        "authors": [
+          {
+            "name": "Benedict Wolff"
+          },
+          {
+            "name": "Jacopo Bennati"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-01-12",
+        "venue": "arXiv.org",
+        "citation_count": 1,
+        "influential_citation_count": 0,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/d38d84dda9b6dc944db84b067e6f931b1fe87707",
+        "external_ids": {
+          "ArXiv": "2601.07978",
+          "CorpusId": "2.84704394e+08",
+          "DBLP": "journals/corr/abs-2601-07978",
+          "DOI": "10.48550/arXiv.2601.07978"
+        },
+        "match_score": 86,
+        "read_minutes": 11,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "A novel cost and accuracy of long that existing evaluations are typically published by framework providers and focus on token usage and.",
+          "problem": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
+          "novelty": [
+            "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks."
+          ],
+          "method": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
+          "result": "Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in Computer Science",
+          "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T08:54:16.135406Z"
+    },
+    "demo:evidence-ranking": {
+      "paper": {
+        "id": "demo:evidence-ranking",
+        "title": "离线示例：用证据强度排序研究候选",
+        "abstract": "This offline demo studies a ranking workflow that combines topical relevance, result specificity, and source quality. It presents a compact evidence score and shows how transparent ranking cues can reduce screening time. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Information Retrieval",
+          "Human-Computer Interaction"
+        ],
+        "match_score": 84,
+        "read_minutes": 7,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Swipe right for better literature review workflows.",
+          "hook": "A transparent ranking system that slashes research screening time.",
+          "problem": "Combining **topical relevance**, **result specificity**, and **source quality** into a single research score.",
+          "novelty": [
+            "Integrates **relevance**, **specificity**, and **quality**.",
+            "Presents a **compact evidence score**.",
+            "Uses **transparent ranking cues** to speed up screening."
+          ],
+          "method": "Develops a scoring function combining multiple factors and tests **transparent ranking cues**.",
+          "result": "Shows that **transparent cues** can reduce screening time.",
+          "audience": "Researchers conducting systematic reviews.",
+          "why_keep": "Provides a concrete metric for filtering high-quality evidence efficiently.",
+          "reading_focus": "Review the evidence score components."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T12:22:17.062377Z"
+    },
+    "demo:memory-architecture": {
+      "paper": {
+        "id": "demo:memory-architecture",
+        "title": "离线示例：面向复杂任务的长期记忆架构",
+        "abstract": "This offline demo card illustrates how PaperSwipe separates working memory, episodic retrieval, and consolidation for long-running intelligent systems. It proposes a layered retrieval workflow and evaluates whether memory selection improves task continuity. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Artificial Intelligence",
+          "Information Retrieval"
+        ],
+        "match_score": 91,
+        "read_minutes": 9,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Swipe right for system design inspiration.",
+          "hook": "A layered memory architecture that enables long-running intelligent systems.",
+          "problem": "Managing **working memory**, **episodic retrieval**, and **consolidation** in long-running intelligent systems.",
+          "novelty": [
+            "Separates **working memory** from long-term storage.",
+            "Proposes a **layered retrieval workflow**.",
+            "Evaluates **memory selection** for task continuity."
+          ],
+          "method": "Uses a **layered retrieval workflow** to isolate distinct memory types and assesses if selection improves continuity.",
+          "result": "This is a **demo card** with no quantitative results.",
+          "audience": "AI system architects and cognitive modelers.",
+          "why_keep": "Offers a structured approach to handling memory in complex, persistent agents.",
+          "reading_focus": "Check the memory layer definitions."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T10:06:39.238679Z"
+    },
+    "demo:research-interface": {
+      "paper": {
+        "id": "demo:research-interface",
+        "title": "离线示例：适合移动端的论文筛选交互",
+        "abstract": "This offline demo explores swipe-based triage for research discovery. It compares rapid reject, save, and priority decisions and recommends preserving full metadata for later verification. The demo contains no claim about a real publication.",
+        "authors": [
+          {
+            "name": "PaperSwipe Demo"
+          }
+        ],
+        "year": 2026,
+        "venue": "离线演示",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "Human-Computer Interaction"
+        ],
+        "match_score": 76,
+        "read_minutes": 6,
+        "source": "PaperSwipe Demo",
+        "digest": {
+          "verdict": "Swipe right for UX insights in academic tools.",
+          "hook": "A swipe-based interface that transforms mobile research discovery.",
+          "problem": "Enabling **rapid triage** of research papers on mobile devices.",
+          "novelty": [
+            "Applies **swipe-based triage** to research discovery.",
+            "Compares **rapid reject**, **save**, and **priority** decisions.",
+            "Recommends preserving **full metadata** for verification."
+          ],
+          "method": "Simulates a **swipe-based interface** to compare decision speeds and metadata needs.",
+          "result": "Recommends keeping **full metadata** for later verification.",
+          "audience": "Developers of academic tools and productivity apps.",
+          "why_keep": "Validates the swipe metaphor for high-volume paper screening.",
+          "reading_focus": "Note the metadata preservation strategy."
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-24T10:06:49.685059Z"
     },
     "openalex:W4391116828": {
       "paper": {
@@ -345,8 +889,28 @@
   },
   "recent_searches": [
     {
+      "query": "LLM agents long-term memory formation retrieval update complex task performance",
+      "created_at": "2026-07-24T12:46:02.872855Z"
+    },
+    {
+      "query": "explainable graph neural network climate change forecasting spatio-temporal modeling uncertainty estimation",
+      "created_at": "2026-07-24T10:06:10.304201Z"
+    },
+    {
       "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-23T16:14:43.9921Z"
+      "created_at": "2026-07-24T09:29:15.285912Z"
+    },
+    {
+      "query": "graph neural networks molecule design",
+      "created_at": "2026-07-24T08:51:17.483491Z"
+    },
+    {
+      "query": "neural architecture search",
+      "created_at": "2026-07-24T08:43:06.958145Z"
+    },
+    {
+      "query": "large language models",
+      "created_at": "2026-07-24T08:06:26.569101Z"
     },
     {
       "query": "llm memory",

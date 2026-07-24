@@ -9,21 +9,36 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
 const (
-	summaryBatchSize      = 10
-	summaryMaxConcurrency = 2
+	summaryBatchSize      = 3
+	summaryMaxConcurrency = 3
 )
 
+var llmCallSeq atomic.Uint64
+
+func llmDebugPromptEnabled() bool {
+	return strings.TrimSpace(os.Getenv("LLM_DEBUG_PROMPT")) == "1"
+}
+
+func logLLM(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, "[llm] "+format+"\n", args...)
+}
+
 type Summarizer struct {
-	client   *http.Client
-	apiKey   string
-	baseURL  string
-	model    string
-	thinking string
+	client           *http.Client
+	apiKey           string
+	baseURL          string
+	model            string
+	thinking         string
+	reasoningEffort  string
+	maxTokens        int
 }
 
 func NewSummarizer(client *http.Client) *Summarizer {
@@ -35,12 +50,20 @@ func NewSummarizer(client *http.Client) *Summarizer {
 	if model == "" {
 		model = "gpt-4.1-mini"
 	}
+	maxTokens := 0
+	if raw := strings.TrimSpace(os.Getenv("LLM_MAX_TOKENS")); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+			maxTokens = n
+		}
+	}
 	return &Summarizer{
-		client:   client,
-		apiKey:   firstEnv("LLM_API_KEY", "ZHIPU_API_KEY"),
-		baseURL:  baseURL,
-		model:    model,
-		thinking: strings.ToLower(strings.TrimSpace(os.Getenv("LLM_THINKING"))),
+		client:          client,
+		apiKey:          firstEnv("LLM_API_KEY", "ZHIPU_API_KEY"),
+		baseURL:         baseURL,
+		model:           model,
+		thinking:        strings.ToLower(strings.TrimSpace(os.Getenv("LLM_THINKING"))),
+		reasoningEffort: strings.ToLower(strings.TrimSpace(os.Getenv("LLM_REASONING_EFFORT"))),
+		maxTokens:       maxTokens,
 	}
 }
 
@@ -56,22 +79,34 @@ func (s *Summarizer) applyProviderOptions(payload map[string]any) {
 	if s.thinking == "enabled" || s.thinking == "disabled" {
 		payload["thinking"] = map[string]string{"type": s.thinking}
 	}
+	if s.reasoningEffort != "" {
+		payload["reasoning_effort"] = s.reasoningEffort
+	}
+	if s.maxTokens > 0 {
+		payload["max_tokens"] = s.maxTokens
+	}
 }
 
 func (s *Summarizer) PlanTopic(ctx context.Context, description string) (TopicPlan, bool) {
 	fallback := heuristicTopicPlan(description)
 	if !s.Enabled() {
+		logLLM("PlanTopic skipped (ai_enabled=false) — heuristic keywords=%v", fallback.Keywords)
 		return fallback, false
 	}
 
+	logLLM("PlanTopic START description=%q model=%s", description, s.model)
+	started := time.Now()
 	plan, err := s.planTopicWithLLM(ctx, description)
 	if err != nil {
+		logLLM("PlanTopic FAILED after %s: %v — falling back to heuristic", time.Since(started).Round(time.Millisecond), err)
 		return fallback, false
 	}
 	plan = normalizeTopicPlan(description, plan)
 	if plan.SearchQuery == "" || len(plan.Keywords) == 0 {
+		logLLM("PlanTopic returned empty plan (query=%q keywords=%v) — falling back", plan.SearchQuery, plan.Keywords)
 		return fallback, false
 	}
+	logLLM("PlanTopic DONE duration=%s query=%q keywords=%v", time.Since(started).Round(time.Millisecond), plan.SearchQuery, plan.Keywords)
 	return plan, true
 }
 
@@ -227,23 +262,135 @@ func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper
 		papers[i].Digest = heuristicDigest(query, papers[i])
 	}
 	if !s.Enabled() || len(papers) == 0 {
+		logLLM("Summarize skipped (ai_enabled=%v papers=%d) — using heuristic digest", s.Enabled(), len(papers))
 		return papers, false
 	}
 
+	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
+	logLLM("Summarize START query=%q papers=%d batches=%d batch_size=%d concurrency=%d model=%s thinking=%s",
+		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model, s.thinking)
+	started := time.Now()
 	digests := s.summarizeInBatches(ctx, query, papers)
 	applied := false
 	for i := range papers {
-		if digest, ok := digests[papers[i].ID]; ok && digest.Verdict != "" {
-			papers[i].Digest = digest
+		if item, ok := digests[papers[i].ID]; ok && item.Verdict != "" {
+			papers[i].Digest = item.Digest
+			if item.ReadMinutes > 0 {
+				papers[i].ReadMinutes = clampReadMinutes(item.ReadMinutes)
+			}
 			applied = true
 		}
 	}
+	logLLM("Summarize DONE query=%q duration=%s applied=%v ai_digests=%d/%d",
+		query, time.Since(started).Round(time.Millisecond), applied, len(digests), len(papers))
 	return papers, applied
 }
 
-func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, papers []Paper) map[string]Digest {
+func clampReadMinutes(v int) int {
+	if v < 10 {
+		return 10
+	}
+	if v > 240 {
+		return 240
+	}
+	return v
+}
+
+// SummarizeStream runs the same summarization pipeline as Summarize but emits
+// each batch to the caller as soon as it completes, in original order. The emit
+// callback is invoked from a single coordinator goroutine, so it does not need
+// to be thread-safe on the caller side.
+//
+// Returns true if at least one AI digest was applied (same semantics as Summarize).
+func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers []Paper, emit func([]Paper)) bool {
+	for i := range papers {
+		papers[i].Digest = heuristicDigest(query, papers[i])
+	}
+	if !s.Enabled() || len(papers) == 0 {
+		logLLM("SummarizeStream skipped (ai_enabled=%v papers=%d) — emitting heuristic digest", s.Enabled(), len(papers))
+		if len(papers) > 0 {
+			emit(papers)
+		}
+		return false
+	}
+
+	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
+	logLLM("SummarizeStream START query=%q papers=%d batches=%d batch_size=%d concurrency=%d model=%s thinking=%s",
+		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model, s.thinking)
+	started := time.Now()
+
+	// One 1-buffered channel per batch; the batch worker writes exactly once,
+	// the coordinator reads in order so later batches wait for earlier ones.
+	slots := make([]chan map[string]llmDigest, batchCount)
+	for i := range slots {
+		slots[i] = make(chan map[string]llmDigest, 1)
+	}
+	semaphore := make(chan struct{}, summaryMaxConcurrency)
+
+	for start := 0; start < len(papers); start += summaryBatchSize {
+		end := min(start+summaryBatchSize, len(papers))
+		batchIdx := start / summaryBatchSize
+		batch := append([]Paper(nil), papers[start:end]...)
+		go func(idx int, batch []Paper) {
+			select {
+			case semaphore <- struct{}{}:
+				defer func() { <-semaphore }()
+			case <-ctx.Done():
+				logLLM("batch %d/%d skipped (ctx canceled before start)", idx+1, batchCount)
+				slots[idx] <- nil
+				return
+			}
+			batchStart := time.Now()
+			logLLM("batch %d/%d SENDING papers=%d", idx+1, batchCount, len(batch))
+			digests, err := s.summarizeWithLLM(ctx, query, batch)
+			if err != nil {
+				logLLM("batch %d/%d FAILED after %s: %v", idx+1, batchCount, time.Since(batchStart).Round(time.Millisecond), err)
+				slots[idx] <- nil
+				return
+			}
+			logLLM("batch %d/%d OK  duration=%s digests=%d/%d", idx+1, batchCount, time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
+			slots[idx] <- digests
+		}(batchIdx, batch)
+	}
+
+	applied := false
+	totalDigests := 0
+	for idx := 0; idx < batchCount; idx++ {
+		start := idx * summaryBatchSize
+		end := min(start+summaryBatchSize, len(papers))
+		select {
+		case digests := <-slots[idx]:
+			for i := start; i < end; i++ {
+				if item, ok := digests[papers[i].ID]; ok && item.Verdict != "" {
+					papers[i].Digest = item.Digest
+					if item.ReadMinutes > 0 {
+						papers[i].ReadMinutes = clampReadMinutes(item.ReadMinutes)
+					}
+					applied = true
+					totalDigests++
+				}
+			}
+		case <-ctx.Done():
+			logLLM("SummarizeStream aborted at batch %d/%d: %v", idx+1, batchCount, ctx.Err())
+			// Emit remaining heuristic-only slices so the caller still sees the deck.
+			for j := idx; j < batchCount; j++ {
+				s2 := j * summaryBatchSize
+				e2 := min(s2+summaryBatchSize, len(papers))
+				emit(papers[s2:e2])
+			}
+			return applied
+		}
+		emit(papers[start:end])
+	}
+
+	logLLM("SummarizeStream DONE query=%q duration=%s applied=%v ai_digests=%d/%d",
+		query, time.Since(started).Round(time.Millisecond), applied, totalDigests, len(papers))
+	return applied
+}
+
+func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, papers []Paper) map[string]llmDigest {
 	type batchResult struct {
-		digests map[string]Digest
+		digests map[string]llmDigest
 	}
 
 	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
@@ -254,6 +401,7 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 	for start := 0; start < len(papers); start += summaryBatchSize {
 		end := min(start+summaryBatchSize, len(papers))
 		batch := append([]Paper(nil), papers[start:end]...)
+		batchIdx := start/summaryBatchSize + 1
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
@@ -261,14 +409,19 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 			case semaphore <- struct{}{}:
 				defer func() { <-semaphore }()
 			case <-ctx.Done():
+				logLLM("batch %d/%d skipped (ctx canceled before start)", batchIdx, batchCount)
 				results <- batchResult{}
 				return
 			}
+			batchStart := time.Now()
+			logLLM("batch %d/%d SENDING papers=%d", batchIdx, batchCount, len(batch))
 			digests, err := s.summarizeWithLLM(ctx, query, batch)
 			if err != nil {
+				logLLM("batch %d/%d FAILED after %s: %v", batchIdx, batchCount, time.Since(batchStart).Round(time.Millisecond), err)
 				results <- batchResult{}
 				return
 			}
+			logLLM("batch %d/%d OK  duration=%s digests=%d/%d", batchIdx, batchCount, time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
 			results <- batchResult{digests: digests}
 		}()
 	}
@@ -278,7 +431,7 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 		close(results)
 	}()
 
-	merged := make(map[string]Digest, len(papers))
+	merged := make(map[string]llmDigest, len(papers))
 	for result := range results {
 		for id, digest := range result.digests {
 			merged[id] = digest
@@ -288,7 +441,8 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 }
 
 type llmDigest struct {
-	ID string `json:"id"`
+	ID          string `json:"id"`
+	ReadMinutes int    `json:"read_minutes"`
 	Digest
 }
 
@@ -296,7 +450,7 @@ type llmDigestResponse struct {
 	Papers []llmDigest `json:"papers"`
 }
 
-func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers []Paper) (map[string]Digest, error) {
+func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers []Paper) (map[string]llmDigest, error) {
 	type compactPaper struct {
 		ID       string `json:"id"`
 		Title    string `json:"title"`
@@ -331,7 +485,7 @@ Other fields (each under 280 chars unless noted):
 - why_keep: why this matters to the field
 - reading_focus: what to pay attention to when reading (max 100 chars)
 
-EMPHASIS — inside "problem", "method", "result", and every "novelty" bullet, wrap the 1-3 most important phrases (e.g. the concrete number, the new mechanism name, the surprising finding) in **double asterisks** so a reader can skim the bold parts and still get the gist. Never bold whole sentences; bold the load-bearing noun phrase only. Example: "Achieves **89.4% accuracy** on ImageNet using a **single-stage detector**."
+EMPHASIS — inside "problem", "method", "result", and every "novelty" bullet, wrap the 1-3 most important phrases (e.g. the concrete number, the new mechanism name, the surprising finding) in **double asterisks** so a reader can skim the bold parts and still get the gist. Never bold whole sentences; bold the load-bearing noun phrase only. Example: "Achieves **89.4%% accuracy** on ImageNet using a **single-stage detector**."
 
 Return valid JSON: {"papers":[{"id":"...","hook":"...","verdict":"...","problem":"...","novelty":["...","..."],"method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}
 
@@ -348,6 +502,16 @@ Papers: %s`, query, inputJSON)
 	}
 	s.applyProviderOptions(payload)
 	body, _ := json.Marshal(payload)
+	callID := llmCallSeq.Add(1)
+	paperIDs := make([]string, 0, len(papers))
+	for _, p := range papers {
+		paperIDs = append(paperIDs, p.ID)
+	}
+	logLLM("call #%d POST %s model=%s payload=%d bytes papers=%v", callID, s.baseURL+"/chat/completions", s.model, len(body), paperIDs)
+	if llmDebugPromptEnabled() {
+		logLLM("call #%d PROMPT ↓↓↓\n%s\n↑↑↑ end prompt", callID, prompt)
+	}
+	sendStart := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.baseURL+"/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -357,9 +521,11 @@ Papers: %s`, query, inputJSON)
 
 	resp, err := s.client.Do(req)
 	if err != nil {
+		logLLM("call #%d NETWORK error after %s: %v", callID, time.Since(sendStart).Round(time.Millisecond), err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+	logLLM("call #%d headers received status=%d after %s", callID, resp.StatusCode, time.Since(sendStart).Round(time.Millisecond))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		message, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
 		return nil, fmt.Errorf("LLM status %d: %s", resp.StatusCode, strings.TrimSpace(string(message)))
@@ -370,6 +536,11 @@ Papers: %s`, query, inputJSON)
 				Content string `json:"content"`
 			} `json:"message"`
 		} `json:"choices"`
+		Usage struct {
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
+		} `json:"usage"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<20)).Decode(&response); err != nil {
 		return nil, err
@@ -377,14 +548,42 @@ Papers: %s`, query, inputJSON)
 	if len(response.Choices) == 0 {
 		return nil, fmt.Errorf("LLM returned no choices")
 	}
+	rawContent := response.Choices[0].Message.Content
+	logLLM("call #%d body parsed prompt_tok=%d comp_tok=%d total_tok=%d content=%d bytes", callID, response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens, len(rawContent))
 	var parsed llmDigestResponse
-	if err := json.Unmarshal([]byte(response.Choices[0].Message.Content), &parsed); err != nil {
+	if err := json.Unmarshal([]byte(rawContent), &parsed); err != nil {
+		logLLM("call #%d JSON parse FAILED: %v | first 400 chars: %q", callID, err, truncateRunes(rawContent, 400))
 		return nil, err
 	}
-	output := make(map[string]Digest, len(parsed.Papers))
-	for _, item := range parsed.Papers {
-		output[item.ID] = item.Digest
+	requestedIDs := make(map[string]string, len(papers))
+	for _, paper := range papers {
+		requestedIDs[paper.ID] = paper.ID
+		if idx := strings.LastIndex(paper.ID, ":"); idx >= 0 {
+			requestedIDs[paper.ID[idx+1:]] = paper.ID
+		}
+		if strings.HasPrefix(paper.ID, "arxiv:") {
+			trimmed := strings.TrimPrefix(paper.ID, "arxiv:")
+			requestedIDs[trimmed] = paper.ID
+			if v := strings.SplitN(trimmed, "v", 2); len(v) > 0 {
+				requestedIDs[v[0]] = paper.ID
+			}
+		}
 	}
+	output := make(map[string]llmDigest, len(parsed.Papers))
+	unmatched := make([]string, 0)
+	for _, item := range parsed.Papers {
+		key := item.ID
+		if canonical, ok := requestedIDs[item.ID]; ok {
+			key = canonical
+		} else {
+			unmatched = append(unmatched, item.ID)
+		}
+		output[key] = item
+	}
+	if len(unmatched) > 0 {
+		logLLM("call #%d ID MISMATCH: returned %d, matched %d/%d; unmatched=%v", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers), unmatched)
+	}
+	logLLM("call #%d parsed %d digest entries (matched=%d/%d)", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers))
 	return output, nil
 }
 

@@ -539,7 +539,22 @@ func abstractFromInvertedIndex(index map[string][]int) string {
 	return strings.Join(words, " ")
 }
 
+// estimateReadMinutes returns a rough end-to-end reading estimate for the full
+// paper (not just the abstract). We only see the abstract, so we use its
+// length as a weak signal for depth: longer / denser abstracts tend to preface
+// longer papers. The output is clamped to a realistic band (25–90 min) so the
+// week planner never suggests a paper can be finished during a coffee break.
 func estimateReadMinutes(abstract string) int {
 	words := len(strings.Fields(abstract))
-	return max(6, min(25, int(math.Ceil(float64(words)/22.0))))
+	// Baseline: 40 min for a typical conference paper.
+	// +1 min per 12 abstract words above 120 (denser paper → longer read).
+	extra := 0
+	if words > 120 {
+		extra = (words - 120) / 12
+	}
+	// -1 min per 15 abstract words below 120 (short abstract → likely short paper).
+	if words < 120 {
+		extra = -(120 - words) / 15
+	}
+	return max(25, min(90, 40+extra))
 }

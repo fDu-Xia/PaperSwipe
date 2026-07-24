@@ -34,9 +34,86 @@ const state = {
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
   todos: [],
   todoScope: "day",
+  weekPlanDone: new Set(),
+  weekPlanRemoved: new Set(),
+  weekPlanAssign: new Map(), // paperId -> 'YYYY-MM-DD' (manual scheduling)
+  weekPlanPriority: new Map(), // paperId -> 'high' | 'medium' | 'low'
+  scheduleDraftDate: null,   // temp selected date before confirm
+  scheduleDraftPriority: null, // temp selected priority before confirm
+  scheduleWeekOffset: 0, // offset for the schedule-date picker
+  actionPaperId: null, // paper id targeted by the long-press action menu
+  weekPlanOffset: 0, // # of weeks from the current one (0 = this week, -1 prev, 1 next)
+  // ↑ legacy placeholder — Profile now uses buildWeekPlan() driven by state.library
   librarySelectMode: false,
   librarySelected: new Set(),
+  friendRecs: new Map(), // paperId -> { boosted:boolean, count:number }
+  streaming: false,
 };
+
+/* ── Mock friend recommendations (front-card banner) ── */
+const MOCK_FRIENDS = [
+  { id: "alex",   name: "Alex Chen",     emoji: "🦊", color: "#f97316" },
+  { id: "mia",    name: "Mia Zhao",      emoji: "🐼", color: "#0ea5e9" },
+  { id: "sora",   name: "Sora Ito",      emoji: "🦉", color: "#8b5cf6" },
+  { id: "liam",   name: "Liam Park",     emoji: "🐧", color: "#14b8a6" },
+  { id: "yuki",   name: "Yuki Tanaka",   emoji: "🦄", color: "#ec4899" },
+  { id: "noah",   name: "Noah Lin",      emoji: "🐨", color: "#eab308" },
+];
+
+function hashString(str) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// Deterministic: same paper id always resolves to the same (or no) friend rec.
+function pickFriendRec(paperId) {
+  if (!paperId) return null;
+  const h = hashString(paperId);
+  // ~40% of cards get a friend banner
+  if ((h % 100) >= 40) return null;
+  const friend = MOCK_FRIENDS[h % MOCK_FRIENDS.length];
+  return { friend };
+}
+
+function toggleFriendRec(paperId, buttonEl) {
+  const rec = pickFriendRec(paperId);
+  if (!rec) return;
+  const current = state.friendRecs.get(paperId) || { boosted: false };
+  current.boosted = !current.boosted;
+  state.friendRecs.set(paperId, current);
+
+  const banner = buttonEl.closest(".friend-rec-banner");
+  if (!banner) return;
+  banner.classList.toggle("is-boosted", current.boosted);
+  buttonEl.classList.toggle("is-active", current.boosted);
+  buttonEl.setAttribute("aria-pressed", current.boosted ? "true" : "false");
+
+  const avatars = banner.querySelector(".frb-avatars");
+  if (avatars) {
+    avatars.classList.toggle("has-me", current.boosted);
+    const existingMe = avatars.querySelector(".frb-me");
+    if (current.boosted && !existingMe) {
+      const me = document.createElement("span");
+      me.className = "frb-avatar frb-me";
+      me.setAttribute("aria-label", "你");
+      me.textContent = "🙂";
+      avatars.appendChild(me);
+    } else if (!current.boosted && existingMe) {
+      existingMe.remove();
+    }
+  }
+  const textEl = banner.querySelector(".frb-text");
+  if (textEl) {
+    const nameLabel = "@" + rec.friend.id;
+    textEl.innerHTML = current.boosted
+      ? `${escapeHTML(nameLabel)} <span class="frb-and">&amp;</span> 你 推荐`
+      : `${escapeHTML(nameLabel)} 推荐`;
+  }
+}
 
 const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1";
 const APPEARANCE_STORAGE_KEY = "paperswipe-appearance-v1";
@@ -50,10 +127,10 @@ let isFlipped = false;
 let flipGuard = false;
 let dragging = false;
 let dragDX = 0, dragDY = 0, dragStartX = 0, dragStartY = 0, dragStartTime = 0;
+let weekPlanSwipe = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
-  state.todos = loadTodos() || defaultTodos();
   state.appearance = loadAppearance();
   applyAppearance(state.appearance);
   bindEvents();
@@ -88,10 +165,16 @@ function cacheElements() {
     profileIdentity: document.querySelector("#profile-identity"),
     settingsPage: document.querySelector("#settings-page"),
     settingsClose: document.querySelector("#settings-close"),
-    todoList: document.querySelector("#todo-list"),
-    todoForm: document.querySelector("#todo-form"),
-    todoInput: document.querySelector("#todo-input"),
+    todoList: null,
+    todoForm: null,
+    todoInput: null,
     searchToggle: document.querySelector("#search-toggle"),
+    todosToggle: document.querySelector("#todos-toggle"),
+    todosToggleBadge: document.querySelector("#todos-toggle-badge"),
+    todosView: document.querySelector("#todos-view"),
+    todosBack: document.querySelector("#todos-back"),
+    weekPlanGrid: document.querySelector("#week-plan-grid"),
+    weekPlanSummary: document.querySelector("#week-plan-summary"),
     searchPanel: document.querySelector("#search-panel"),
     searchForm: document.querySelector("#search-form"),
     searchInput: document.querySelector("#search-input"),
@@ -127,6 +210,11 @@ function cacheElements() {
     dialogContent: document.querySelector("#dialog-content"),
     libraryCardDialog: document.querySelector("#library-card-dialog"),
     libraryCardDialogContent: document.querySelector("#library-card-dialog-content"),
+    libraryActionMenu: document.querySelector("#library-action-menu"),
+    libraryActionTitle: document.querySelector("#library-action-title"),
+    libraryScheduleDialog: document.querySelector("#library-schedule-dialog"),
+    scheduleWeekLabel: document.querySelector("#schedule-week-label"),
+    scheduleDateGrid: document.querySelector("#schedule-date-grid"),
     filterDialog: null,
     forumDialog: document.querySelector("#forum-dialog"),
     aiBotPage: document.querySelector("#ai-bot-page"),
@@ -243,12 +331,45 @@ function bindEvents() {
       toggleCardFlip();
       return;
     }
+    const friendRec = event.target.closest("[data-friend-rec]");
+    if (friendRec) {
+      event.stopPropagation();
+      toggleFriendRec(friendRec.dataset.friendRec, friendRec);
+      return;
+    }
     const queryButton = event.target.closest("[data-query]");
     if (queryButton) {
       elements.searchInput.value = queryButton.dataset.query;
       elements.searchPanel.hidden = true;
       switchView("discover");
       performSearch(queryButton.dataset.query);
+      return;
+    }
+    const weekPlanAction = event.target.closest("[data-week-plan-action]");
+    if (weekPlanAction) {
+      event.preventDefault();
+      event.stopPropagation();
+      handleWeekPlanAction(weekPlanAction.dataset.id, weekPlanAction.dataset.weekPlanAction);
+      return;
+    }
+    const weekNavButton = event.target.closest("[data-week-nav]");
+    if (weekNavButton) {
+      event.preventDefault();
+      const delta = Number(weekNavButton.dataset.weekNav) || 0;
+      state.weekPlanOffset = (state.weekPlanOffset || 0) + delta;
+      renderWeekPlan();
+      return;
+    }
+    const weekPlanCard = event.target.closest("[data-week-plan-card]");
+    if (weekPlanCard) {
+      const shell = weekPlanCard.closest(".wp-item-shell");
+      if (shell && shell.classList.contains("is-revealed")) {
+        // First click on a revealed shell just closes the action drawer.
+        shell.classList.remove("is-revealed");
+        shell.style.setProperty("--wp-swipe", "0px");
+        return;
+      }
+      openWeekPlanCard(weekPlanCard.dataset.id);
       return;
     }
     const detailButton = event.target.closest("[data-detail-id]");
@@ -268,11 +389,43 @@ function bindEvents() {
     }
     const libraryCard = event.target.closest("[data-library-card]");
     if (libraryCard && !event.target.closest("button")) {
+      if (libraryPressCard) { clearLibraryInlineActions(); return; }
       if (state.librarySelectMode) {
         toggleLibrarySelection(libraryCard.dataset.id);
       } else {
         openLibraryCard(libraryCard.dataset.id);
       }
+      return;
+    }
+    const libraryAction = event.target.closest("[data-library-action]");
+    if (libraryAction) {
+      event.preventDefault();
+      handleLibraryAction(libraryAction.dataset.libraryAction);
+      return;
+    }
+    const scheduleWeekBtn = event.target.closest("[data-schedule-week]");
+    if (scheduleWeekBtn) {
+      state.scheduleWeekOffset = (state.scheduleWeekOffset || 0) + Number(scheduleWeekBtn.dataset.scheduleWeek);
+      renderScheduleGrid();
+      return;
+    }
+    const scheduleDate = event.target.closest("[data-schedule-date]");
+    if (scheduleDate) {
+      event.preventDefault();
+      state.scheduleDraftDate = scheduleDate.dataset.scheduleDate;
+      renderScheduleGrid();
+      return;
+    }
+    const schedulePriority = event.target.closest("[data-schedule-priority]");
+    if (schedulePriority) {
+      event.preventDefault();
+      setPaperPriority(schedulePriority.dataset.schedulePriority);
+      return;
+    }
+    const scheduleConfirm = event.target.closest("[data-schedule-confirm]");
+    if (scheduleConfirm) {
+      event.preventDefault();
+      assignPaperToDate(state.scheduleDraftDate);
       return;
     }
     const removeButton = event.target.closest("[data-remove-id]");
@@ -430,6 +583,8 @@ function bindEvents() {
 
   const zoteroApiKeyInput = document.querySelector("#zotero-api-key");
   const zoteroUserIdInput = document.querySelector("#zotero-user-id");
+
+  bindLibraryLongPress();
   const zoteroTestBtn = document.querySelector("#zotero-test-button");
   const zoteroClearBtn = document.querySelector("#zotero-clear-button");
   const saved = loadZoteroCredentials();
@@ -442,22 +597,14 @@ function bindEvents() {
 
   if (elements.profileSettingsButton) elements.profileSettingsButton.addEventListener("click", openSettingsPage);
   if (elements.settingsClose) elements.settingsClose.addEventListener("click", closeSettingsPage);
-  if (elements.todoForm) elements.todoForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const text = elements.todoInput.value.trim();
-    if (!text) return;
-    addTodo(text);
-    elements.todoInput.value = "";
-  });
-  document.querySelectorAll("[data-todo-scope]").forEach((button) => {
-    button.addEventListener("click", () => switchTodoScope(button.dataset.todoScope));
-  });
-  if (elements.todoList) elements.todoList.addEventListener("click", (event) => {
-    const toggle = event.target.closest("[data-todo-toggle]");
-    if (toggle) { toggleTodo(toggle.dataset.todoToggle); return; }
-    const remove = event.target.closest("[data-todo-remove]");
-    if (remove) { removeTodo(remove.dataset.todoRemove); return; }
-  });
+
+  if (elements.todosToggle && elements.todosView) {
+    elements.todosToggle.addEventListener("click", () => switchView("todos"));
+  }
+  if (elements.todosBack) {
+    elements.todosBack.addEventListener("click", () => switchView("discover"));
+  }
+  bindWeekPlanSwipe();
 
   document.addEventListener("keydown", (event) => {
     if (!state.started || state.activeView !== "discover" || state.loading || dragging || anyDialogOpen() || event.target.matches("input, textarea")) return;
@@ -777,6 +924,7 @@ async function performSearch(rawQuery) {
   state.query = query;
   state.index = 0;
   state.papers = [];
+  state.streaming = true;
   elements.searchInput.value = query;
   elements.searchNote.textContent = "";
   elements.resultSource.textContent = "正在检索开放论文源";
@@ -784,24 +932,96 @@ async function performSearch(rawQuery) {
   setActionEnabled(false);
   renderLoadingCard();
 
+  let receivedAny = false;
   try {
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`);
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "检索失败");
-    state.papers = payload.papers || [];
-    state.source = payload.source || "Open papers";
-    state.imageEnabled = Boolean(payload.image_enabled);
-    elements.searchNote.textContent = payload.warning || "";
-    elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
-    elements.resultQuery.textContent = payload.query;
-    setEngineStatus(Boolean(payload.ai_enabled));
-    renderCard();
-    refreshSearches();
+    console.log(`[search] START q="${query}" @${new Date().toISOString()}`);
+    const t0 = performance.now();
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`, {
+      headers: { Accept: "text/event-stream" },
+    });
+    console.log(`[search] response received status=${response.status} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => "");
+      throw new Error(errBody || `检索失败 (HTTP ${response.status})`);
+    }
+    if (!response.body) throw new Error("此浏览器不支持流式响应");
+
+    await consumeSSE(response.body, (event, data) => {
+      if (event === "meta") {
+        state.source = data.source || "Open papers";
+        state.imageEnabled = Boolean(data.image_enabled);
+        elements.searchNote.textContent = data.warning || "";
+        elements.resultSource.textContent = `${state.source} · loading…`;
+        elements.resultQuery.textContent = data.query || query;
+        setEngineStatus(Boolean(data.ai_enabled));
+      } else if (event === "batch") {
+        const incoming = Array.isArray(data.papers) ? data.papers : [];
+        if (!incoming.length) return;
+        const wasEmpty = state.papers.length === 0;
+        state.papers.push(...incoming);
+        receivedAny = true;
+        elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates${state.streaming ? " (loading…)" : ""}`;
+        // Promote the deck if we were showing loading or skeleton.
+        if (wasEmpty || state.index >= state.papers.length - incoming.length) {
+          renderCard();
+        }
+      } else if (event === "done") {
+        state.streaming = false;
+        elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
+        console.log(`[search] done total=${state.papers.length} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
+        refreshSearches();
+      }
+    });
   } catch (error) {
-    renderErrorCard(error.message);
-    showToast(error.message);
+    console.error("[search] failed", error);
+    if (!receivedAny) {
+      renderErrorCard(error.message);
+      showToast(error.message);
+    } else {
+      showToast(`加载中断：${error.message}`);
+    }
   } finally {
     state.loading = false;
+    state.streaming = false;
+    if (state.papers.length && elements.resultSource) {
+      elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
+    }
+  }
+}
+
+async function consumeSSE(stream, dispatch) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let boundary;
+      while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+        const rawEvent = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+        if (!rawEvent.trim()) continue;
+        let name = "message";
+        const dataLines = [];
+        for (const line of rawEvent.split("\n")) {
+          if (line.startsWith("event:")) name = line.slice(6).trim();
+          else if (line.startsWith("data:")) dataLines.push(line.slice(5).replace(/^\s/, ""));
+        }
+        if (!dataLines.length) continue;
+        let payload;
+        try {
+          payload = JSON.parse(dataLines.join("\n"));
+        } catch (err) {
+          console.warn("[sse] bad JSON payload for", name, err);
+          continue;
+        }
+        dispatch(name, payload);
+      }
+    }
+  } finally {
+    reader.releaseLock();
   }
 }
 
@@ -832,6 +1052,47 @@ function renderLoadingCard() {
   elements.cardFront = document.querySelector("#cardFront");
   elements.cardBack = document.querySelector("#cardBack");
   elements.cardHero = document.querySelector("#cardHero");
+  setActionEnabled(false);
+  updateProgress();
+}
+
+function renderSkeletonCard() {
+  elements.card.className = "card theme-violet is-loading is-skeleton";
+  elements.card.style.transform = "";
+  elements.card.style.opacity = "";
+  elements.card.style.boxShadow = "";
+  elements.card.style.transition = "";
+  isFlipped = false;
+  elements.cardInner.classList.remove("is-flipped");
+  elements.card.innerHTML = `
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-hero skeleton-hero">
+          <div class="skeleton-top">
+            <span class="skeleton-chip"></span>
+            <span class="skeleton-chip skeleton-chip-sm"></span>
+          </div>
+          <div class="skeleton-body">
+            <span class="skeleton-line skeleton-line-lg"></span>
+            <span class="skeleton-line skeleton-line-md"></span>
+            <span class="skeleton-line skeleton-line-sm"></span>
+          </div>
+          <div class="skeleton-foot">
+            <span class="skeleton-avatar"></span>
+            <span class="skeleton-line skeleton-line-xs"></span>
+          </div>
+          <p class="skeleton-status">Loading next paper…</p>
+        </div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-back-face"><div class="back-hero theme-violet"><h2 class="back-title">Loading…</h2></div></div>
+      </div>
+    </div>`;
+  elements.cardInner = document.querySelector("#cardInner");
+  elements.cardFront = document.querySelector("#cardFront");
+  elements.cardBack = document.querySelector("#cardBack");
+  elements.cardHero = document.querySelector(".skeleton-hero");
+  setActionEnabled(false);
   updateProgress();
 }
 
@@ -873,6 +1134,10 @@ function renderCard() {
   elements.cardInner.classList.remove("is-flipped");
 
   if (!paper) {
+    if (state.streaming) {
+      renderSkeletonCard();
+      return;
+    }
     elements.card.className = "card theme-violet is-loading";
     elements.card.innerHTML = `
       <div class="card-inner" id="cardInner">
@@ -917,13 +1182,35 @@ function renderCard() {
     bestFor: deriveBestFor(paper),
     url: paper.url || "",
     pdf_url: paper.pdf_url || "",
-    read_minutes: numberOrZero(paper.read_minutes),
-    citation_count: numberOrZero(paper.citation_count),
+    read_minutes: mockReadMinutes(paper.read_minutes, paper.id),
+    citation_count: mockCitationCount(paper.citation_count),
   };
 
   elements.card.className = "card " + c.theme;
   elements.card.style.transform = "";
+  const rec = pickFriendRec(paper.id);
+  let friendBannerHTML = "";
+  if (rec) {
+    const stored = state.friendRecs.get(paper.id) || { boosted: false };
+    if (!state.friendRecs.has(paper.id)) state.friendRecs.set(paper.id, stored);
+    const nameLabel = "@" + rec.friend.id;
+    const textLabel = stored.boosted
+      ? `${escapeHTML(nameLabel)} <span class="frb-and">&amp;</span> 你 推荐`
+      : `${escapeHTML(nameLabel)} 推荐`;
+    friendBannerHTML = `
+      <div class="friend-rec-banner${stored.boosted ? " is-boosted" : ""}" data-stop-click>
+        <div class="frb-avatars${stored.boosted ? " has-me" : ""}">
+          <span class="frb-avatar" style="background:${rec.friend.color}">${rec.friend.emoji}</span>
+          ${stored.boosted ? `<span class="frb-avatar frb-me" aria-label="你">🙂</span>` : ""}
+        </div>
+        <div class="frb-text">${textLabel}</div>
+        <button type="button" class="frb-thumb${stored.boosted ? " is-active" : ""}" data-friend-rec="${escapeAttribute(paper.id)}" data-stop-click aria-label="一起推荐" aria-pressed="${stored.boosted ? "true" : "false"}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7"/><path d="M7 10H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4"/></svg>
+        </button>
+      </div>`;
+  }
   elements.card.innerHTML = `
+    ${friendBannerHTML}
     <div class="stamp dismiss">NOPE</div>
     <div class="stamp save">YES</div>
     <div class="stamp priority">TOP</div>
@@ -1031,7 +1318,7 @@ function renderCard() {
 
             <div class="source-links">
               <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
-              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${c.citation_count} cites</span>
+              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
               ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Original
@@ -2120,8 +2407,8 @@ function appendBotTopPick(data) {
               </section>
               <div class="paper-meta">
                 <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
-                <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
-                <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
+                <span><i data-lucide="clock-3"></i>${mockReadMinutes(paper.read_minutes, paper.id)} min</span>
+                <span><i data-lucide="quote"></i>${escapeHTML(citationLabel({ citation_count: mockCitationCount(paper.citation_count) }))}</span>
                 ${paperLink}${pdfLink}
               </div>
             </div>
@@ -2177,7 +2464,11 @@ async function refreshLibrary() {
     const response = await fetch("/api/library");
     const payload = await response.json();
     state.library = payload.papers || [];
+    const ids = new Set(state.library.map((entry) => entry.paper?.id).filter(Boolean));
+    state.weekPlanDone = new Set([...state.weekPlanDone].filter((id) => ids.has(id)));
+    state.weekPlanRemoved = new Set([...state.weekPlanRemoved].filter((id) => ids.has(id)));
     updateLibraryCounts();
+    updateTodosBadge();
     if (state.activeView === "library") renderLibrary();
   } catch (_) {
     // Preserve the current list when the local API is temporarily unavailable.
@@ -2551,7 +2842,7 @@ async function refreshSearches() {
 }
 
 function switchView(view) {
-  const validViews = ["discover", "library", "network", "profile"];
+  const validViews = ["discover", "library", "network", "profile", "todos"];
   state.activeView = validViews.includes(view) ? view : "discover";
   closeAiBotPage();
   closeSettingsPage();
@@ -2560,6 +2851,7 @@ function switchView(view) {
     library: elements.libraryView,
     network: elements.networkView,
     profile: elements.profileView,
+    todos: elements.todosView,
   };
   Object.entries(views).forEach(([name, panel]) => {
     const active = name === state.activeView;
@@ -2571,6 +2863,14 @@ function switchView(view) {
   if (state.activeView === "library") refreshLibrary();
   if (state.activeView === "network") renderPeople();
   if (state.activeView === "profile") renderProfile();
+  if (state.activeView === "todos") {
+    state.weekPlanOffset = 0;
+    refreshLibrary().finally(() => {
+      renderWeekPlan();
+      updateTodosBadge();
+    });
+    renderWeekPlan();
+  }
 }
 
 function switchNetworkTab(tab) {
@@ -2643,31 +2943,7 @@ function renderSettings() {
   refreshIcons();
 }
 
-const TODO_STORAGE_KEY = "paperswipe_todos";
-const TODO_SCOPES = ["day", "week", "month"];
-
-function loadTodos() {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem(TODO_STORAGE_KEY));
-    if (!Array.isArray(saved)) return null;
-    return saved.filter((item) => item && typeof item.text === "string");
-  } catch (_) {
-    return null;
-  }
-}
-
-function persistTodos() {
-  window.localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(state.todos));
-}
-
-function defaultTodos() {
-  return [
-    { id: "t1", text: "Deep-read MemGPT hierarchical memory management", done: false, scope: "day" },
-    { id: "t2", text: "Organize RAG evaluation benchmark notes", done: false, scope: "week" },
-    { id: "t3", text: "Track this week's new Memory Agent papers", done: false, scope: "week" },
-    { id: "t4", text: "Finish the long-term memory survey monthly report", done: false, scope: "month" },
-  ];
-}
+const TODO_STORAGE_KEY = "paperswipe_todos"; // legacy — cleared on next boot
 
 function scopeLabel(scope) {
   return scope === "day" ? "Today" : scope === "week" ? "This week" : "This month";
@@ -2677,57 +2953,259 @@ function renderProfile() {
   const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
   const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
   if (elements.profileIdentity) elements.profileIdentity.textContent = `${identities[onboardingProfile.identity] || "研究者"} · ${styleLabel}`;
-  renderTodos();
   refreshIcons();
 }
 
-function renderTodos() {
-  const scope = state.todoScope || "day";
-  document.querySelectorAll("[data-todo-scope]").forEach((button) => {
-    const active = button.dataset.todoScope === scope;
-    button.classList.toggle("is-active", active);
-    button.setAttribute("aria-checked", String(active));
+const WEEK_PLAN_DAY_TARGET_MIN = 120;
+const WEEK_PLAN_ORDER = ["priority", "save"];
+
+function buildWeekPlanTask(entry) {
+  const p = entry.paper || {};
+  return {
+    id: p.id,
+    title: p.title || "Untitled paper",
+    minutes: mockReadMinutes(p.read_minutes, p.id),
+    action: entry.action,
+    theme: paperTheme(p),
+    subtitle: pickSubtitle(p),
+    priority: state.weekPlanPriority.get(p.id) || ["high", "medium", "low"][Math.abs(hashString(p.id || "")) % 3],
+    done: state.weekPlanDone.has(p.id),
+    removed: state.weekPlanRemoved.has(p.id),
+    order: WEEK_PLAN_ORDER.indexOf(entry.action) * 1000 + hashString(p.id || ""),
+  };
+}
+
+function weekStartDate(offset) {
+  // Monday-start week. offset: 0 = this week, -1 = last week, +1 = next week.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const day = today.getDay(); // 0 = Sun, 1 = Mon, ...
+  const diffToMonday = (day === 0 ? -6 : 1 - day);
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diffToMonday + (offset || 0) * 7);
+  return monday;
+}
+
+function buildWeekPlan(offset) {
+  const start = weekStartDate(offset || 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return { date: d, items: [], totalMin: 0, isToday: d.getTime() === today.getTime(), isPast: d.getTime() < today.getTime() };
   });
-  const items = state.todos.filter((item) => item.scope === scope);
-  if (!items.length) {
-    elements.todoList.innerHTML = `<li class="todo-empty">${scopeLabel(scope)}暂无阅读任务，添加一项吧。</li>`;
+
+  const tasks = [];
+  for (const entry of state.library || []) {
+    if (!entry || !entry.paper) continue;
+    if (!WEEK_PLAN_ORDER.includes(entry.action)) continue;
+    const task = buildWeekPlanTask(entry);
+    if (!task.id || task.removed) continue;
+    tasks.push(task);
+  }
+  tasks.sort((a, b) => a.order - b.order);
+
+  // Manual assignments take priority: pin each task to its chosen date.
+  const dateKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const placedIds = new Set();
+  for (const day of days) {
+    const key = dateKey(day.date);
+    for (const task of tasks) {
+      if (placedIds.has(task.id)) continue;
+      if (state.weekPlanAssign.get(task.id) === key) {
+        day.items.push(task);
+        day.totalMin += task.minutes;
+        placedIds.add(task.id);
+      }
+    }
+  }
+
+  // Placement uses a stable per-week hash seed so tasks land differently
+  // when you page to another week (rather than showing "empty" everywhere).
+  const seed = hashString(`${start.toISOString().slice(0, 10)}`);
+  let cursor = 0;
+  // Rotate task order per week so different weeks show different subsets.
+  const rotated = tasks.filter((t) => !placedIds.has(t.id));
+  rotated.sort((a, b) => a.order - b.order);
+  const rotatedFull = rotated.length ? rotated.slice(seed % rotated.length).concat(rotated.slice(0, seed % rotated.length)) : rotated;
+  for (let i = 0; i < days.length && cursor < rotatedFull.length; i++) {
+    const h = hashString(`${rotatedFull[cursor]?.id || ""}-${i}-${seed}`);
+    const limit = (h % 100 < 38) ? 2 : 1;
+    for (let slot = 0; slot < limit && cursor < rotatedFull.length; slot++) {
+      days[i].items.push(rotatedFull[cursor]);
+      days[i].totalMin += rotatedFull[cursor].minutes;
+      cursor += 1;
+    }
+  }
+
+  for (const day of days) {
+    day.items.sort((a, b) => Number(a.done) - Number(b.done) || a.order - b.order);
+  }
+  return { start, days };
+}
+
+function formatDayLabel(date, isToday) {
+  if (isToday) return "Today";
+  const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][date.getDay()];
+  return `${wd} ${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function updateTodosBadge() {
+  if (!elements.todosToggleBadge) return;
+  const count = (state.library || []).filter((e) => e && e.paper && WEEK_PLAN_ORDER.includes(e.action) && !state.weekPlanRemoved.has(e.paper.id)).length;
+  if (count > 0) {
+    elements.todosToggleBadge.textContent = count > 99 ? "99+" : String(count);
+    elements.todosToggleBadge.hidden = false;
+  } else {
+    elements.todosToggleBadge.hidden = true;
+  }
+}
+
+function formatWeekRangeLabel(startDate) {
+  const end = new Date(startDate);
+  end.setDate(startDate.getDate() + 6);
+  const sameMonth = startDate.getMonth() === end.getMonth();
+  const startStr = `${startDate.getMonth() + 1}/${startDate.getDate()}`;
+  const endStr = sameMonth ? `${end.getDate()}` : `${end.getMonth() + 1}/${end.getDate()}`;
+  return `${startStr} – ${endStr}`;
+}
+
+function renderWeekPlan() {
+  const grid = elements.weekPlanGrid;
+  const summary = elements.weekPlanSummary;
+  if (!grid) return;
+  const { start, days } = buildWeekPlan(state.weekPlanOffset);
+  const totalTasks = days.reduce((n, d) => n + d.items.length, 0);
+  const totalMin = days.reduce((n, d) => n + d.totalMin, 0);
+
+  const offset = state.weekPlanOffset || 0;
+  const weekWord = offset === 0 ? "This week" : offset === -1 ? "Last week" : offset === 1 ? "Next week" : (offset < 0 ? `${-offset} weeks ago` : `In ${offset} weeks`);
+  if (summary) {
+    const rangeLabel = formatWeekRangeLabel(start);
+    const stats = totalTasks
+      ? `${totalTasks} paper${totalTasks > 1 ? "s" : ""} · ${totalMin} min`
+      : "Nothing scheduled";
+    summary.innerHTML = `
+      <div class="wp-nav">
+        <button type="button" class="wp-nav-btn" data-week-nav="-1" aria-label="上一周"><i data-lucide="chevron-left"></i></button>
+        <div class="wp-nav-center">
+          <strong>${escapeHTML(weekWord)}</strong>
+          <small>${escapeHTML(rangeLabel)} · ${escapeHTML(stats)}</small>
+        </div>
+        <button type="button" class="wp-nav-btn" data-week-nav="1" aria-label="下一周"><i data-lucide="chevron-right"></i></button>
+      </div>`;
+  }
+
+  const renderItem = (t) => `
+    <li class="wp-item-shell${t.done ? " is-done" : ""}" data-week-plan-shell data-done="${t.done ? "1" : "0"}">
+      <div class="wp-item-actions" aria-hidden="true">
+        <button type="button" class="wp-action wp-action--done" data-week-plan-action="done" data-id="${escapeAttribute(t.id)}" aria-label="Mark done" title="Mark done"><i data-lucide="check"></i></button>
+        <button type="button" class="wp-action wp-action--remove" data-week-plan-action="remove" data-id="${escapeAttribute(t.id)}" aria-label="Delete" title="Delete"><i data-lucide="trash-2"></i></button>
+      </div>
+      <button type="button" class="wp-item wp-item--${t.action} wp-item--${t.priority}${t.done ? " is-done" : ""}" data-week-plan-card data-id="${escapeAttribute(t.id)}">
+        <span class="wp-item-title">${escapeHTML(t.title)}</span>
+        <span class="wp-item-row">
+          <span class="wp-item-meta">${t.minutes} min</span>
+        </span>
+      </button>
+    </li>`;
+
+  const renderDayCard = (day, idx, layout) => {
+    const active = day.items.filter((t) => !t.done);
+    const done = day.items.filter((t) => t.done);
+    const activeHTML = active.length ? `<ul class="wp-day-list">${active.map(renderItem).join("")}</ul>` : (day.items.length ? "" : `<div class="wp-empty">Free</div>`);
+    const doneHTML = done.length ? `<ul class="wp-day-list wp-day-list--done">${done.map(renderItem).join("")}</ul>` : "";
+    const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day.date.getDay()];
+    const dateNum = day.date.getDate();
+    return `
+      <article class="wp-day wp-day--${layout}${day.isToday ? " is-today" : ""}${day.isPast ? " is-past" : ""}" role="listitem" style="--wp-day-index:${idx}">
+        <header class="wp-day-head">
+          <div class="wp-day-date">
+            <span class="wp-day-num">${dateNum}</span>
+            <span class="wp-day-wd">${wd}${day.isToday ? " · Today" : ""}</span>
+          </div>
+          <span class="wp-day-sum">${day.totalMin ? `${day.totalMin} min` : ""}</span>
+        </header>
+        ${activeHTML}${doneHTML}
+      </article>`;
+  };
+
+  // Layout: Today (if this week) gets its own full-width row; other days flow in a 2-col grid.
+  const todayIdx = days.findIndex((d) => d.isToday);
+  const parts = [];
+  if (todayIdx >= 0) {
+    parts.push(`<div class="wp-row wp-row--hero">${renderDayCard(days[todayIdx], todayIdx, "hero")}</div>`);
+    const rest = days.filter((_, i) => i !== todayIdx);
+    parts.push(`<div class="wp-row wp-row--pairs">${rest.map((d, i) => renderDayCard(d, i + 1, "compact")).join("")}</div>`);
+  } else {
+    parts.push(`<div class="wp-row wp-row--pairs">${days.map((d, i) => renderDayCard(d, i, "compact")).join("")}</div>`);
+  }
+  grid.innerHTML = parts.join("");
+  refreshIcons();
+}
+
+function handleWeekPlanAction(id, action) {
+  if (!id) return;
+  if (action === "remove") {
+    state.weekPlanRemoved.add(id);
+    state.weekPlanDone.delete(id);
+    renderWeekPlan();
+    updateTodosBadge();
+    removeFromLibrary(id);
     return;
   }
-  elements.todoList.innerHTML = items.map((item) => `
-    <li class="todo-item${item.done ? " is-done" : ""}" data-todo-id="${escapeAttribute(item.id)}">
-      <button class="todo-check" type="button" data-todo-toggle="${escapeAttribute(item.id)}" aria-label="${item.done ? "标记为未完成" : "标记为完成"}" title="完成">
-        <i data-lucide="${item.done ? "check" : "circle"}"></i>
-      </button>
-      <span class="todo-text">${escapeHTML(item.text)}</span>
-      <button class="todo-remove" type="button" data-todo-remove="${escapeAttribute(item.id)}" aria-label="删除任务" title="删除"><i data-lucide="x"></i></button>
-    </li>`).join("");
+  if (action === "done") {
+    if (state.weekPlanDone.has(id)) state.weekPlanDone.delete(id);
+    else state.weekPlanDone.add(id);
+    renderWeekPlan();
+    showToast(state.weekPlanDone.has(id) ? "已标记完成" : "已取消完成");
+  }
 }
 
-function addTodo(text) {
-  const scope = state.todoScope || "day";
-  state.todos.unshift({ id: `t${Date.now()}`, text: text.trim(), done: false, scope });
-  persistTodos();
-  renderTodos();
+function openWeekPlanCard(id) {
+  openLibraryCard(id);
 }
 
-function toggleTodo(id) {
-  const item = state.todos.find((entry) => entry.id === id);
-  if (!item) return;
-  item.done = !item.done;
-  persistTodos();
-  renderTodos();
-}
-
-function removeTodo(id) {
-  state.todos = state.todos.filter((entry) => entry.id !== id);
-  persistTodos();
-  renderTodos();
-}
-
-function switchTodoScope(scope) {
-  if (!TODO_SCOPES.includes(scope)) return;
-  state.todoScope = scope;
-  renderTodos();
+function bindWeekPlanSwipe() {
+  if (!elements.weekPlanGrid) return;
+  elements.weekPlanGrid.addEventListener("pointerdown", (event) => {
+    const shell = event.target.closest("[data-week-plan-shell]");
+    if (!shell || event.target.closest("[data-week-plan-action]")) return;
+    if (shell.classList.contains("is-done")) return; // completed cards don't reveal actions
+    // Close any other revealed shell before starting a new swipe.
+    elements.weekPlanGrid.querySelectorAll(".wp-item-shell.is-revealed").forEach((other) => {
+      if (other !== shell) {
+        other.classList.remove("is-revealed");
+        other.style.setProperty("--wp-swipe", "0px");
+      }
+    });
+    weekPlanSwipe = { shell, startX: event.clientX, startY: event.clientY, dx: 0, active: false };
+  });
+  elements.weekPlanGrid.addEventListener("pointermove", (event) => {
+    if (!weekPlanSwipe) return;
+    const dx = event.clientX - weekPlanSwipe.startX;
+    const dy = event.clientY - weekPlanSwipe.startY;
+    if (!weekPlanSwipe.active && Math.abs(dx) < 8) return;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    weekPlanSwipe.active = true;
+    weekPlanSwipe.dx = Math.min(0, dx);
+    const reveal = Math.max(-132, weekPlanSwipe.dx);
+    weekPlanSwipe.shell.style.setProperty("--wp-swipe", `${reveal}px`);
+    weekPlanSwipe.shell.classList.toggle("is-revealed", reveal < -56);
+  });
+  const finish = () => {
+    if (!weekPlanSwipe) return;
+    const shell = weekPlanSwipe.shell;
+    const reveal = Math.max(-132, Math.min(0, weekPlanSwipe.dx || 0));
+    const open = reveal < -56;
+    shell.style.setProperty("--wp-swipe", open ? "-132px" : "0px");
+    shell.classList.toggle("is-revealed", open);
+    weekPlanSwipe = null;
+  };
+  elements.weekPlanGrid.addEventListener("pointerup", finish);
+  elements.weekPlanGrid.addEventListener("pointercancel", finish);
+  elements.weekPlanGrid.addEventListener("pointerleave", finish);
 }
 
 function openSettingsPage() {
@@ -2844,7 +3322,6 @@ function openLibraryCard(id) {
 
   elements.libraryCardDialogContent.innerHTML = `
     <article class="card ${theme} library-pop-card" data-library-pop-card>
-      <button class="library-pop-close" type="button" data-close-dialog="library-card-dialog" aria-label="Close"><i data-lucide="x"></i></button>
       <div class="card-inner">
         <div class="card-face card-front">
           <div class="card-hero">
@@ -2914,8 +3391,8 @@ function openLibraryCard(id) {
                 <div class="best-for-row">${bestFor.map((t) => `<span class="best-chip">${escapeHTML(t)}</span>`).join("")}</div>
               </div>
               <div class="source-links">
-                <span class="source-stat"><span class="source-stat-emoji">📖</span>${numberOrZero(paper.read_minutes)} min</span>
-                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${numberOrZero(paper.citation_count)} cites</span>
+                <span class="source-stat"><span class="source-stat-emoji">📖</span>${mockReadMinutes(paper.read_minutes, paper.id)} min</span>
+                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
                 ${safeURL(paper.url) ? `<a class="source-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener" data-stop-click>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                   Original
@@ -2949,6 +3426,159 @@ function openLibraryCard(id) {
       popInner.classList.toggle("is-flipped");
     });
   }
+}
+
+/* ── Library long-press inline actions ── */
+let libraryPress = null;
+let libraryPressCard = null;
+
+function bindLibraryLongPress() {
+  const list = elements.libraryList;
+  if (!list) return;
+  const HOLD_MS = 450;
+  list.addEventListener("pointerdown", (event) => {
+    if (state.librarySelectMode) return;
+    const card = event.target.closest("[data-library-card]");
+    if (!card || event.target.closest("button")) return;
+    const id = card.dataset.id;
+    const startX = event.clientX, startY = event.clientY;
+    let fired = false;
+    const timer = setTimeout(() => {
+      fired = true;
+      if (navigator.vibrate) navigator.vibrate(12);
+      openLibraryInlineActions(card, id);
+    }, HOLD_MS);
+    const cancel = (moveEvent) => {
+      if (moveEvent && moveEvent.type === "pointermove") {
+        const dx = Math.abs(moveEvent.clientX - startX);
+        const dy = Math.abs(moveEvent.clientY - startY);
+        if (dx > 10 || dy > 10) clearTimeout(timer);
+      } else {
+        clearTimeout(timer);
+      }
+      if (!fired) {
+        list.removeEventListener("pointermove", cancel);
+        list.removeEventListener("pointerup", cancel);
+        list.removeEventListener("pointercancel", cancel);
+      }
+    };
+    list.addEventListener("pointermove", cancel);
+    list.addEventListener("pointerup", cancel);
+    list.addEventListener("pointercancel", cancel);
+    libraryPress = { id, timer, cancel };
+  });
+  list.addEventListener("pointerup", () => {
+    if (libraryPress) {
+      clearTimeout(libraryPress.timer);
+      libraryPress = null;
+    }
+  });
+}
+
+function clearLibraryInlineActions() {
+  if (libraryPressCard) {
+    libraryPressCard.classList.remove("is-pressing");
+    const overlay = libraryPressCard.querySelector(".library-card-actions");
+    if (overlay) overlay.remove();
+    libraryPressCard = null;
+  }
+}
+
+function openLibraryInlineActions(card, id) {
+  clearLibraryInlineActions();
+  state.actionPaperId = id;
+  card.classList.add("is-pressing");
+  const overlay = document.createElement("div");
+  overlay.className = "library-card-actions";
+  overlay.innerHTML = `
+    <button type="button" class="library-card-action is-danger" data-library-action="delete" aria-label="删除"><i data-lucide="trash-2"></i></button>
+    <button type="button" class="library-card-action is-schedule" data-library-action="schedule" aria-label="加入日程"><i data-lucide="calendar-plus"></i></button>`;
+  card.appendChild(overlay);
+  refreshIcons();
+  libraryPressCard = card;
+}
+
+function handleLibraryAction(action) {
+  const id = state.actionPaperId;
+  if (!id) return;
+  clearLibraryInlineActions();
+  if (action === "delete") {
+    removeFromLibrary(id);
+    return;
+  }
+  if (action === "schedule") {
+    state.scheduleWeekOffset = 0;
+    state.scheduleDraftDate = state.weekPlanAssign.get(id) || null;
+    state.scheduleDraftPriority = state.weekPlanPriority.get(id) || null;
+    renderScheduleGrid();
+    if (elements.libraryScheduleDialog) elements.libraryScheduleDialog.showModal();
+  }
+}
+
+if (elements.libraryScheduleDialog) {
+  elements.libraryScheduleDialog.addEventListener("close", () => {
+    state.scheduleDraftDate = null;
+    state.scheduleDraftPriority = null;
+  });
+  elements.libraryScheduleDialog.addEventListener("click", (event) => {
+    const rect = elements.libraryScheduleDialog.getBoundingClientRect();
+    const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+    if (!inside) elements.libraryScheduleDialog.close();
+  });
+}
+
+function renderScheduleGrid() {
+  if (!elements.scheduleDateGrid) return;
+  const offset = state.scheduleWeekOffset || 0;
+  const start = weekStartDate(offset);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dateKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  if (elements.scheduleWeekLabel) {
+    elements.scheduleWeekLabel.textContent = `${start.getMonth() + 1}/${start.getDate()} – ${end.getMonth() + 1}/${end.getDate()}`;
+  }
+  const assignedKey = state.scheduleDraftDate || state.weekPlanAssign.get(state.actionPaperId);
+  const priority = state.scheduleDraftPriority || state.weekPlanPriority.get(state.actionPaperId) || "medium";
+  const cells = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const key = dateKey(d);
+    const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    const isPast = d.getTime() < today.getTime();
+    const assigned = assignedKey === key;
+    return `
+      <button type="button" class="schedule-date-cell${isPast ? " is-past" : ""}${assigned ? " is-assigned" : ""}" data-schedule-date="${key}" ${isPast ? "disabled" : ""}>
+        <span class="schedule-date-wd">${wd}</span>
+        <span class="schedule-date-num">${d.getDate()}</span>
+        ${assigned ? '<span class="schedule-date-tick"><i data-lucide="check"></i></span>' : ""}
+      </button>`;
+  }).join("");
+  elements.scheduleDateGrid.innerHTML = cells;
+  document.querySelectorAll("[data-schedule-priority]").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.schedulePriority === priority);
+  });
+  refreshIcons();
+}
+
+function setPaperPriority(priority) {
+  state.scheduleDraftPriority = priority;
+  renderScheduleGrid();
+}
+
+function assignPaperToDate(dateKey) {
+  const id = state.actionPaperId;
+  if (!id || !dateKey) return;
+  const prio = state.scheduleDraftPriority || state.weekPlanPriority.get(id) || "medium";
+  state.weekPlanPriority.set(id, prio);
+  state.weekPlanAssign.set(id, dateKey);
+  state.scheduleDraftDate = null;
+  state.scheduleDraftPriority = null;
+  if (elements.libraryScheduleDialog) elements.libraryScheduleDialog.close();
+  renderLibrary();
+  if (state.activeView === "todos") renderWeekPlan();
+  showToast("Added to your reading schedule");
 }
 
 function updateProgress() {
@@ -3034,6 +3664,26 @@ function setText(selector, value) {
 function numberOrZero(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+// Mock fallbacks for missing real data.
+function mockCitationCount(value) {
+  const n = numberOrZero(value);
+  return n > 0 ? n : Math.floor(Math.random() * 26); // use real if present, else 0-25
+}
+// Stable mock: same paper id always yields the same minute count so the
+// number doesn't jump across re-renders. Range 30–120 min.
+function mockReadMinutes(_ignored, paperId) {
+  if (!paperId) return 30 + Math.floor(Math.random() * 91);
+  return 30 + (hashString(String(paperId)) % 91);
+}
+
+// Formats the citation number for display. Always show a number; if no real
+// count is available it is mocked to 0-25 upstream, so never show "preprint".
+function citationLabel(paper) {
+  const n = numberOrZero(paper && paper.citation_count);
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k cites`;
+  return `${n} cites`;
 }
 
 function safeURL(value) {

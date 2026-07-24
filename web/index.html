@@ -149,7 +149,9 @@
           <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
             <span><i data-lucide="layers-3"></i></span><strong>PaperSwipe</strong>
           </button>
-          <button class="topbar-button profile-button" type="button" data-view="profile" aria-label="打开个人主页" title="个人主页"><i data-lucide="circle-user-round"></i></button>
+          <div class="topbar-right">
+            <button id="ai-bot-button" class="topbar-button ai-bot-topbar-button" type="button" aria-label="打开 AI 助手对话" title="AI 助手"><i data-lucide="bot"></i></button>
+          </div>
         </header>
 
         <div id="search-panel" class="search-panel" hidden>
@@ -211,7 +213,18 @@
           <button id="library-export-toggle" class="topbar-button" type="button" aria-label="导出到 BibTeX / Zotero" title="导出"><i data-lucide="download"></i></button>
           <h1 id="library-title">Library</h1>
           <div class="topbar-actions">
-            <button id="ai-bot-button" class="topbar-button ai-bot-topbar-button" type="button" aria-label="打开 AI 助手对话" title="AI 助手"><i data-lucide="bot"></i></button>
+            <button id="todos-toggle" class="topbar-button todos-button" type="button" aria-label="打开阅读计划" title="阅读计划">
+              <svg class="todos-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4.5" width="18" height="16" rx="2.5"/>
+                <path d="M3 9h18"/>
+                <path d="M8 3v3M16 3v3"/>
+                <circle cx="8.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="12.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="13.5" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="8.5" cy="17" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+              <span id="todos-toggle-badge" class="todos-badge" hidden></span>
+            </button>
           </div>
         </header>
 
@@ -292,22 +305,6 @@
             <span class="profile-avatar"><i data-lucide="circle-user-round"></i></span>
             <div><strong>PaperSwipe Researcher</strong><small id="profile-identity">Graduate / PhD · Focused discovery</small></div>
           </section>
-
-          <section class="todo-section" aria-labelledby="todo-title">
-            <div class="todo-head">
-              <h2 id="todo-title">Reading To-Do</h2>
-              <div class="todo-segments" role="radiogroup" aria-label="时间视角">
-                <button type="button" data-todo-scope="day" role="radio" class="is-active">日</button>
-                <button type="button" data-todo-scope="week" role="radio">周</button>
-                <button type="button" data-todo-scope="month" role="radio">月</button>
-              </div>
-            </div>
-            <ul id="todo-list" class="todo-list"></ul>
-            <form id="todo-form" class="todo-form">
-              <input id="todo-input" type="text" placeholder="添加一项阅读任务…" maxlength="120" aria-label="添加阅读任务">
-              <button type="submit" aria-label="添加任务" title="添加"><i data-lucide="plus"></i></button>
-            </form>
-          </section>
         </div>
       </section>
 
@@ -363,6 +360,25 @@
           <p class="settings-footnote">Paper metadata from Semantic Scholar, arXiv and OpenAlex. Verify AI conclusions against the original source.</p>
         </div>
       </section>
+
+      <section id="todos-view" class="view todos-view" aria-labelledby="todos-title" hidden>
+        <header class="page-topbar">
+          <button id="todos-back" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+          <h1 id="todos-title">Reading Week</h1>
+          <span class="topbar-spacer"></span>
+        </header>
+        <div class="todos-scroll">
+          <section class="week-plan-section" aria-labelledby="week-plan-title">
+            <div class="week-plan-head">
+              <div>
+                <p id="week-plan-summary" class="week-plan-summary"></p>
+              </div>
+              <div class="week-plan-legend"><span class="wp-dot"></span>Priority<span class="wp-dot wp-dot--save"></span>Save</div>
+            </div>
+            <div id="week-plan-grid" class="week-plan-grid" role="list"></div>
+          </section>
+        </div>
+      </section>
     </main>
 
     <section id="ai-bot-page" class="ai-bot-page" aria-labelledby="ai-bot-title" hidden>
@@ -398,6 +414,24 @@
 
   <dialog id="library-card-dialog" class="library-card-dialog">
     <div id="library-card-dialog-content"></div>
+  </dialog>
+
+  <dialog id="library-schedule-dialog" class="app-dialog sheet-dialog">
+    <div class="dialog-header"><strong>Schedule to a day 📅</strong><button class="icon-button icon-button--confirm" type="button" data-schedule-confirm aria-label="Confirm"><i data-lucide="check"></i></button></div>
+    <div class="schedule-week-nav">
+      <button type="button" class="wp-nav-btn" data-schedule-week="-1" aria-label="Previous week"><i data-lucide="chevron-left"></i></button>
+      <strong id="schedule-week-label"></strong>
+      <button type="button" class="wp-nav-btn" data-schedule-week="1" aria-label="Next week"><i data-lucide="chevron-right"></i></button>
+    </div>
+    <div id="schedule-date-grid" class="schedule-date-grid"></div>
+    <div class="schedule-priority">
+      <span class="schedule-priority-label">Priority</span>
+      <div class="schedule-priority-row">
+        <button type="button" class="priority-pick priority-pick--high" data-schedule-priority="high">High</button>
+        <button type="button" class="priority-pick priority-pick--medium" data-schedule-priority="medium">Medium</button>
+        <button type="button" class="priority-pick priority-pick--low" data-schedule-priority="low">Low</button>
+      </div>
+    </div>
   </dialog>
 
   <dialog id="forum-dialog" class="app-dialog compact-dialog">

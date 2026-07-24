@@ -28,7 +28,7 @@ func main() {
 
 	searchClient := &http.Client{Timeout: 18 * time.Second}
 	searcher := NewPaperSearcher(searchClient)
-	llmClient := &http.Client{Timeout: 40 * time.Second}
+	llmClient := &http.Client{Timeout: 300 * time.Second}
 	summarizer := NewSummarizer(llmClient)
 	imageClient := &http.Client{Timeout: 120 * time.Second}
 	images := NewImageGenerator(imageClient)
