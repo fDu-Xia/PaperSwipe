@@ -389,7 +389,9 @@ function bindEvents() {
     }
     const libraryCard = event.target.closest("[data-library-card]");
     if (libraryCard && !event.target.closest("button")) {
-      if (libraryPressCard) { clearLibraryInlineActions(); return; }
+      // If a long-press overlay is open, don't open the detail dialog —
+      // the overlay's own click handler will dismiss it if the tap is outside the buttons.
+      if (libraryPressCard) return;
       if (state.librarySelectMode) {
         toggleLibrarySelection(libraryCard.dataset.id);
       } else {
@@ -3100,10 +3102,11 @@ function renderWeekPlan() {
   const renderItem = (t) => `
     <li class="wp-item-shell${t.done ? " is-done" : ""}" data-week-plan-shell data-done="${t.done ? "1" : "0"}">
       <div class="wp-item-actions" aria-hidden="true">
-        <button type="button" class="wp-action wp-action--done" data-week-plan-action="done" data-id="${escapeAttribute(t.id)}" aria-label="Mark done" title="Mark done"><i data-lucide="check"></i></button>
-        <button type="button" class="wp-action wp-action--remove" data-week-plan-action="remove" data-id="${escapeAttribute(t.id)}" aria-label="Delete" title="Delete"><i data-lucide="trash-2"></i></button>
+        <button type="button" class="wp-action wp-action--done" data-week-plan-action="done" data-id="${escapeAttribute(t.id)}" aria-label="Mark done" title="Mark done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>
+        <button type="button" class="wp-action wp-action--remove" data-week-plan-action="remove" data-id="${escapeAttribute(t.id)}" aria-label="Delete" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
       </div>
-      <button type="button" class="wp-item wp-item--${t.action} wp-item--${t.priority}${t.done ? " is-done" : ""}" data-week-plan-card data-id="${escapeAttribute(t.id)}">
+      <button type="button" class="wp-item wp-item--${t.action} wp-priority-${t.priority || "medium"}${t.done ? " is-done" : ""}" data-week-plan-card data-id="${escapeAttribute(t.id)}">
+        <span class="wp-priority-flag" aria-hidden="true"></span>
         <span class="wp-item-title">${escapeHTML(t.title)}</span>
         <span class="wp-item-row">
           <span class="wp-item-meta">${t.minutes} min</span>
@@ -3480,6 +3483,11 @@ function clearLibraryInlineActions() {
     libraryPressCard.classList.remove("is-pressing");
     const overlay = libraryPressCard.querySelector(".library-card-actions");
     if (overlay) overlay.remove();
+    if (libraryPressCard._dismissOnOutside) {
+      document.removeEventListener("click", libraryPressCard._dismissOnOutside, true);
+      libraryPressCard._dismissOnOutside = null;
+    }
+    libraryPressCard._suppressNextClick = false;
     libraryPressCard = null;
   }
 }
@@ -3491,11 +3499,39 @@ function openLibraryInlineActions(card, id) {
   const overlay = document.createElement("div");
   overlay.className = "library-card-actions";
   overlay.innerHTML = `
-    <button type="button" class="library-card-action is-danger" data-library-action="delete" aria-label="删除"><i data-lucide="trash-2"></i></button>
-    <button type="button" class="library-card-action is-schedule" data-library-action="schedule" aria-label="加入日程"><i data-lucide="calendar-plus"></i></button>`;
+    <button type="button" class="library-card-action is-danger" data-library-action="delete" aria-label="删除" title="删除">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+    </button>
+    <button type="button" class="library-card-action is-schedule" data-library-action="schedule" aria-label="加入日程" title="加入日程">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><path d="M8 3v3"/><path d="M16 3v3"/><path d="M12 13v5"/><path d="M9.5 15.5h5"/></svg>
+    </button>`;
   card.appendChild(overlay);
-  refreshIcons();
+  // Suppress the click that immediately follows the long-press pointerup,
+  // so the just-opened overlay isn't dismissed by the same gesture.
   libraryPressCard = card;
+  libraryPressCard._suppressNextClick = true;
+  // Dismiss when the user taps anywhere outside the action buttons.
+  const dismissOnOutside = (event) => {
+    if (event.target.closest(".library-card-action")) return;
+    // Ignore the very first click after long-press finishes.
+    if (libraryPressCard && libraryPressCard._suppressNextClick) {
+      libraryPressCard._suppressNextClick = false;
+      return;
+    }
+    if (event.target.closest("[data-library-card]") === card) {
+      // Tap on the same card while overlay is up → just dismiss.
+      clearLibraryInlineActions();
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    clearLibraryInlineActions();
+  };
+  libraryPressCard._dismissOnOutside = dismissOnOutside;
+  // Register on next tick so we don't catch the current pointerup's click.
+  setTimeout(() => {
+    document.addEventListener("click", dismissOnOutside, true);
+  }, 0);
 }
 
 function handleLibraryAction(action) {
