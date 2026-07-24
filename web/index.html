@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="PaperSwipe - 把论文筛选变成轻松、快速、有证据的滑动决策。">
   <title>PaperSwipe</title>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/paperswipe-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="is-onboarding">
@@ -249,7 +249,11 @@
         <header class="page-topbar">
           <span class="topbar-spacer"></span>
           <h1 id="network-title">Your Network</h1>
-          <button id="forums-button" class="topbar-button forum-button" type="button" aria-label="通知" title="通知"><i data-lucide="bell"></i><b></b></button>
+          <button id="forums-button" class="topbar-button forum-button" type="button" aria-label="通知" title="通知"><i data-lucide="bell"></i><b id="notif-badge"></b></button>
+          <div id="notif-panel" class="notif-panel" hidden>
+            <div class="notif-header"><strong>通知</strong><small>假数据演示</small></div>
+            <div class="notif-list" id="notif-list"></div>
+          </div>
         </header>
 
         <div class="network-tabs" role="tablist" aria-label="Network 页面">
@@ -294,6 +298,18 @@
             </div>
 
             <div class="forum-posts" id="forum-posts"></div>
+
+            <!-- Forum post full detail page -->
+            <div class="forum-detail-page" id="forum-detail-page" hidden>
+              <button class="forum-detail-back" type="button" id="forum-detail-back">
+                <i data-lucide="arrow-left"></i> <span>返回论坛</span>
+              </button>
+              <div class="forum-detail-content" id="forum-detail-content"></div>
+              <form class="forum-detail-reply-form" id="forum-detail-page-reply-form">
+                <input type="text" id="forum-detail-page-reply-input" placeholder="写下你的回复…" maxlength="500" autocomplete="off">
+                <button type="submit" aria-label="发送回复"><i data-lucide="send"></i></button>
+              </form>
+            </div>
           </div>
 
         </div>

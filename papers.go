@@ -58,37 +58,51 @@ type s2Paper struct {
 }
 
 func (s *PaperSearcher) Search(ctx context.Context, query string, limit int) ([]Paper, string, error) {
-	sourceCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
-	papers, err := s.searchSemanticScholar(sourceCtx, query, limit)
-	cancel()
-	if err == nil && len(papers) > 0 {
-		return papers, "Semantic Scholar", nil
+	type result struct {
+		papers []Paper
+		source string
+		err    error
 	}
 
-	sourceCtx, cancel = context.WithTimeout(ctx, 8*time.Second)
-	arxivPapers, arxivErr := s.searchArxiv(sourceCtx, query, limit)
-	cancel()
-	if arxivErr == nil && len(arxivPapers) > 0 {
-		return arxivPapers, "arXiv", nil
+	ch := make(chan result, 3)
+	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
+	defer cancel()
+
+	go func() {
+		p, err := s.searchSemanticScholar(ctx, query, limit)
+		ch <- result{p, "Semantic Scholar", err}
+	}()
+	go func() {
+		p, err := s.searchArxiv(ctx, query, limit)
+		ch <- result{p, "arXiv", err}
+	}()
+	go func() {
+		p, err := s.searchOpenAlex(ctx, query, limit)
+		ch <- result{p, "OpenAlex", err}
+	}()
+
+	var lastErr error
+	for i := 0; i < 3; i++ {
+		select {
+		case r := <-ch:
+			if r.err == nil && len(r.papers) > 0 {
+				return r.papers, r.source, nil
+			}
+			if r.err != nil {
+				lastErr = r.err
+			}
+		case <-ctx.Done():
+			if lastErr != nil {
+				return nil, "", lastErr
+			}
+			return nil, "", ctx.Err()
+		}
 	}
 
-	sourceCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
-	openAlexPapers, openAlexErr := s.searchOpenAlex(sourceCtx, query, limit)
-	cancel()
-	if openAlexErr == nil && len(openAlexPapers) > 0 {
-		return openAlexPapers, "OpenAlex", nil
+	if lastErr != nil {
+		return nil, "", lastErr
 	}
-
-	if err == nil {
-		err = errors.New("Semantic Scholar returned no papers")
-	}
-	if arxivErr == nil {
-		arxivErr = errors.New("arXiv returned no papers")
-	}
-	if openAlexErr == nil {
-		openAlexErr = errors.New("OpenAlex returned no papers")
-	}
-	return nil, "", fmt.Errorf("paper sources unavailable: Semantic Scholar: %v; arXiv: %v; OpenAlex: %v", err, arxivErr, openAlexErr)
+	return nil, "", errors.New("all paper sources returned empty results")
 }
 
 func (s *PaperSearcher) searchSemanticScholar(ctx context.Context, query string, limit int) ([]Paper, error) {

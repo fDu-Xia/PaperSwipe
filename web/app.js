@@ -199,13 +199,7 @@ function bindEvents() {
       elements.searchInput.focus();
       elements.searchToggle.classList.add("is-search-open");
     } else {
-      panel.classList.add("is-closing");
-      elements.searchToggle.classList.remove("is-search-open");
-      panel.addEventListener("transitionend", function close() {
-        panel.hidden = true;
-        panel.classList.remove("is-closing");
-        panel.removeEventListener("transitionend", close);
-      });
+      closeSearchPanel();
     }
   });
   elements.searchForm.addEventListener("submit", (event) => {
@@ -227,6 +221,15 @@ function bindEvents() {
   elements.saveButton.addEventListener("click", () => decide("save"));
 
   document.addEventListener("click", (event) => {
+    // Close search panel when clicking outside
+    if (!elements.searchPanel.hidden && !event.target.closest("#search-panel") && !event.target.closest("#search-toggle")) {
+      closeSearchPanel();
+    }
+    // Close notif panel when clicking outside
+    const notifPanel = document.querySelector("#notif-panel");
+    if (notifPanel && !notifPanel.hidden && !event.target.closest("#notif-panel") && !event.target.closest("#forums-button")) {
+      notifPanel.hidden = true;
+    }
     const viewButton = event.target.closest("[data-view]");
     if (viewButton) {
       event.preventDefault();
@@ -435,7 +438,13 @@ function bindEvents() {
     });
   });
 
-  document.querySelector("#forums-button").addEventListener("click", () => elements.forumDialog.showModal());
+  const forumsBtn = document.querySelector("#forums-button");
+  if (forumsBtn) {
+    forumsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleNotifPanel();
+    });
+  }
   document.querySelectorAll("[data-network-tab]").forEach((button) => {
     button.addEventListener("click", () => switchNetworkTab(button.dataset.networkTab));
   });
@@ -814,7 +823,7 @@ function startApp(profile) {
   renderPeople();
   renderSettings();
   refreshHealth();
-  refreshLibrary();
+  refreshLibrary().then(() => updateLibraryCounts());
   refreshStats();
   refreshSearches();
   bindCardGestures();
@@ -824,13 +833,9 @@ function startApp(profile) {
 function closeSearchPanel() {
   const panel = elements.searchPanel;
   if (panel.hidden) return;
-  panel.classList.add("is-closing");
+  panel.hidden = true;
+  panel.classList.remove("is-closing");
   elements.searchToggle.classList.remove("is-search-open");
-  panel.addEventListener("transitionend", function close() {
-    panel.hidden = true;
-    panel.classList.remove("is-closing");
-    panel.removeEventListener("transitionend", close);
-  });
 }
 
 async function clearSearchHistory() {
@@ -890,7 +895,7 @@ function renderLoadingCard() {
   elements.card.style.boxShadow = "";
   elements.card.style.transition = "";
   isFlipped = false;
-  elements.cardInner.classList.remove("is-flipped");
+  if (elements.cardInner) elements.cardInner.classList.remove("is-flipped");
   elements.card.innerHTML = `
     <div class="stamp dismiss">NOPE</div>
     <div class="stamp save">YES</div>
@@ -1470,15 +1475,17 @@ function updateStamps(dx, dy, strength) {
   };
   if (!stamps.dismiss) return;
   const nls = Math.pow(strength, .65);
-  stamps.dismiss.style.opacity = dx < -10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
-  stamps.save.style.opacity = dx > 10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
-  stamps.priority.style.opacity = dy < -10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
-  stamps.read.style.opacity = dy > 10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
+  // Tighter angle lock: dominant axis must be 135%+ of the other
+  stamps.dismiss.style.opacity = dx < -10 && Math.abs(dx) > Math.abs(dy) * 1.35 ? nls : 0;
+  stamps.save.style.opacity = dx > 10 && Math.abs(dx) > Math.abs(dy) * 1.35 ? nls : 0;
+  stamps.priority.style.opacity = dy < -10 && Math.abs(dy) > Math.abs(dx) * 1.25 ? nls : 0;
+  stamps.read.style.opacity = dy > 10 && Math.abs(dy) > Math.abs(dx) * 1.25 ? nls : 0;
 }
 
 /* ── Gesture system (drag = swipe, tap = flip) ── */
 function bindCardGestures() {
-  const card = elements.card;
+  const card = document.getElementById("card");
+  if (!card) return;
 
   function onDown(e) {
     if (!currentPaper() || state.loading) return;
@@ -1528,12 +1535,9 @@ function bindCardGestures() {
     const dt = Date.now() - dragStartTime;
     const velocity = dt > 0 ? dist / dt : 0;
 
-    /* Tap: flip (front → back) or unflip (back → front) */
+    /* Tap: just spring back, flip handled by click */
     if (dist < 8 && dt < 300) {
       springBack();
-      flipGuard = true;
-      setTimeout(() => { flipGuard = false; }, 100);
-      isFlipped ? unflip() : flip();
       return;
     }
 
@@ -1555,13 +1559,91 @@ function bindCardGestures() {
   card.addEventListener("pointerup", onUp);
   card.addEventListener("pointercancel", onUp);
 
-  /* Tap anywhere on back to flip back */
+  /* Click to flip */
   card.addEventListener("click", (e) => {
-    if (flipGuard || !isFlipped || !currentPaper() || dragging) return;
-    if (e.target.closest("button, a, [data-stop-click]")) return;
-    unflip();
+    const inner = document.querySelector("#cardInner");
+    if (!inner || !currentPaper() || state.loading) return;
+    e.stopPropagation();
+    if (isFlipped) {
+      isFlipped = false;
+      inner.style.transform = "";
+      inner.classList.remove("is-flipped");
+    } else {
+      isFlipped = true;
+      inner.style.transform = "rotateY(180deg)";
+      inner.classList.add("is-flipped");
+    }
   });
 }
+
+// Global fallback: flip card when clicking card area
+document.addEventListener("click", (e) => {
+  if (state.activeView !== "discover" || state.loading || !currentPaper()) return;
+  if (!e.target.closest("#card")) return;
+  // Only block clicks on actual interactive elements on the back
+  if (e.target.closest("button, a, [data-stop-click]")) return;
+  if (e.target.closest(".source-link, .detail-trigger")) return;
+  const inner = document.querySelector("#cardInner");
+  if (!inner) return;
+  if (isFlipped) {
+    isFlipped = false;
+    inner.style.transform = "";
+    inner.classList.remove("is-flipped");
+  } else {
+    isFlipped = true;
+    inner.style.transform = "rotateY(180deg)";
+    inner.classList.add("is-flipped");
+  }
+});
+
+// Global swipe: redirect pointer events from card area
+document.addEventListener("pointerdown", (e) => {
+  if (state.activeView !== "discover" || state.loading || !currentPaper()) return;
+  if (!e.target.closest("#card")) return;
+  if (e.target.closest("button, a, [data-stop-click]")) return;
+  dragging = true; dragDX = 0; dragDY = 0;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  dragStartTime = Date.now();
+  const card = document.getElementById("card");
+  if (card) { card.classList.add("is-dragging"); card.setPointerCapture(e.pointerId); }
+});
+document.addEventListener("pointermove", (e) => {
+  if (!dragging) return;
+  const card = document.getElementById("card");
+  if (!card) return;
+  dragDX = e.clientX - dragStartX;
+  dragDY = e.clientY - dragStartY;
+  const rx = (dragDY / 300) * 16;
+  const ry = (dragDX / 200) * 12;
+  card.style.transform = `translate(${dragDX}px, ${dragDY}px) rotateX(${-rx}deg) rotateY(${ry}deg)`;
+  const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
+  const lift = Math.min(dist / 30, 1);
+  const shadowAlpha = .10 + lift * .12;
+  card.style.boxShadow = `0 1px 2px rgba(0,0,0,.04), 0 ${4 + lift * 8}px ${8 + lift * 10}px rgba(0,0,0,.06), 0 ${14 + lift * 16}px ${28 + lift * 20}px rgba(0,0,0,${shadowAlpha}), 0 ${28 + lift * 24}px ${56 + lift * 32}px rgba(0,0,0,${shadowAlpha * .8})`;
+  const strength = Math.min(1, Math.max(Math.abs(dragDX), Math.abs(dragDY)) / 110);
+  const s1 = document.querySelector(".stack-1"); const s2 = document.querySelector(".stack-2");
+  if (s1) { s1.style.transform = `translateY(${10 - strength * 10}px) scale(${.94 + strength * .06})`; s1.style.opacity = .35 - strength * .25; }
+  if (s2) { s2.style.transform = `translateY(${20 - strength * 20}px) scale(${.89 + strength * .1})`; s2.style.opacity = .18 - strength * .14; }
+  updateStamps(dragDX, dragDY, strength);
+});
+document.addEventListener("pointerup", (e) => {
+  if (!dragging) return;
+  dragging = false;
+  const card = document.getElementById("card");
+  if (card) card.classList.remove("is-dragging");
+  const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
+  const dt = Date.now() - dragStartTime;
+  const velocity = dt > 0 ? dist / dt : 0;
+  if (dist < 8 && dt < 300) { springBack(); return; }
+  const fastFlick = velocity > 0.65;
+  const thresholdX = fastFlick ? 50 : 95;
+  const thresholdY = fastFlick ? 42 : 85;
+  if (dragDX < -thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("dismiss"); }
+  else if (dragDX > thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("save"); }
+  else if (dragDY < -thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("priority"); }
+  else if (dragDY > thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("read"); }
+  else { springBack(); }
+});
 
 function springBack() {
   elements.card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4), box-shadow 420ms ease";
@@ -1585,21 +1667,17 @@ function resetStacks() {
 
 /* ── Flip ── */
 function flip() {
-  if (!currentPaper()) return;
+  if (!currentPaper() || state.loading) return;
   isFlipped = true;
-  if (elements.cardInner) elements.cardInner.classList.add("is-flipped");
-  const fh = document.getElementById("flipHintFront");
-  if (fh) fh.style.opacity = "0";
-  if (elements.cardFront) elements.cardFront.style.pointerEvents = "none";
-  if (elements.cardBack) elements.cardBack.style.pointerEvents = "auto";
+  const inner = document.querySelector("#cardInner");
+  if (inner) { inner.style.transform = "rotateY(180deg)"; inner.classList.add("is-flipped"); }
 }
 
 function unflip() {
   if (!isFlipped) return;
   isFlipped = false;
-  if (elements.cardInner) elements.cardInner.classList.remove("is-flipped");
-  if (elements.cardFront) elements.cardFront.style.pointerEvents = "auto";
-  if (elements.cardBack) elements.cardBack.style.pointerEvents = "none";
+  const inner = document.querySelector("#cardInner");
+  if (inner) { inner.style.transform = ""; inner.classList.remove("is-flipped"); }
 }
 
 function fly(action, velocity) {
@@ -2983,17 +3061,21 @@ const FAKE_REPLIES = {
 };
 
 function openForumDetail(type, index) {
-  const dialog = document.querySelector("#forum-detail-dialog");
-  const body = document.querySelector("#forum-detail-body");
-  const typeLabel = document.querySelector("#forum-detail-type");
-  if (!dialog || !body) return;
+  const detailPage = document.querySelector("#forum-detail-page");
+  const content = document.querySelector("#forum-detail-content");
+  const postsList = document.querySelector("#forum-posts");
+  const typeTabs = document.querySelector(".forum-type-tabs");
+  if (!detailPage || !content) return;
 
   const posts = FORUM_POSTS[type] || [];
   const post = posts[index];
   if (!post) return;
 
-  const typeLabels = { qa: "Q&A 求助", discuss: "观点讨论", rec: "论文速递" };
-  if (typeLabel) typeLabel.textContent = typeLabels[type] || "帖子详情";
+  // Hide list, show detail page
+  if (postsList) postsList.hidden = true;
+  if (typeTabs) typeTabs.hidden = true;
+  detailPage.hidden = false;
+  if (elements.composeFab) elements.composeFab.hidden = true;
 
   let html = `<div class="forum-detail-full-post">
     <article class="forum-post">
@@ -3037,25 +3119,25 @@ function openForumDetail(type, index) {
   });
   html += `</div>`;
 
-  body.innerHTML = html;
+  content.innerHTML = html;
   refreshIcons();
 
   // Bind reply action buttons
-  body.querySelectorAll("[data-reply-like]").forEach((btn) => {
+  content.querySelectorAll("[data-reply-like]").forEach((btn) => {
     btn.addEventListener("click", () => {
       btn.classList.toggle("liked");
       showToast(btn.classList.contains("liked") ? "❤️ 已点赞" : "已取消点赞");
     });
   });
-  body.querySelectorAll("[data-reply-reply]").forEach((btn) => {
+  content.querySelectorAll("[data-reply-reply]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const replyInput = document.querySelector("#forum-reply-input");
-      if (replyInput) replyInput.focus();
+      const input = document.querySelector("#forum-detail-page-reply-input");
+      if (input) input.focus();
     });
   });
 
-  // Paper ref click → show floating card dialog
-  body.querySelectorAll("[data-ref-detail-click]").forEach((ref) => {
+  // Paper ref click
+  content.querySelectorAll("[data-ref-detail-click]").forEach((ref) => {
     ref.addEventListener("click", (e) => {
       e.stopPropagation();
       const title = ref.querySelector("strong")?.textContent || "";
@@ -3064,36 +3146,37 @@ function openForumDetail(type, index) {
     });
   });
 
-  dialog.showModal();
+  // Scroll content to top
+  const scrollEl = document.querySelector("#network-scroll");
+  if (scrollEl) scrollEl.scrollTop = 0;
 }
 
-// Ensure forum detail dialog can be closed via backdrop click
-const forumDetailDialog = document.querySelector("#forum-detail-dialog");
-if (forumDetailDialog) {
-  forumDetailDialog.addEventListener("click", (e) => {
-    // Close only when clicking the backdrop (dialog itself), not its children
-    if (e.target === forumDetailDialog) {
-      forumDetailDialog.close();
-    }
-  });
-  // Also handle Escape key properly
-  forumDetailDialog.addEventListener("cancel", (e) => {
-    // default behavior closes, just ensure it works
-    const input = document.querySelector("#forum-reply-input");
-    if (input) input.value = "";
+// Back button: return from detail to forum list
+const forumDetailBack = document.querySelector("#forum-detail-back");
+if (forumDetailBack) {
+  forumDetailBack.addEventListener("click", () => {
+    const detailPage = document.querySelector("#forum-detail-page");
+    const postsList = document.querySelector("#forum-posts");
+    const typeTabs = document.querySelector(".forum-type-tabs");
+    if (detailPage) detailPage.hidden = true;
+    if (postsList) postsList.hidden = false;
+    if (typeTabs) typeTabs.hidden = false;
+    if (elements.composeFab) elements.composeFab.hidden = false;
+    const scrollEl = document.querySelector("#network-scroll");
+    if (scrollEl) scrollEl.scrollTop = 0;
   });
 }
 
-// Bind reply form submit
-const replyForm = document.querySelector("#forum-detail-reply-form");
-const replyInput = document.querySelector("#forum-reply-input");
-if (replyForm && replyInput) {
-  replyForm.addEventListener("submit", (e) => {
+// Bind detail page reply form
+const detailReplyForm = document.querySelector("#forum-detail-page-reply-form");
+const detailReplyInput = document.querySelector("#forum-detail-page-reply-input");
+if (detailReplyForm && detailReplyInput) {
+  detailReplyForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const text = replyInput.value.trim();
+    const text = detailReplyInput.value.trim();
     if (!text) return;
     showToast("✅ 回复已发布（假数据演示）");
-    replyInput.value = "";
+    detailReplyInput.value = "";
   });
 }
 
@@ -3637,4 +3720,40 @@ function escapeHTML(value) {
 
 function escapeAttribute(value) {
   return escapeHTML(value).replace(/`/g, "&#96;");
+}
+
+/* ── Notification panel ── */
+const FAKE_NOTIFS = [
+  { type: "reply", icon: "💬", name: "Kai W.", text: "回复了你的帖子：怎么处理 LLM Agent…", time: "2 小时前" },
+  { type: "like", icon: "❤️", name: "Maya Garcia", text: "赞了你的回复", time: "3 小时前" },
+  { type: "follow", icon: "👤", name: "Sandra Wei", text: "关注了你", time: "昨天" },
+  { type: "reply", icon: "💬", name: "David P.", text: "回复了你的帖子：多模态大模型真的理解视觉吗", time: "昨天" },
+  { type: "like", icon: "❤️", name: "T. Kobayashi", text: "赞了你的帖子", time: "2 天前" },
+];
+
+function renderNotifs() {
+  const list = document.querySelector("#notif-list");
+  if (!list) return;
+  list.innerHTML = FAKE_NOTIFS.map((n) => `
+    <div class="notif-item">
+      <span class="notif-item-icon ${n.type}">${n.icon}</span>
+      <div class="notif-item-body">
+        <strong>${escapeHTML(n.name)}</strong>
+        <span>${escapeHTML(n.text)} · ${escapeHTML(n.time)}</span>
+      </div>
+    </div>
+  `).join("");
+  const badge = document.querySelector("#notif-badge");
+  if (badge) { badge.textContent = ""; badge.classList.add("has-dot"); }
+}
+
+function toggleNotifPanel() {
+  const panel = document.querySelector("#notif-panel");
+  if (!panel) return;
+  if (panel.hidden) {
+    renderNotifs();
+    panel.hidden = false;
+  } else {
+    panel.hidden = true;
+  }
 }

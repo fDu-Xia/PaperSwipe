@@ -119,7 +119,7 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		limit = parsed
 	}
 
-	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 28*time.Second)
+	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 15*time.Second)
 	papers, source, err := a.searcher.Search(searchCtx, query, limit)
 	cancelSearch()
 	warning := ""
@@ -129,7 +129,7 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		source = "PaperSwipe Demo"
 		warning = "开放论文源暂时不可用，当前展示离线示例卡。稍后重试即可获取真实论文。"
 	}
-	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 55*time.Second)
+	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 20*time.Second)
 	papers, aiApplied := a.summarizer.Summarize(summaryCtx, query, papers)
 	cancelSummary()
 	if err := a.store.RecordSearch(query); err != nil {
