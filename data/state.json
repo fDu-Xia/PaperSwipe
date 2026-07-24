@@ -275,6 +275,55 @@
       "action": "priority",
       "updated_at": "2026-07-23T15:34:07.328261Z"
     },
+    "openalex:W4402021639": {
+      "paper": {
+        "id": "openalex:W4402021639",
+        "title": "计算机科学与技术的未来发展趋势",
+        "abstract": "计算机科学与技术的未来发展趋势呈现出多元化与深度融合的特点。人工智能技术的突破与应用将推动 智能化社会的加速到来，大数据技术的关键角色将助力决策支持与创新发展。同时，云计算技术的普及与深化将实现 计算资源的灵活配置与高效利用，物联网技术的广阔前景将促进万物互联与智能社会的构建。此外，生物计算机与量 子计算等前沿技术也展现出巨大的发展潜力，有望突破传统计算的局限，引领新一轮的技术革新。在挑战与机遇并存 的环境下，计算机科学与技术领域将持续创新，推动社会进步与产业升级。",
+        "authors": [
+          {
+            "name": "宋浩杰"
+          },
+          {
+            "name": "贺桂锡"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-01-01",
+        "venue": "电子通信与计算机科学",
+        "citation_count": 1,
+        "influential_citation_count": 0,
+        "fields": [
+          "Military Technology and Strategies",
+          "Aerospace Engineering",
+          "Engineering"
+        ],
+        "url": "https://doi.org/10.37155/2717-5170-0605-10",
+        "pdf_url": "http://ojs.omniscient.sg/index.php/eccs/article/download/37341/36271",
+        "external_ids": {
+          "DOI": "10.37155/2717-5170-0605-10",
+          "OpenAlex": "https://openalex.org/W4402021639"
+        },
+        "match_score": 62,
+        "read_minutes": 6,
+        "source": "OpenAlex",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "A novel 计算机科学与技术的未来发展趋势 that �����挑战与机遇并存.",
+          "problem": "计算机科学与技术的未来发展趋势呈现出多元化与深度融合的特点。",
+          "novelty": [
+            "人工智能技术的突破与应用将推动 智能化社会的加速到来，大数据技术的关键角色将助力决策支持与创新发展。"
+          ],
+          "method": "人工智能技术的突破与应用将推动 智能化社会的加速到来，大数据技术的关键角色将助力决策支持与创新发展。",
+          "result": "在挑战与机遇并存 的环境下，计算机科学与技术领域将持续创新，推动社会进步与产业升级。",
+          "audience": "Researchers interested in 计算机的未来发展趋势, especially in Military Technology and Strategies / Aerospace Engineering",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-24T08:40:47.0714164Z"
+    },
     "openalex:W4412203333": {
       "paper": {
         "id": "openalex:W4412203333",
@@ -345,12 +394,8 @@
   },
   "recent_searches": [
     {
-      "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-23T16:14:43.9921Z"
-    },
-    {
-      "query": "llm memory",
-      "created_at": "2026-07-23T14:19:06.93295Z"
+      "query": "计算机的未来发展趋势",
+      "created_at": "2026-07-24T08:40:34.1388052Z"
     }
   ]
 }

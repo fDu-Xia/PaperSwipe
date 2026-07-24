@@ -147,7 +147,7 @@
         <header class="app-topbar">
           <button id="search-toggle" class="topbar-button" type="button" aria-label="搜索研究方向" title="搜索"><i data-lucide="search"></i></button>
           <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
-            <span><i data-lucide="layers-3"></i></span><strong>PaperSwipe</strong>
+            <span class="wordmark-icon-wrap"><img src="/assets/paperswipe-icon.svg" alt="PaperSwipe" class="wordmark-icon"></span><strong>PaperSwipe</strong>
           </button>
           <button class="topbar-button profile-button" type="button" data-view="profile" aria-label="打开个人主页" title="个人主页"><i data-lucide="circle-user-round"></i></button>
         </header>
@@ -159,6 +159,9 @@
             <button type="submit" aria-label="搜索论文" title="搜索论文"><i data-lucide="arrow-right"></i></button>
           </form>
           <div id="recent-searches" class="recent-searches"></div>
+          <button id="clear-searches" class="clear-searches" type="button" hidden>
+            <i data-lucide="trash-2"></i><span>清除搜索历史</span>
+          </button>
         </div>
 
         <h1 id="discover-title" class="sr-only">论文发现</h1>

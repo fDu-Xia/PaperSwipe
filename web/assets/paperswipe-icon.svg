@@ -1,0 +1,24 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bottom layer (mint) -->
+  <rect x="20" y="16" width="24" height="36" rx="5" fill="#f5fcfb"/>
+  <rect x="20" y="16" width="24" height="36" rx="5" stroke="#c5ece6" stroke-width="1"/>
+  <rect x="24" y="23" width="16" height="2" rx="1" fill="#2aada0" opacity=".5"/>
+  <rect x="24" y="29" width="12" height="2" rx="1" fill="#2aada0" opacity=".35"/>
+  <rect x="24" y="35" width="14" height="2" rx="1" fill="#2aada0" opacity=".25"/>
+
+  <!-- Middle layer (peach) — shifted up+left -->
+  <rect x="14" y="11" width="24" height="36" rx="5" fill="#fff8f6"/>
+  <rect x="14" y="11" width="24" height="36" rx="5" stroke="#f0d0c8" stroke-width="1"/>
+  <rect x="18" y="18" width="16" height="2" rx="1" fill="#e66a58" opacity=".55"/>
+  <rect x="18" y="24" width="13" height="2" rx="1" fill="#e66a58" opacity=".4"/>
+  <rect x="18" y="30" width="15" height="2" rx="1" fill="#e66a58" opacity=".3"/>
+
+  <!-- Top layer (lavender) — tilting -->
+  <g transform="rotate(8 29 28)">
+    <rect x="8" y="5" width="24" height="36" rx="5" fill="#fdfbff"/>
+    <rect x="8" y="5" width="24" height="36" rx="5" stroke="#ddd4f5" stroke-width="1"/>
+    <rect x="12" y="12" width="16" height="2.5" rx="1.25" fill="#7c54d0" opacity=".8"/>
+    <rect x="12" y="18" width="12" height="2.5" rx="1.25" fill="#7c54d0" opacity=".55"/>
+    <rect x="12" y="24" width="8" height="2.5" rx="1.25" fill="#7c54d0" opacity=".35"/>
+  </g>
+</svg>

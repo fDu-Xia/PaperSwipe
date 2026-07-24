@@ -138,6 +138,7 @@ function cacheElements() {
     aiBotReset: document.querySelector("#ai-bot-reset"),
     toast: document.querySelector("#toast"),
     recentSearches: document.querySelector("#recent-searches"),
+    clearSearches: document.querySelector("#clear-searches"),
     peopleList: document.querySelector("#people-list"),
     settingsTopicChips: document.querySelector("#settings-topic-chips"),
     settingsTopicInput: document.querySelector("#settings-topic-input"),
@@ -179,14 +180,34 @@ function bindEvents() {
   document.querySelector("#onboarding-finish").addEventListener("click", finishOnboarding);
 
   elements.searchToggle.addEventListener("click", () => {
-    elements.searchPanel.hidden = !elements.searchPanel.hidden;
-    if (!elements.searchPanel.hidden) elements.searchInput.focus();
+    const panel = elements.searchPanel;
+    if (panel.hidden) {
+      panel.hidden = false;
+      panel.classList.remove("is-closing");
+      elements.searchInput.focus();
+      elements.searchToggle.classList.add("is-search-open");
+    } else {
+      panel.classList.add("is-closing");
+      elements.searchToggle.classList.remove("is-search-open");
+      panel.addEventListener("transitionend", function close() {
+        panel.hidden = true;
+        panel.classList.remove("is-closing");
+        panel.removeEventListener("transitionend", close);
+      });
+    }
   });
   elements.searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    elements.searchPanel.hidden = true;
+    closeSearchPanel();
     performSearch(elements.searchInput.value);
   });
+
+  if (elements.clearSearches) {
+    elements.clearSearches.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearSearchHistory();
+    });
+  }
 
   elements.dismissButton.addEventListener("click", () => decide("dismiss"));
   elements.priorityButton.addEventListener("click", () => decide("priority"));
@@ -246,7 +267,7 @@ function bindEvents() {
     const queryButton = event.target.closest("[data-query]");
     if (queryButton) {
       elements.searchInput.value = queryButton.dataset.query;
-      elements.searchPanel.hidden = true;
+      closeSearchPanel();
       switchView("discover");
       performSearch(queryButton.dataset.query);
       return;
@@ -764,6 +785,29 @@ function startApp(profile) {
   refreshSearches();
   bindCardGestures();
   performSearch(state.query);
+}
+
+function closeSearchPanel() {
+  const panel = elements.searchPanel;
+  if (panel.hidden) return;
+  panel.classList.add("is-closing");
+  elements.searchToggle.classList.remove("is-search-open");
+  panel.addEventListener("transitionend", function close() {
+    panel.hidden = true;
+    panel.classList.remove("is-closing");
+    panel.removeEventListener("transitionend", close);
+  });
+}
+
+async function clearSearchHistory() {
+  try {
+    await fetch("/api/searches", { method: "DELETE" });
+  } catch (_) {
+    // Clear locally even if API fails
+  }
+  elements.recentSearches.innerHTML = "";
+  if (elements.clearSearches) elements.clearSearches.hidden = true;
+  showToast("已清除搜索历史");
 }
 
 async function performSearch(rawQuery) {
@@ -2544,9 +2588,12 @@ async function refreshSearches() {
     const payload = await response.json();
     const searches = payload.searches || [];
     const items = searches.length ? searches : onboardingProfile.topics.map((query) => ({ query }));
-    elements.recentSearches.innerHTML = items.slice(0, 5).map((item) => `<button type="button" data-query="${escapeAttribute(item.query)}">${escapeHTML(item.query)}</button>`).join("");
+    const hasItems = items.length > 0;
+    elements.recentSearches.innerHTML = items.slice(0, 8).map((item) => `<button type="button" data-query="${escapeAttribute(item.query)}">${escapeHTML(item.query)}</button>`).join("");
+    if (elements.clearSearches) elements.clearSearches.hidden = !hasItems;
   } catch (_) {
     elements.recentSearches.innerHTML = "";
+    if (elements.clearSearches) elements.clearSearches.hidden = true;
   }
 }
 
@@ -2568,6 +2615,8 @@ function switchView(view) {
   });
   document.querySelectorAll(".bottom-nav [data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === state.activeView));
   elements.searchPanel.hidden = true;
+  elements.searchPanel.classList.remove("is-closing");
+  elements.searchToggle.classList.remove("is-search-open");
   if (state.activeView === "library") refreshLibrary();
   if (state.activeView === "network") renderPeople();
   if (state.activeView === "profile") renderProfile();

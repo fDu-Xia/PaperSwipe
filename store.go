@@ -107,6 +107,13 @@ func (s *Store) RecentSearches() []SearchRecord {
 	return append([]SearchRecord(nil), s.state.RecentSearches...)
 }
 
+func (s *Store) ClearSearches() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.state.RecentSearches = nil
+	return s.saveLocked()
+}
+
 func (s *Store) Stats() Stats {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

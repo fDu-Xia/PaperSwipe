@@ -34,6 +34,7 @@ func (a *API) Routes(static http.Handler) http.Handler {
 	mux.HandleFunc("GET /api/library", a.library)
 	mux.HandleFunc("GET /api/stats", a.stats)
 	mux.HandleFunc("GET /api/searches", a.searches)
+	mux.HandleFunc("DELETE /api/searches", a.clearSearches)
 	mux.Handle("/", static)
 	return requestLogger(a.logger, securityHeaders(mux))
 }
@@ -163,6 +164,14 @@ func (a *API) stats(w http.ResponseWriter, _ *http.Request) {
 
 func (a *API) searches(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"searches": a.store.RecentSearches()})
+}
+
+func (a *API) clearSearches(w http.ResponseWriter, _ *http.Request) {
+	if err := a.store.ClearSearches(); err != nil {
+		writeError(w, http.StatusInternalServerError, "无法清除搜索历史")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 }
 
 func decodeJSON(w http.ResponseWriter, r *http.Request, destination any) error {
