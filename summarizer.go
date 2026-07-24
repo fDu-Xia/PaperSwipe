@@ -234,9 +234,6 @@ func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper
 	applied := false
 	for i := range papers {
 		if digest, ok := digests[papers[i].ID]; ok && digest.Verdict != "" {
-			if digest.TLDR == "" {
-				digest.TLDR = papers[i].Digest.TLDR
-			}
 			papers[i].Digest = digest
 			applied = true
 		}
@@ -310,12 +307,40 @@ func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers 
 		input = append(input, compactPaper{ID: paper.ID, Title: paper.Title, Abstract: paper.Abstract})
 	}
 	inputJSON, _ := json.Marshal(input)
-	prompt := fmt.Sprintf(`你是严谨的论文筛选助手。用户研究方向是 %q。请只根据给出的标题和摘要，为每篇论文生成中文判断卡。不要编造摘要中没有的结果、数字或结论。tldr 字段必须是一句话（最多 45 个汉字），面向非专业读者，用最通俗的比喻或语言说清楚"这篇论文到底做了什么、为什么值得看"，要能吸引人点进来，同时忠于摘要证据、不要用"本文/我们"这样的学术腔。其他字段每个最多 55 个汉字，reading_focus 最多 35 个汉字。返回 JSON 对象，格式为 {"papers":[{"id":"...","verdict":"...","tldr":"...","problem":"...","novelty":"...","method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}。论文：%s`, query, inputJSON)
+	prompt := fmt.Sprintf(`You are a science journalist writing for an academic card-swiping app (like Tinder for papers). The user's research direction is %q.
+
+For each paper, generate a concise English digest card based ONLY on the title and abstract. Do not invent results, numbers, or conclusions.
+
+CRITICAL — the "hook" field must follow this exact style (like a New Scientist headline):
+- ONE sentence, under 140 characters
+- Pattern: "A [adjective] [concept] that [dramatic impact]."
+- Examples of the target style:
+  "A simple method that dramatically improves LLM reasoning by showing intermediate steps."
+  "The transformer architecture that reshaped modern deep learning entirely."
+  "A new generative paradigm that matches GANs in image quality without adversarial training."
+- Focus on the BIG PICTURE — what makes this paper exciting? Not technical details.
+- Use plain English. Avoid jargon. Avoid "We propose...", "This paper...", "In this work..."
+
+Other fields (each under 280 chars unless noted):
+- verdict: 1-line screening recommendation
+- problem: what problem they tackle
+- novelty: 2-4 short bullet points listing what is new / the key insights (JSON array of strings, each under 160 chars, no leading dashes)
+- method: how they solved it
+- result: key quantitative outcome (include numbers if available)
+- audience: who should read this
+- why_keep: why this matters to the field
+- reading_focus: what to pay attention to when reading (max 100 chars)
+
+EMPHASIS — inside "problem", "method", "result", and every "novelty" bullet, wrap the 1-3 most important phrases (e.g. the concrete number, the new mechanism name, the surprising finding) in **double asterisks** so a reader can skim the bold parts and still get the gist. Never bold whole sentences; bold the load-bearing noun phrase only. Example: "Achieves **89.4% accuracy** on ImageNet using a **single-stage detector**."
+
+Return valid JSON: {"papers":[{"id":"...","hook":"...","verdict":"...","problem":"...","novelty":["...","..."],"method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}
+
+Papers: %s`, query, inputJSON)
 
 	payload := map[string]any{
 		"model": s.model,
 		"messages": []map[string]string{
-			{"role": "system", "content": "Return valid JSON only. Be concise and evidence-bound."},
+			{"role": "system", "content": "Return valid JSON only. Write like a science journalist for a general audience. The hook field is the most important — it must be a single punchy sentence under 140 chars."},
 			{"role": "user", "content": prompt},
 		},
 		"temperature":     0.2,
@@ -370,71 +395,313 @@ func heuristicDigest(query string, paper Paper) Digest {
 	problem := pickSentence(sentences, []string{"challenge", "problem", "we study", "we investigate", "we examine", "we address", "aims to"}, 0)
 	method := pickSentence(sentences, []string{"we propose", "we present", "we introduce", "framework", "method", "approach", "model"}, 1)
 	result := pickSentence(sentences, []string{"results", "experiments", "outperform", "achieve", "demonstrate", "show that", "evaluation"}, len(sentences)-1)
-	novelty := pickSentence(sentences, []string{"novel", "first", "new", "contribution", "unlike", "enables"}, 1)
+	noveltyBullets := pickNoveltyBullets(sentences, method)
 
 	if problem == "" {
-		problem = "摘要未明确给出问题定义，建议先检查引言与任务设定。"
+		problem = "The abstract does not clearly state the research problem — check the introduction."
 	}
 	if method == "" {
-		method = "摘要仅提供高层方法描述，核心模块需要进入正文确认。"
+		method = "The abstract only provides a high-level method description; core details need verification from the full text."
 	}
 	if result == "" {
-		result = "摘要未报告可核验的结果描述，实验强度需要进一步确认。"
+		result = "The abstract does not report verifiable quantitative results."
 	}
-	if novelty == "" {
-		novelty = method
+	if len(noveltyBullets) == 0 {
+		noveltyBullets = []string{method}
+	}
+	noveltyLead := noveltyBullets[0]
+
+	audience := "Researchers interested in " + shorten(query, 48)
+	if len(paper.Fields) > 0 {
+		audience += ", especially in " + strings.Join(compactStrings(paper.Fields, 2), " / ")
+	}
+	whyKeep := "Matches the search direction well"
+	if paper.CitationCount >= 100 {
+		whyKeep += fmt.Sprintf(" — already cited %d times, serves as a mature reference", paper.CitationCount)
+	} else if paper.PDFURL != "" {
+		whyKeep += " — open access PDF available for quick verification"
+	} else {
+		whyKeep += " — skim the method figures and experiments before deciding to deep-read"
+	}
+	verdict := "Worth a quick skim of methods and experiments"
+	if paper.MatchScore >= 88 {
+		verdict = "Strong match — save and verify with priority"
+	} else if paper.MatchScore < 70 {
+		verdict = "Peripheral match — confirm relevance before investing time"
 	}
 
-	audience := "适合关注「" + shorten(query, 34) + "」的研究者"
-	if len(paper.Fields) > 0 {
-		audience += "，尤其是 " + strings.Join(compactStrings(paper.Fields, 2), " / ") + " 方向"
-	}
-	whyKeep := "与检索方向匹配度较高"
-	if paper.CitationCount >= 100 {
-		whyKeep += fmt.Sprintf("，已有 %d 次引用，可作为成熟参考", paper.CitationCount)
-	} else if paper.PDFURL != "" {
-		whyKeep += "，且有开放全文，适合快速核验"
-	} else {
-		whyKeep += "，建议先看方法图和实验表再决定是否精读"
-	}
-	verdict := "值得快速浏览方法与实验"
-	if paper.MatchScore >= 88 {
-		verdict = "高度相关，建议保留并优先核验"
-	} else if paper.MatchScore < 70 {
-		verdict = "主题有交集，但需要先确认任务设定"
+	// Build a synthesized hook from the best available digest sentence
+	hook := buildHook(noveltyLead, method, result, paper)
+
+	trimmedBullets := make(Bullets, 0, len(noveltyBullets))
+	for _, item := range noveltyBullets {
+		trimmedBullets = append(trimmedBullets, shorten(item, 200))
 	}
 
 	return Digest{
 		Verdict:      verdict,
-		TLDR:         heuristicTLDR(query, paper, problem, method, result),
-		Problem:      shorten(problem, 150),
-		Novelty:      shorten(novelty, 150),
-		Method:       shorten(method, 150),
-		Result:       shorten(result, 150),
-		Audience:     shorten(audience, 100),
-		WhyKeep:      shorten(whyKeep, 120),
-		ReadingFocus: "先看方法框架、主实验与局限性",
+		Hook:         hook,
+		Problem:      shorten(problem, 280),
+		Novelty:      trimmedBullets,
+		Method:       shorten(method, 280),
+		Result:       shorten(result, 280),
+		Audience:     shorten(audience, 200),
+		WhyKeep:      shorten(whyKeep, 240),
+		ReadingFocus: "Focus on the method framework, main experiments, and limitations.",
 	}
 }
 
-func heuristicTLDR(query string, paper Paper, problem, method, result string) string {
-	pieces := make([]string, 0, 3)
-	if method != "" {
-		pieces = append(pieces, shorten(method, 55))
-	} else if problem != "" {
-		pieces = append(pieces, shorten(problem, 55))
-	}
-	if result != "" && result != method {
-		pieces = append(pieces, shorten(result, 55))
-	}
-	joined := strings.TrimSpace(strings.Join(pieces, "；"))
-	if joined == "" {
-		if title := strings.TrimSpace(paper.Title); title != "" {
-			return shorten("围绕「"+title+"」展开的研究，摘要信息有限，需回到原文核验。", 90)
+// pickNoveltyBullets returns 1-3 short novelty-oriented sentences from the
+// abstract. It prefers sentences whose lead words signal contribution / novelty
+// ("novel", "first", "new"), then falls back to sentences with method verbs.
+func pickNoveltyBullets(sentences []string, method string) Bullets {
+	keywords := []string{"novel", "first ", "new ", "contribution", "unlike", "enables", "we propose", "we present", "we introduce"}
+	seen := make(map[string]struct{}, len(sentences))
+	bullets := make(Bullets, 0, 3)
+	add := func(s string) {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			return
 		}
-		return "这篇论文与「" + shorten(query, 30) + "」相关，摘要信息不足，建议打开原文快速浏览。"
+		if _, dup := seen[s]; dup {
+			return
+		}
+		seen[s] = struct{}{}
+		bullets = append(bullets, s)
 	}
-	return shorten(joined, 90)
+	for _, sentence := range sentences {
+		if len(bullets) >= 3 {
+			break
+		}
+		lower := strings.ToLower(sentence)
+		for _, kw := range keywords {
+			if strings.Contains(lower, kw) {
+				add(sentence)
+				break
+			}
+		}
+	}
+	if len(bullets) == 0 && method != "" {
+		add(method)
+	}
+	return bullets
+}
+
+// buildHook synthesizes a card-swipe-demo-style punchy one-liner.
+// Target pattern: "A [adjective] [concept] that [dramatic impact]."
+// Examples:
+//   "A simple method that dramatically improves LLM reasoning by showing intermediate steps."
+//   "The transformer architecture that reshaped modern deep learning entirely."
+//   "A new generative paradigm that matches GANs in image quality without adversarial training."
+func buildHook(novelty, method, result string, paper Paper) string {
+	// ── Helper: strip academic boilerplate and clean up ──
+	distill := func(s string) string {
+		s = strings.TrimSpace(s)
+		if s == "" { return "" }
+		prefixes := []string{
+			"We propose ","We present ","We introduce ","We investigate ",
+			"We demonstrate ","We show ","We study ","We explore ",
+			"We address ","We develop ","We describe ","We examine ",
+			"In this paper, ","In this work, ","This paper ","This work ",
+		}
+		lower := strings.ToLower(s)
+		for _, p := range prefixes {
+			if strings.HasPrefix(lower, strings.ToLower(p)) {
+				s = s[len(p):]; break
+			}
+		}
+		if len(s) > 0 { s = strings.ToUpper(s[:1]) + s[1:] }
+		return strings.TrimSpace(s)
+	}
+
+	// ── Helper: extract a clean short concept name from the title ──
+	// e.g. "Attention Is All You Need" → "attention mechanism"
+	//      "Chain-of-Thought Prompting Elicits Reasoning..." → "chain-of-thought prompting"
+	//      "Denoising Diffusion Probabilistic Models" → "denoising diffusion"
+	extractConcept := func() string {
+		t := paper.Title
+
+		// Strategy 1: If title has a colon, the part before it is usually the concept name
+		if idx := strings.IndexAny(t, ":-—–"); idx > 10 {
+			t = strings.TrimSpace(t[:idx])
+		}
+
+		// Strategy 2: Remove common leading phrases
+		for _, p := range []string{"On the ","Towards ","Toward ","A ","The "} {
+			if strings.HasPrefix(strings.ToLower(t), strings.ToLower(p)) {
+				t = strings.TrimSpace(t[len(p):])
+				break
+			}
+		}
+
+		// Strategy 3: For verb-heavy titles ("X Elicits Y", "X Improves Y"), extract the subject
+		titleLower := strings.ToLower(t)
+		verbIndicators := []string{" elicits ", " improves ", " enables ", " reshapes ", " transforms ",
+			" matches ", " achieves ", " unlocks ", " redefines "}
+		for _, v := range verbIndicators {
+			if idx := strings.Index(titleLower, v); idx > 5 {
+				t = strings.TrimSpace(t[:idx])
+				break
+			}
+		}
+
+		// Strategy 4: For titles ending with "... in Large Language Models" or similar
+		suffixes := []string{" in Large Language Models", " in Deep Learning", " for Image Generation",
+			" in Natural Language Processing", " in Computer Vision", " for Machine Learning"}
+		for _, suf := range suffixes {
+			if strings.HasSuffix(strings.ToLower(t), strings.ToLower(suf)) {
+				t = strings.TrimSpace(t[:len(t)-len(suf)])
+				break
+			}
+		}
+
+		// Limit to ~60 chars at word boundary
+		if len(t) > 60 {
+			if idx := strings.LastIndex(t[:60], " "); idx > 20 {
+				t = t[:idx]
+			} else {
+				t = t[:60]
+			}
+		}
+		return t
+	}
+
+	// ── Helper: extract a punchy benefit/impact phrase ──
+	extractBenefit := func() string {
+		raw := result
+		if raw == "" { raw = method }
+		if raw == "" { raw = novelty }
+		if raw == "" { return "" }
+		raw = distill(raw)
+
+		// Pattern 1: Achievement with numbers — "improves GSM8K accuracy from 18% to 58%"
+		patterns := []string{
+			`(?i)((?:achieve|improve|outperform|reach|boost|increase|reduce|surpass|rival|match|exceed|enable|unlock|transform|reshape)(?:s|d|ing)?\s+[^.!?]{10,100})`,
+			`(?i)([^.!?]{10,80}?\d+[%％]\s*(?:on|in|at|across|from)?\s*[^.!?]{0,60})`,
+			`(?i)([^.!?]{10,80}?(?:outperform|state-of-the-art|SOTA|better than|superior|first to|first time)[^.!?]{0,60})`,
+		}
+		for _, pat := range patterns {
+			re := regexp.MustCompile(pat)
+			if m := re.FindStringSubmatch(raw); m != nil {
+				b := strings.TrimSpace(m[1])
+				b = strings.TrimRight(b, ",; ")
+				if !strings.HasSuffix(b, ".") { b += "." }
+				b = strings.ToUpper(b[:1]) + b[1:]
+				if len(b) <= 120 { return b }
+				// Truncate at word boundary
+				if idx := strings.LastIndex(b[:117], " "); idx > 20 {
+					return b[:idx] + "."
+				}
+				return b[:117] + "."
+			}
+		}
+
+		// Pattern 2: Just truncate to a reasonable length
+		if len(raw) > 100 {
+			if idx := strings.LastIndex(raw[:97], " "); idx > 20 {
+				raw = raw[:idx] + "."
+			} else {
+				raw = raw[:97] + "."
+			}
+		}
+		if len(raw) > 15 { return raw }
+		return ""
+	}
+
+	// ── Helper: pick the best adjective based on context ──
+	pickAdjective := func() string {
+		lower := strings.ToLower(novelty + " " + method)
+		if strings.Contains(lower, "simple") || strings.Contains(lower, "straightforward") { return "simple" }
+		if strings.Contains(lower, "first") || strings.Contains(lower, "pioneering") { return "pioneering" }
+		if strings.Contains(lower, "efficient") || strings.Contains(lower, "scalable") { return "efficient" }
+		if strings.Contains(lower, "novel") || strings.Contains(lower, "new paradigm") || strings.Contains(lower, "new framework") { return "novel" }
+		if strings.Contains(lower, "powerful") || strings.Contains(lower, "robust") { return "powerful" }
+		if strings.Contains(lower, "unified") || strings.Contains(lower, "universal") { return "unified" }
+		return "novel"
+	}
+
+	concept := extractConcept()
+	benefit := extractBenefit()
+	adj := pickAdjective()
+
+	// ── Template A: "A [adj] [concept] that [benefit]." (strongest pattern) ──
+	if concept != "" && benefit != "" {
+		hook := fmt.Sprintf("A %s %s that %s", adj, strings.ToLower(concept), strings.ToLower(benefit))
+		// Fix capitalization after "that"
+		for _, w := range []string{"achieves", "improves", "outperforms", "enables", "reduces",
+			"matches", "rivals", "reaches", "boosts", "transforms", "reshapes", "unlocks",
+			"surpasses", "exceeds", "delivers", "provides", "offers", "allows"} {
+			hook = strings.Replace(hook, "that "+w, "that "+w, 1)
+		}
+		// Fix "that a" / "that the" etc — should NOT be capitalized after "that"
+		firstAfterThat := strings.Index(hook, "that ")
+		if firstAfterThat >= 0 {
+			rest := hook[firstAfterThat+5:]
+			if len(rest) > 0 {
+				hook = hook[:firstAfterThat+5] + strings.ToLower(rest[:1]) + rest[1:]
+			}
+		}
+		if len(hook) <= 140 { return hook }
+	}
+
+	// ── Template B: "The [concept] that [benefit]." (when concept is a known entity) ──
+	if concept != "" && benefit != "" {
+		hook := fmt.Sprintf("The %s that %s", strings.ToLower(concept), strings.ToLower(benefit))
+		firstAfterThat := strings.Index(hook, "that ")
+		if firstAfterThat >= 0 {
+			rest := hook[firstAfterThat+5:]
+			if len(rest) > 0 {
+				hook = hook[:firstAfterThat+5] + strings.ToLower(rest[:1]) + rest[1:]
+			}
+		}
+		if len(hook) <= 140 { return hook }
+	}
+
+	// ── Template C: Just the benefit/impact statement ──
+	if benefit != "" && len(benefit) > 25 { return benefit }
+
+	// ── Template D: "[Concept] — a [adj] [description]." ──
+	noveltyClean := distill(novelty)
+	if concept != "" && noveltyClean != "" && len(noveltyClean) < 120 {
+		hook := concept + " — a " + adj + " " + strings.ToLower(noveltyClean[:1]) + noveltyClean[1:]
+		if len(hook) <= 140 { return hook }
+	}
+
+	// ── Template E: "A [adj] [concept] that changes how we think about [field]." ──
+	if concept != "" && len(paper.Fields) > 0 {
+		field := paper.Fields[0]
+		if strings.EqualFold(field, "Computer Science") && len(paper.Fields) > 1 {
+			field = paper.Fields[1]
+		}
+		hook := fmt.Sprintf("A %s %s that changes how we think about %s.", adj, strings.ToLower(concept), strings.ToLower(field))
+		if len(hook) <= 140 { return hook }
+	}
+
+	// ── Fallback chain ──
+	if len(noveltyClean) > 20 { return noveltyClean }
+	if m := distill(method); len(m) > 20 { return m }
+	if len(benefit) > 15 { return benefit }
+
+	// ── Last resort: synthesize from title ──
+	if len(paper.Title) > 15 {
+		t := paper.Title
+		// If title has description after colon, use that
+		if idx := strings.IndexAny(t, ":-—–"); idx > 0 {
+			desc := strings.TrimSpace(t[idx+1:])
+			if len(desc) > 15 && len(desc) < 130 {
+				return desc + "."
+			}
+		}
+		// Truncate
+		if len(t) > 130 {
+			if idx := strings.LastIndex(t[:127], " "); idx > 30 {
+				return t[:idx] + "…"
+			}
+		}
+		if len(t) <= 130 { return t }
+	}
+
+	return "A noteworthy paper worth your attention."
 }
 
 func splitSentences(text string) []string {

@@ -45,6 +45,12 @@ let toastTimer;
 let onboardingStep = 0;
 let onboardingProfile = { ...DEFAULT_PROFILE, topics: [...DEFAULT_PROFILE.topics] };
 
+/* ── Card swipe state ── */
+let isFlipped = false;
+let flipGuard = false;
+let dragging = false;
+let dragDX = 0, dragDY = 0, dragStartX = 0, dragStartY = 0, dragStartTime = 0;
+
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   state.todos = loadTodos() || defaultTodos();
@@ -95,6 +101,18 @@ function cacheElements() {
     paperPosition: document.querySelector("#paper-position"),
     paperTotal: document.querySelector("#paper-total"),
     paperCard: document.querySelector("#paper-card"),
+    posLabel: document.querySelector("#posLabel"),
+    totalLabel: document.querySelector("#totalLabel"),
+    progressFill: document.querySelector("#progressFill"),
+    card: document.querySelector("#card"),
+    cardInner: document.querySelector("#cardInner"),
+    cardFront: document.querySelector("#cardFront"),
+    cardBack: document.querySelector("#cardBack"),
+    cardHero: document.querySelector("#cardHero"),
+    stage: document.querySelector("#stage"),
+    stack1: document.querySelector(".stack-1"),
+    stack2: document.querySelector(".stack-2"),
+    hint: document.querySelector("#hint"),
     dismissButton: document.querySelector("#dismiss-button"),
     priorityButton: document.querySelector("#priority-button"),
     readButton: document.querySelector("#read-button"),
@@ -442,11 +460,13 @@ function bindEvents() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (!state.started || state.activeView !== "discover" || state.loading || anyDialogOpen() || event.target.matches("input, textarea")) return;
+    if (!state.started || state.activeView !== "discover" || state.loading || dragging || anyDialogOpen() || event.target.matches("input, textarea")) return;
+    if (!currentPaper()) return;
     if (event.key === "ArrowLeft") decide("dismiss");
     if (event.key === "ArrowUp") decide("priority");
     if (event.key === "ArrowDown") decide("read");
     if (event.key === "ArrowRight") decide("save");
+    if (event.key === " " || event.key === "Spacebar") { event.preventDefault(); isFlipped ? unflip() : flip(); }
   });
 }
 
@@ -742,6 +762,7 @@ function startApp(profile) {
   refreshLibrary();
   refreshStats();
   refreshSearches();
+  bindCardGestures();
   performSearch(state.query);
 }
 
@@ -785,147 +806,538 @@ async function performSearch(rawQuery) {
 }
 
 function renderLoadingCard() {
-  elements.paperCard.className = "paper-card is-loading";
-  elements.paperCard.innerHTML = `
-    <div class="skeleton-hero"></div>
-    <div class="skeleton-line title"></div>
-    <div class="skeleton-line"></div>
-    <div class="skeleton-panel"></div>`;
+  elements.card.className = "card theme-violet is-loading";
+  elements.card.style.transform = "";
+  elements.card.style.opacity = "";
+  elements.card.style.boxShadow = "";
+  elements.card.style.transition = "";
+  isFlipped = false;
+  elements.cardInner.classList.remove("is-flipped");
+  elements.card.innerHTML = `
+    <div class="stamp dismiss">NOPE</div>
+    <div class="stamp save">YES</div>
+    <div class="stamp priority">TOP</div>
+    <div class="stamp read">DONE</div>
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:16px;font-weight:800;">
+          Searching papers…
+        </div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-back-face"><div class="back-hero theme-violet"><h2 class="back-title">Loading…</h2></div></div>
+      </div>
+    </div>`;
+  elements.cardInner = document.querySelector("#cardInner");
+  elements.cardFront = document.querySelector("#cardFront");
+  elements.cardBack = document.querySelector("#cardBack");
+  elements.cardHero = document.querySelector("#cardHero");
   updateProgress();
 }
 
 function renderErrorCard(message) {
-  elements.paperCard.className = "paper-card";
-  elements.paperCard.innerHTML = `
-    <div class="empty-deck">
-      <img src="/assets/paper-stack.jpg" alt="叠放的研究论文">
-      <h2>这次没抓到论文</h2>
-      <p>${escapeHTML(message)}。换一个更具体的关键词再试试。</p>
+  elements.card.className = "card theme-violet is-loading";
+  elements.card.style.transform = "";
+  elements.card.style.opacity = "";
+  elements.card.style.boxShadow = "";
+  elements.card.style.transition = "";
+  isFlipped = false;
+  elements.cardInner.classList.remove("is-flipped");
+  elements.card.innerHTML = `
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;text-align:center;padding:30px;">
+          No papers found<br><small style="font-weight:400;opacity:.7;margin-top:8px;">${escapeHTML(message)}. Try a different keyword.</small>
+        </div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-back-face"><div class="back-hero theme-violet"><h2 class="back-title">No results</h2></div></div>
+      </div>
     </div>`;
+  elements.cardInner = document.querySelector("#cardInner");
+  elements.cardFront = document.querySelector("#cardFront");
+  elements.cardBack = document.querySelector("#cardBack");
+  elements.cardHero = document.querySelector("#cardHero");
   setActionEnabled(false);
   updateProgress();
 }
 
 function renderCard() {
   const paper = currentPaper();
-  elements.paperCard.style.transform = "";
-  elements.paperCard.style.opacity = "";
-  elements.paperCard.className = "paper-card";
+  /* Reset card state */
+  elements.card.style.transition = "";
+  elements.card.style.opacity = "";
+  elements.card.style.boxShadow = "";
+  elements.card.style.transform = "";
+  isFlipped = false;
+  elements.cardInner.classList.remove("is-flipped");
+
   if (!paper) {
-    elements.paperCard.innerHTML = `
-      <div class="empty-deck">
-        <img src="/assets/paper-stack.jpg" alt="叠放的研究论文">
-        <h2>这一组筛完了</h2>
-        <p>去 Library 回看保留的论文，或搜索一个新的研究主题。</p>
+    elements.card.className = "card theme-violet is-loading";
+    elements.card.innerHTML = `
+      <div class="card-inner" id="cardInner">
+        <div class="card-face card-front" id="cardFront">
+          <div class="card-hero theme-violet" style="display:grid;place-items:center;color:#fff;font-size:16px;font-weight:800;">
+            All done ✨<br><small style="font-weight:400;opacity:.7">Check Library or search again</small>
+          </div>
+        </div>
+        <div class="card-face card-back" id="cardBack">
+          <div class="card-back-face"><div class="back-hero theme-violet"><h2 class="back-title">Done</h2></div></div>
+        </div>
       </div>`;
+    refreshElementRefs();
     setActionEnabled(false);
     updateProgress();
     return;
   }
 
+  /* Map PaperSwipe paper → card-swipe-demo card format */
   const theme = paperTheme(paper);
-  const authors = formatAuthors(paper.authors);
-  const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
-  const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
-  const tags = deriveTags(paper);
-  const paperLink = safeURL(paper.url) ? `<a href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Original</a>` : "";
-  const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
-  const generatedImage = normalizeURL(state.paperImages.get(paper.id));
-  const heroClass = generatedImage ? "knowledge-hero has-generated-image" : "knowledge-hero";
-  const heroStyle = generatedImage ? ` style="--paper-image: url(&quot;${escapeAttribute(generatedImage)}&quot;)"` : "";
-  const generatingImage = state.generatingImage === paper.id;
-  const imageButton = state.imageEnabled ? `
-    <button class="visual-button${generatingImage ? " is-generating" : ""}${generatedImage ? " is-active" : ""}" type="button" data-generate-image-id="${escapeAttribute(paper.id)}" aria-label="${generatedImage ? "重新生成论文视觉图" : "生成论文视觉图（按次计费）"}" title="${generatedImage ? "重新生成视觉图" : "使用 AI 生成视觉图（按次计费）"}" ${generatingImage ? "disabled" : ""}><i data-lucide="${generatedImage ? "image-check" : "image-plus"}"></i></button>` : "";
-  const highlights = [
-    {
-      label: "研究问题",
-      icon: "search",
-      text: paper.digest?.problem || "摘要未提供明确的研究问题",
-    },
-    {
-      label: "核心方法",
-      icon: "book-open",
-      text: paper.digest?.method || paper.digest?.novelty || "摘要未提供明确的方法说明",
-    },
-    {
-      label: "主要结果",
-      icon: "sparkles",
-      text: paper.digest?.result || "摘要未提供可核验的研究结果",
-    },
-  ];
+  const venueName = paper.venue || paper.source || "";
+  const venueYear = paper.year || "";
+  const venueFull = [venueName, venueYear].filter(Boolean).join(" · ") || "Publication pending";
+  /* Clean badge: "Conference Year" like card-swipe-demo's "NeurIPS 2022" */
+  const venueBadge = venueYear ? venueName + " " + venueYear : venueName || "Publication";
 
-  elements.paperCard.className = `paper-card ${theme}`;
-  elements.paperCard.innerHTML = `
-    <span class="swipe-stamp dismiss">NOPE</span>
-    <span class="swipe-stamp save">INTERESTED</span>
-    <span class="swipe-stamp priority">KEY</span>
-    <span class="swipe-stamp read">READ</span>
-    <div class="card-flip">
-      <div class="card-face card-front">
-        <header class="${heroClass} card-front-hero"${heroStyle}>
-          <div class="knowledge-topline">
-            <span>Knowledge Card · ${escapeHTML(paper.source || state.source)}</span>
-            <div class="knowledge-tools">
-              ${imageButton}
-              <button type="button" data-card-action="priority" aria-label="标为重点论文" title="重点论文"><i data-lucide="star"></i></button>
+  const c = {
+    theme: theme,
+    title: paper.title,
+    subtitle: pickSubtitle(paper),
+    initials: getInitials(paper.authors?.[0]?.name || "PS"),
+    author: formatAuthors(paper.authors),
+    venueFull: venueFull,
+    venueBadge: venueBadge,
+    problem: paper.digest?.problem || "Check the introduction for the research question.",
+    method: paper.digest?.method || firstNoveltyBullet(paper) || "Core method details need verification from the full text.",
+    result: paper.digest?.result || "Key results not available in the abstract — check the experiments section.",
+    noveltyBullets: noveltyBullets(paper),
+    whyImportant: paper.digest?.why_keep || "Matches the search direction — skim before committing to a deep read.",
+    whyRead: paper.digest?.audience || paper.digest?.reading_focus || "Relevant for researchers in this area.",
+    fields: deriveTags(paper),
+    bestFor: deriveBestFor(paper),
+    url: paper.url || "",
+    pdf_url: paper.pdf_url || "",
+    read_minutes: numberOrZero(paper.read_minutes),
+    citation_count: numberOrZero(paper.citation_count),
+  };
+
+  elements.card.className = "card " + c.theme;
+  elements.card.style.transform = "";
+  elements.card.innerHTML = `
+    <div class="stamp dismiss">NOPE</div>
+    <div class="stamp save">YES</div>
+    <div class="stamp priority">TOP</div>
+    <div class="stamp read">DONE</div>
+    <div class="card-inner" id="cardInner">
+      <!-- FRONT -->
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-hero">
+          <div class="card-top-wrap">
+            <div class="card-topline">
+              <span class="card-badge">${escapeHTML(c.venueBadge)}</span>
             </div>
+            <div class="card-fields">${c.fields.map(escapeHTML).join(" · ")}</div>
           </div>
-          <div class="front-main">
-            <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
-            <p class="front-tldr">${escapeHTML(paper.digest?.tldr || paper.digest?.verdict || "点击卡片查看详细分析")}</p>
+          <div class="flip-hint-front" id="flipHintFront">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+            Tap to flip
           </div>
-          <div class="knowledge-byline">
-            <span class="author-avatar">${escapeHTML(authorInitials)}</span>
-            <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
+          <div class="card-body">
+            <p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
+            <h2 class="card-title">${escapeHTML(c.title)}</h2>
           </div>
-          <span class="match-pill">${numberOrZero(paper.match_score)}</span>
-          <button class="flip-hint" type="button" data-flip-card aria-label="翻到详情"><i data-lucide="repeat"></i><span>轻点卡片查看要点</span></button>
-        </header>
+          <div class="card-byline">
+            <span class="avatar">${escapeHTML(c.initials)}</span>
+            <div class="byline-text"><strong>${escapeHTML(c.author)}</strong>${escapeHTML(c.venueFull)}</div>
+          </div>
+        </div>
       </div>
-      <div class="card-face card-back">
-        <div class="card-scroll">
-          <div class="back-topbar">
-            <button class="flip-back-button" type="button" data-flip-card aria-label="返回一句话总结"><i data-lucide="arrow-left"></i><span>返回</span></button>
-            <strong>${escapeHTML(paper.title)}</strong>
-          </div>
-          <div class="knowledge-body">
-            <section class="knowledge-section">
-              <h3>Highlights</h3>
-              <div class="core-idea" aria-label="AI 提取的论文要点">
-                ${highlights.map((item) => `
-                  <div class="highlight-item">
-                    <span class="core-node"><i data-lucide="${item.icon}"></i></span>
-                    <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
-                  </div>`).join("")}
-              </div>
-            </section>
-            <section class="knowledge-section">
-              <h3>Key Contributions</h3>
-              <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
-            </section>
-            <section class="knowledge-section">
-              <h3>Why it matters?</h3>
-              <p class="insight-copy">${escapeHTML(paper.digest?.why_keep || paper.digest?.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
-            </section>
-            <section class="knowledge-section">
-              <h3>Application</h3>
-              <div class="application-copy"><i data-lucide="briefcase-business"></i><span>${escapeHTML(paper.digest?.audience || paper.digest?.reading_focus || "适合关注该方向的方法研究者")}</span></div>
-            </section>
-            <div class="paper-meta">
-              <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
-              <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
-              <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
-              ${paperLink}${pdfLink}
+      <!-- BACK -->
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-back-face">
+          <div class="back-hero">
+            <div class="back-topline">
+              <span class="card-badge">${escapeHTML(c.venueBadge)}</span>
             </div>
-            <button class="detail-trigger" type="button" data-detail-id="${escapeAttribute(paper.id)}"><i data-lucide="panel-right-open"></i><span>查看判断依据与原始摘要</span></button>
+            <h2 class="back-title">${escapeHTML(c.title)}</h2>
+            <div class="back-byline">${escapeHTML(c.author)}</div>
+          </div>
+          <div class="back-details">
+            <!-- Highlights -->
+            <div class="detail-section">
+              <div class="detail-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Highlights
+              </div>
+              <div class="highlight-list">
+                <div class="hl-item">
+                  <span class="hl-badge problem">Problem</span>
+                  <p>${boldMarkup(escapeHTML(truncateText(c.problem)))}</p>
+                </div>
+                <div class="hl-item">
+                  <span class="hl-badge method">Method</span>
+                  <p>${boldMarkup(escapeHTML(truncateText(c.method)))}</p>
+                </div>
+                <div class="hl-item">
+                  <span class="hl-badge result">Results</span>
+                  <p>${boldMarkup(escapeHTML(truncateText(c.result)))}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="back-divider"></div>
+
+            <!-- What's New -->
+            <div class="detail-section">
+              <div class="detail-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                What's New
+              </div>
+              <ul class="detail-bullets">${(c.noveltyBullets || []).map((b) => `<li>${boldMarkup(escapeHTML(b))}</li>`).join("")}</ul>
+            </div>
+
+            <div class="back-divider"></div>
+
+            <!-- Why It Matters -->
+            <div class="detail-section">
+              <div class="detail-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Why It Matters
+              </div>
+              <div class="why-grid">
+                <div class="why-col">
+                  <span class="why-tag">For the field</span>
+                  <p>${escapeHTML(c.whyImportant)}</p>
+                </div>
+                <div class="why-col">
+                  <span class="why-tag">For you</span>
+                  <p>${escapeHTML(c.whyRead)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="back-divider"></div>
+
+            <!-- Best for -->
+            <div class="detail-section">
+              <div class="detail-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                Best for
+              </div>
+              <div class="best-for-row">
+                ${c.bestFor.map(t => `<span class="best-chip">${escapeHTML(t)}</span>`).join("")}
+              </div>
+            </div>
+
+            <div class="source-links">
+              <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
+              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${c.citation_count} cites</span>
+              ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Original
+              </a>` : ""}
+              ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                PDF
+              </a>` : ""}
+            </div>
+
+            <div class="flip-hint-back">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+              Tap to flip back
+            </div>
           </div>
         </div>
       </div>
     </div>`;
-  setActionEnabled(true);
+
+  refreshElementRefs();
+  updateStamps(0, 0, 0);
   updateProgress();
-  refreshIcons();
-  enableGestures(elements.paperCard);
+  setActionEnabled(true);
+
+  /* Entrance animation — slide up + fade in */
+  elements.card.style.transition = 'none';
+  elements.card.style.transform = 'translateY(38px) scale(0.93)';
+  elements.card.style.opacity = '0';
+  elements.stack1.style.transition = elements.stack2.style.transition = 'none';
+  elements.stack1.style.transform = 'translateY(6px) scale(.96)';
+  elements.stack1.style.opacity = '.45';
+  elements.stack2.style.transform = 'translateY(14px) scale(.91)';
+  elements.stack2.style.opacity = '.25';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      elements.card.style.transition = 'transform 440ms cubic-bezier(.25,.8,.25,1.2), opacity 360ms ease, box-shadow 440ms ease';
+      elements.card.style.transform = '';
+      elements.card.style.opacity = '';
+      elements.card.style.boxShadow = '';
+      elements.stack1.style.transition = elements.stack2.style.transition = 'transform 440ms cubic-bezier(.25,.8,.25,1.2), opacity 440ms ease';
+      elements.stack1.style.transform = 'translateY(10px) scale(.94)';
+      elements.stack1.style.opacity = '.35';
+      elements.stack2.style.transform = 'translateY(20px) scale(.89)';
+      elements.stack2.style.opacity = '.18';
+      elements.card.addEventListener('transitionend', function h() {
+        elements.card.style.transition = '';
+        elements.card.removeEventListener('transitionend', h);
+      });
+    });
+  });
+}
+
+/* Refresh cached element refs after innerHTML replacement */
+function refreshElementRefs() {
+  elements.cardInner = document.querySelector("#cardInner");
+  elements.cardFront = document.querySelector("#cardFront");
+  elements.cardBack = document.querySelector("#cardBack");
+  elements.cardHero = document.querySelector("#cardHero");
+}
+
+/* ── Polish a hook to match card-swipe-demo style ── */
+function polishHook(raw, title) {
+  if (!raw || raw.length < 10) return null;
+  /* Reject Chinese text / placeholders */
+  if (/[一-鿿]/.test(raw)) return null;
+  if (/research paper worth checking out|noteworthy paper/i.test(raw) && raw.length < 60) return null;
+  let s = raw.trim();
+  /* Normalize whitespace */
+  s = s.replace(/\s+/g, ' ');
+  /* Strip trailing dots, ensure one clean sentence */
+  s = s.replace(/\.+$/, '').trim();
+  if (!/[.!?]$/.test(s)) s += '.';
+  /* Truncate to 120 chars at word boundary */
+  if (s.length > 120) {
+    const cut = s.lastIndexOf(' ', 117);
+    s = (cut > 60 ? s.slice(0, cut) : s.slice(0, 117)) + '.';
+  }
+  /* Remove boilerplate starts — rewrite as demo-style "A [concept]..." */
+  s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|demonstrate|show|study|explore|address|develop|describe|investigate|examine|consider|focus on)(s?)\s+(a |an |the )?/i, 'A ');
+  /* Remove leading lowercase after "A " replacement */
+  s = s.replace(/^A ([a-z])/, (_, c) => 'A ' + c.toUpperCase());
+  /* Capitalize first letter */
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  /* Reject if it's essentially the same as the title (but be lenient) */
+  if (title && s.length > 20) {
+    const t = title.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const h = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    /* Only reject if the hook is contained entirely within the title */
+    if (h.length > 30 && t.includes(h)) return null;
+    /* Also reject if hook is just the title verbatim */
+    if (h === t) return null;
+  }
+  return s;
+}
+
+/* ── Pick the hook subtitle: AI-generated first, then heuristic synthesis ── */
+function pickSubtitle(paper) {
+  const title = (paper.title || "").trim();
+
+  /* 0) AI / heuristic hook from Go backend */
+  const aiHook = paper.digest?.hook || "";
+  const polished = polishHook(aiHook, title);
+  if (polished) return polished;
+
+  /* Fall through to heuristic synthesis (below) */
+  const d = paper.digest || {};
+
+  /* ── Step 1: Distill raw academic sentences into clean hook phrases ── */
+  function distill(raw) {
+    if (!raw) return null;
+    /* Reject Chinese text / placeholders outright */
+    if (/[一-鿿]|摘要|确认|建议|未提供|未明确|未报告|需要进入正文|值得快速/.test(raw)) return null;
+    /* Must start with a letter or digit */
+    if (!/^[A-Za-z0-9]/.test(raw)) return null;
+
+    let s = raw.replace(/\s+/g, ' ').trim();
+
+    /* Strip boilerplate prefixes */
+    s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|investigate|demonstrate|show|study|explore|address|develop|describe|consider|examine|focus on)(s| that| a novel| an)?\s*/i, '');
+
+    /* Strip trailing "We show / demonstrate / find / observe / report that..." */
+    s = s.replace(/,?\s*(we|and|&) (show|demonstrate|find|observe|report|conclude|argue|suggest) that[^.!?]*$/i, '');
+
+    /* Remove inline citations: [1], [2,3,4], (Author, 2020), (Author et al., 2020a) */
+    s = s.replace(/\s*[\[\(]\d+(?:[,\s]*\d+)*[\]\)]/g, '');
+    s = s.replace(/\s*\([A-Z][a-z]+(?:\s(?:et\s+al\.?))?,?\s*\d{4}[a-z]?\)/g, '');
+
+    /* Capitalize first letter */
+    s = s.trim();
+    if (s.length < 12) return null;
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+
+    /* Ensure sentence-ending punctuation */
+    if (!/[.!?]$/.test(s)) s += '.';
+    return s;
+  }
+
+  /* ── Step 2: Extract a punchy result snippet (numbers / outperformance claims) ── */
+  function extractResult(raw) {
+    if (!raw) return null;
+    if (/[一-鿿]/.test(raw)) return null;
+    /* "X% improvement", "outperforms by X", "achieves X BLEU/accuracy/F1" */
+    const m = raw.match(/((?:achieve|improve|outperform|reach|boost|increase|reduce|surpass|rival|match|exceed)(?:s|d|ing)?\s+[^.!?]{10,100}?[.!]?)/i);
+    if (m) {
+      let r = m[1].trim().replace(/\s+/g, ' ');
+      if (!/[.!?]$/.test(r)) r += '.';
+      return r.charAt(0).toUpperCase() + r.slice(1);
+    }
+    /* Any sentence with a number or percentage */
+    const nm = raw.match(/([^.!?]{10,120}?\d+[%％]?[^.!?]{0,60}[.!]?)/);
+    if (nm) {
+      let r = nm[1].trim().replace(/\s+/g, ' ');
+      if (r.length < 15) return null;
+      if (!/[.!?]$/.test(r)) r += '.';
+      return r.charAt(0).toUpperCase() + r.slice(1);
+    }
+    return null;
+  }
+
+  /* ── Step 3: Assemble the hook ── */
+
+  const noveltyClean = distill(firstNoveltyBullet(paper));
+  const methodClean = distill(d.method);
+  const resultClean = extractResult(d.result);
+  const resultFull = distill(d.result);
+
+  /* (A) Novelty + Result combo — strongest hook */
+  if (noveltyClean && resultClean && noveltyClean !== resultClean) {
+    if (noveltyClean.length + resultClean.length < 180) {
+      return noveltyClean + ' ' + resultClean;
+    }
+    return noveltyClean;
+  }
+
+  /* (B) Novelty alone (clean, not boilerplate) */
+  if (noveltyClean && noveltyClean.length > 20) return noveltyClean;
+
+  /* (C) Method + Result combo */
+  if (methodClean && resultClean && methodClean !== resultClean) {
+    if (methodClean.length + resultClean.length < 180) {
+      return methodClean + ' ' + resultClean;
+    }
+    return methodClean;
+  }
+
+  /* (D) Method alone */
+  if (methodClean && methodClean.length > 20) return methodClean;
+
+  /* (E) Result alone (cleaned) */
+  if (resultClean) return resultClean;
+  if (resultFull && resultFull.length > 20) return resultFull;
+
+  /* (F) Scan abstract for the strongest standalone sentence */
+  const abstract = (paper.abstract || "").trim();
+  if (abstract && /^[A-Z]/.test(abstract)) {
+    const sentences = abstract.match(/[^.!?]+[.!?]+/g) || [];
+    for (const s of sentences) {
+      const d = distill(s);
+      if (d && d.length > 25 && d.length < 160 &&
+          /outperform|state.of.the.art|first|novel|significant|improves?|achieves?|enable|transform|reshape|unlock/i.test(d)) {
+        return d;
+      }
+    }
+    /* Fallback: distill the first decent sentence */
+    for (const s of sentences) {
+      const d = distill(s);
+      if (d && d.length > 20 && d.length < 160) return d;
+    }
+  }
+
+  /* (G) Synthesize from title — craft a demo-style one-liner */
+  if (title) {
+    /* G1: Title has a subtitle after colon — use that part (usually the most interesting) */
+    const colonIdx = Math.max(
+      title.indexOf(':'), title.indexOf('–'), title.indexOf('—'), title.indexOf('-')
+    );
+    if (colonIdx > 10 && colonIdx < title.length - 10) {
+      const hookPart = title.slice(colonIdx + 1).trim();
+      /* Remove common filler: "A Survey", "A Review", "A Comprehensive Study" */
+      const cleaned = hookPart.replace(/^(A |An )?(Survey|Review|Comprehensive Study|Systematic Review|Meta.Analysis)( of | on )?/i, '');
+      if (cleaned.length > 20 && cleaned.length < 130) return cleaned + '.';
+      if (hookPart.length > 20 && hookPart.length < 130) return hookPart + '.';
+    }
+
+    /* G2: For verb-heavy titles like "X Elicits Y" or "X Improves Y", extract and reformat */
+    const verbPatterns = [
+      { verb: 'elicits', adj: 'simple' },
+      { verb: 'improves', adj: 'novel' },
+      { verb: 'enables', adj: 'powerful' },
+      { verb: 'reshapes', adj: 'transformative' },
+      { verb: 'transforms', adj: 'revolutionary' },
+      { verb: 'matches', adj: 'new' },
+      { verb: 'achieves', adj: 'breakthrough' },
+      { verb: 'unlocks', adj: 'novel' },
+      { verb: 'redefines', adj: 'pioneering' },
+      { verb: 'outperforms', adj: 'powerful' },
+    ];
+    const titleLower = title.toLowerCase();
+    for (const {verb, adj} of verbPatterns) {
+      const pattern = new RegExp(`(.+?)\\s+${verb}\\s+(.+?)($|\\.)`, 'i');
+      const m = title.match(pattern);
+      if (m) {
+        const subject = m[1].trim();
+        const impact = m[2].trim().replace(/\.$/, '');
+        /* Clean subject: remove leading "A ", "The ", "On the ", "Towards " */
+        const cleanSubject = subject.replace(/^(A |An |The |On the |Towards |Toward )/i, '').toLowerCase();
+        const cleanImpact = impact.charAt(0).toLowerCase() + impact.slice(1);
+        if (cleanSubject.length > 5 && cleanImpact.length > 10) {
+          const hook = `A ${adj} ${cleanSubject} that ${verb}s ${cleanImpact}.`;
+          if (hook.length < 140) return hook;
+        }
+        break;
+      }
+    }
+
+    /* G3: Extract subject from title ending with common suffixes */
+    const suffixes = [
+      ' in Large Language Models', ' in Deep Learning', ' for Image Generation',
+      ' in Natural Language Processing', ' in Computer Vision', ' for Machine Learning',
+      ' in Neural Networks', ' for Sequence Modeling',
+    ];
+    let subject = title;
+    for (const suf of suffixes) {
+      if (titleLower.endsWith(suf.toLowerCase())) {
+        subject = title.slice(0, -suf.length).trim();
+        break;
+      }
+    }
+    if (subject !== title && subject.length > 8 && subject.length < 80) {
+      return `A novel ${subject.toLowerCase()} that advances the state of the art.`;
+    }
+
+    /* G4: Truncate long title */
+    if (title.length > 90) {
+      const cut = title.lastIndexOf(' ', 87);
+      return (cut > 40 ? title.slice(0, cut) : title.slice(0, 87)) + '…';
+    }
+
+    /* G5: For short declarative titles, prefix with "A" and reframe */
+    if (title.length < 100 && /^[A-Z]/.test(title)) {
+      /* Already a decent one-liner — just ensure period */
+      return title.endsWith('.') ? title : title + '.';
+    }
+  }
+
+  return "A research paper worth checking out.";
+}
+
+/* Derive "Best for" audience tags from paper data */
+function deriveBestFor(paper) {
+  const tags = [];
+  if (paper.digest?.audience) {
+    const audience = paper.digest.audience.toLowerCase();
+    if (audience.includes("researcher")) tags.push("Researchers");
+    if (audience.includes("engineer") || audience.includes("practitioner")) tags.push("Engineers");
+    if (audience.includes("student") || audience.includes("beginner")) tags.push("Students");
+  }
+  if (tags.length < 3) {
+    const fields = (paper.fields || []).filter(Boolean);
+    if (fields.some(f => /LLM|agent|language|NLP/i.test(f)) && !tags.includes("NLP Practitioners")) tags.push("NLP Practitioners");
+    if (fields.some(f => /vision|image|CV/i.test(f)) && !tags.includes("CV Researchers")) tags.push("CV Researchers");
+    if (fields.some(f => /ML|deep|learning/i.test(f)) && !tags.includes("ML Engineers")) tags.push("ML Engineers");
+  }
+  if (tags.length < 3) tags.push("Researchers", "Engineers", "Students");
+  return tags.slice(0, 3);
 }
 
 async function generatePaperVisual(id) {
@@ -958,7 +1370,7 @@ async function generatePaperVisual(id) {
 }
 
 function paperTheme(paper) {
-  const themes = ["theme-teal", "theme-violet", "theme-coral", "theme-green"];
+  const themes = ["theme-teal", "theme-violet", "theme-coral"];
   const hash = String(paper.title || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return themes[hash % themes.length];
 }
@@ -966,87 +1378,190 @@ function paperTheme(paper) {
 function deriveTags(paper) {
   const fields = (paper.fields || []).filter(Boolean).slice(0, 3);
   if (fields.length >= 3) return fields;
-  return [...fields, paper.digest?.novelty ? "Novel method" : "Research", paper.pdf_url ? "Open PDF" : "Metadata"].slice(0, 3);
+  return [...fields, firstNoveltyBullet(paper) ? "Novel method" : "Research", paper.pdf_url ? "Open PDF" : "Metadata"].slice(0, 3);
 }
 
-function enableGestures(card) {
-  const zone = card.querySelector(".card-front-hero");
-  if (!zone) return;
-  let startX = 0;
-  let startY = 0;
-  let dx = 0;
-  let dy = 0;
-  let dragging = false;
-  let pressedInteractive = false;
+/* ── Stamp visibility (4-direction) ── */
+function updateStamps(dx, dy, strength) {
+  const card = elements.card;
+  const stamps = {
+    dismiss: card.querySelector(".stamp.dismiss"),
+    save: card.querySelector(".stamp.save"),
+    priority: card.querySelector(".stamp.priority"),
+    read: card.querySelector(".stamp.read"),
+  };
+  if (!stamps.dismiss) return;
+  const nls = Math.pow(strength, .65);
+  stamps.dismiss.style.opacity = dx < -10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
+  stamps.save.style.opacity = dx > 10 && Math.abs(dx) > Math.abs(dy) * .5 ? nls : 0;
+  stamps.priority.style.opacity = dy < -10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
+  stamps.read.style.opacity = dy > 10 && Math.abs(dy) > Math.abs(dx) * .6 ? nls : 0;
+}
 
-  zone.addEventListener("pointerdown", (event) => {
-    if (state.loading) return;
-    pressedInteractive = Boolean(event.target.closest("button, a"));
-    if (pressedInteractive) return;
-    dragging = true;
-    dx = 0;
-    dy = 0;
-    startX = event.clientX;
-    startY = event.clientY;
-    zone.setPointerCapture(event.pointerId);
+/* ── Gesture system (drag = swipe, tap = flip) ── */
+function bindCardGestures() {
+  const card = elements.card;
+
+  function onDown(e) {
+    if (!currentPaper() || state.loading) return;
+    if (e.target.closest("button, a, [data-stop-click]")) return;
+    if (isFlipped && e.target.closest(".back-details")) return;
+    dragging = true; dragDX = 0; dragDY = 0;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    dragStartTime = Date.now();
     card.classList.add("is-dragging");
-  });
-  zone.addEventListener("pointermove", (event) => {
+    card.setPointerCapture(e.pointerId);
+  }
+
+  function onMove(e) {
     if (!dragging) return;
-    dx = event.clientX - startX;
-    dy = event.clientY - startY;
-    card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 30}deg)`;
-    const strength = Math.min(1, Math.max(Math.abs(dx), Math.abs(dy)) / 105);
-    setStampOpacity(card, dx, dy, strength);
-  });
-  const finish = () => {
+    dragDX = e.clientX - dragStartX;
+    dragDY = e.clientY - dragStartY;
+
+    /* Full 3D tilt */
+    const rx = (dragDY / 300) * 16;
+    const ry = (dragDX / 200) * 12;
+    card.style.transform = `translate(${dragDX}px, ${dragDY}px) rotateX(${-rx}deg) rotateY(${ry}deg)`;
+
+    const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
+    const lift = Math.min(dist / 30, 1);
+    const shadowAlpha = .10 + lift * .12;
+    card.style.boxShadow = `
+      0 1px 2px rgba(0,0,0,.04),
+      0 ${4 + lift * 8}px ${8 + lift * 10}px rgba(0,0,0,.06),
+      0 ${14 + lift * 16}px ${28 + lift * 20}px rgba(0,0,0,${shadowAlpha}),
+      0 ${28 + lift * 24}px ${56 + lift * 32}px rgba(0,0,0,${shadowAlpha * .8})`;
+
+    const strength = Math.min(1, Math.max(Math.abs(dragDX), Math.abs(dragDY)) / 110);
+    elements.stack1.style.transform = `translateY(${10 - strength * 10}px) scale(${.94 + strength * .06})`;
+    elements.stack1.style.opacity = .35 - strength * .25;
+    elements.stack2.style.transform = `translateY(${20 - strength * 20}px) scale(${.89 + strength * .1})`;
+    elements.stack2.style.opacity = .18 - strength * .14;
+
+    updateStamps(dragDX, dragDY, strength);
+  }
+
+  function onUp() {
     if (!dragging) return;
     dragging = false;
     card.classList.remove("is-dragging");
-    const moved = Math.hypot(dx, dy);
-    if (dx < -95 && Math.abs(dx) > Math.abs(dy)) return decide("dismiss");
-    if (dx > 95 && Math.abs(dx) > Math.abs(dy)) return decide("save");
-    if (dy < -85 && Math.abs(dy) > Math.abs(dx) * .8) return decide("priority");
-    if (dy > 85 && Math.abs(dy) > Math.abs(dx) * .8) return decide("read");
-    card.style.transform = "";
-    setStampOpacity(card, 0, 0, 0);
-    if (moved < 8) toggleCardFlip();
-  };
-  zone.addEventListener("pointerup", finish);
-  zone.addEventListener("pointercancel", finish);
+
+    const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
+    const dt = Date.now() - dragStartTime;
+    const velocity = dt > 0 ? dist / dt : 0;
+
+    /* Tap: flip (front → back) or unflip (back → front) */
+    if (dist < 8 && dt < 300) {
+      springBack();
+      flipGuard = true;
+      setTimeout(() => { flipGuard = false; }, 100);
+      isFlipped ? unflip() : flip();
+      return;
+    }
+
+    /* Dynamic thresholds: fast flick needs less distance */
+    const fastFlick = velocity > 0.65;
+    const thresholdX = fastFlick ? 50 : 95;
+    const thresholdY = fastFlick ? 42 : 85;
+
+    /* Swipe: fly away with velocity boost */
+    if (dragDX < -thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("dismiss"); }
+    else if (dragDX > thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("save"); }
+    else if (dragDY < -thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("priority"); }
+    else if (dragDY > thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("read"); }
+    else { springBack(); }
+  }
+
+  card.addEventListener("pointerdown", onDown);
+  card.addEventListener("pointermove", onMove);
+  card.addEventListener("pointerup", onUp);
+  card.addEventListener("pointercancel", onUp);
+
+  /* Tap anywhere on back to flip back */
+  card.addEventListener("click", (e) => {
+    if (flipGuard || !isFlipped || !currentPaper() || dragging) return;
+    if (e.target.closest("button, a, [data-stop-click]")) return;
+    unflip();
+  });
 }
 
-function toggleCardFlip() {
-  if (!elements.paperCard || elements.paperCard.classList.contains("is-leaving")) return;
-  elements.paperCard.classList.toggle("is-flipped");
+function springBack() {
+  elements.card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4), box-shadow 420ms ease";
+  elements.card.style.transform = "";
+  elements.card.style.boxShadow = "";
+  elements.card.addEventListener("transitionend", function h() {
+    elements.card.style.transition = "";
+    elements.card.removeEventListener("transitionend", h);
+  });
+  resetStacks();
+  updateStamps(0, 0, 0);
 }
 
-function setStampOpacity(card, dx, dy, strength) {
-  const stamps = {
-    dismiss: card.querySelector(".swipe-stamp.dismiss"),
-    save: card.querySelector(".swipe-stamp.save"),
-    priority: card.querySelector(".swipe-stamp.priority"),
-    read: card.querySelector(".swipe-stamp.read"),
-  };
-  if (!stamps.dismiss) return;
-  stamps.dismiss.style.opacity = dx < 0 && Math.abs(dx) > Math.abs(dy) ? strength : 0;
-  stamps.save.style.opacity = dx > 0 && Math.abs(dx) > Math.abs(dy) ? strength : 0;
-  stamps.priority.style.opacity = dy < 0 && Math.abs(dy) >= Math.abs(dx) ? strength : 0;
-  stamps.read.style.opacity = dy > 0 && Math.abs(dy) >= Math.abs(dx) ? strength : 0;
+function resetStacks() {
+  elements.stack1.style.transition = elements.stack2.style.transition = "transform 420ms cubic-bezier(.25,.8,.25,1.2), opacity 420ms ease";
+  elements.stack1.style.transform = "translateY(10px) scale(.94)";
+  elements.stack1.style.opacity = ".35";
+  elements.stack2.style.transform = "translateY(20px) scale(.89)";
+  elements.stack2.style.opacity = ".18";
+}
+
+/* ── Flip ── */
+function flip() {
+  if (!currentPaper()) return;
+  isFlipped = true;
+  if (elements.cardInner) elements.cardInner.classList.add("is-flipped");
+  const fh = document.getElementById("flipHintFront");
+  if (fh) fh.style.opacity = "0";
+  if (elements.cardFront) elements.cardFront.style.pointerEvents = "none";
+  if (elements.cardBack) elements.cardBack.style.pointerEvents = "auto";
+}
+
+function unflip() {
+  if (!isFlipped) return;
+  isFlipped = false;
+  if (elements.cardInner) elements.cardInner.classList.remove("is-flipped");
+  if (elements.cardFront) elements.cardFront.style.pointerEvents = "auto";
+  if (elements.cardBack) elements.cardBack.style.pointerEvents = "none";
+}
+
+function fly(action, velocity) {
+  unflip();
+  elements.card.style.transition = "transform 340ms cubic-bezier(.4,0,1,1), opacity 300ms ease";
+  const boost = Math.min(1.6, 1 + (velocity || 0) * 0.7);
+  let tx = 0, ty = 0, rx = 0, ry = 0;
+  if (action === "dismiss") { tx = -130 * boost; ty = 20; rx = -3; ry = -18; }
+  if (action === "save") { tx = 130 * boost; ty = 20; rx = -3; ry = 18; }
+  if (action === "priority") { tx = 10; ty = -140 * boost; rx = -18; ry = 2; }
+  if (action === "read") { tx = -5; ty = 140 * boost; rx = 18; ry = -2; }
+  elements.card.style.transform = `translate(${tx}vw, ${ty}px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  elements.card.style.opacity = ".15";
+  updateStamps(0, 0, 0);
+
+  const labels = { dismiss: "Skipped", save: "Saved!", priority: "Marked Key!", read: "Marked Read" };
+  showToast(labels[action] || action);
+
+  setTimeout(() => {
+    state.index += 1;
+    elements.stack1.style.transition = elements.stack2.style.transition = "none";
+    elements.stack1.style.transform = "translateY(10px) scale(.94)";
+    elements.stack1.style.opacity = ".35";
+    elements.stack2.style.transform = "translateY(20px) scale(.89)";
+    elements.stack2.style.opacity = ".18";
+    renderCard();
+    if (elements.hint && !elements.hint.classList.contains("is-gone")) {
+      elements.hint.style.transition = "opacity 300ms ease";
+      elements.hint.style.opacity = "0";
+      elements.hint.classList.add("is-gone");
+    }
+  }, 320);
 }
 
 async function decide(action) {
   const paper = currentPaper();
-  if (!paper || state.loading || elements.paperCard.classList.contains("is-leaving")) return;
-  elements.paperCard.classList.remove("is-flipped");
-  elements.paperCard.classList.add("is-leaving", `fly-${action}`);
+  if (!paper || state.loading) return;
   state.session[action] += 1;
-  const labels = { dismiss: "已跳过", save: "已加入 Interested", priority: "已标为 Key", read: "已标为 Read" };
-
-  window.setTimeout(() => {
-    state.index += 1;
-    renderCard();
-  }, 235);
+  unflip();
+  fly(action, 0);
 
   try {
     const response = await fetch("/api/actions", {
@@ -1054,13 +1569,17 @@ async function decide(action) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paper, action }),
     });
-    if (!response.ok) throw new Error("保存失败");
-    showToast(labels[action]);
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`HTTP ${response.status} ${body.slice(0, 120)}`);
+    }
     await Promise.all([refreshLibrary(), refreshStats()]);
-  } catch (_) {
-    showToast("本次判断没有保存，请稍后重试");
+  } catch (err) {
+    console.error("[decide] persist failed", { action, paperId: paper.id, err });
+    showToast(`未同步到 Library：${err.message || err}`);
   }
 }
+
 
 async function refreshHealth() {
   try {
@@ -1146,6 +1665,23 @@ function shorten(text, maxRunes) {
   const runes = Array.from(String(text || "").trim());
   if (runes.length <= maxRunes) return runes.join("");
   return runes.slice(0, maxRunes - 1).join("") + "…";
+}
+
+function truncateText(str) {
+  if (!str) return "";
+  const hasCJK = /[一-鿿㐀-䶿]/.test(str);
+  if (hasCJK) {
+    if (str.length <= 50) return str;
+    return str.slice(0, 50) + '…';
+  }
+  const words = str.split(/\s+/);
+  if (words.length <= 40) return str;
+  return words.slice(0, 40).join(' ') + '…';
+}
+
+function boldMarkup(escapedText) {
+  // Convert **phrase** → <strong>phrase</strong>. Runs AFTER escapeHTML so no XSS.
+  return String(escapedText || "").replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
 }
 
 function appendBotMessage(text, role = "bot") {
@@ -1528,7 +2064,7 @@ function appendBotTopPick(data) {
   const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
   const highlights = [
     { label: "研究问题", icon: "search", text: digest.problem || "摘要未提供明确的研究问题" },
-    { label: "核心方法", icon: "book-open", text: digest.method || digest.novelty || "摘要未提供明确的方法说明" },
+    { label: "核心方法", icon: "book-open", text: digest.method || (Array.isArray(digest.novelty) ? digest.novelty.join(" ") : digest.novelty) || "摘要未提供明确的方法说明" },
     { label: "主要结果", icon: "sparkles", text: digest.result || "摘要未提供可核验的研究结果" },
   ];
   const minutes = Number(paper.read_minutes) || 0;
@@ -1668,11 +2204,10 @@ function renderLibrary() {
     return;
   }
 
-  const themes = ["theme-teal", "theme-violet", "theme-coral", "theme-green"];
   const selectMode = state.librarySelectMode;
-  elements.libraryList.innerHTML = `<div class="library-grid${selectMode ? " is-selecting" : ""}">${entries.map((entry, index) => {
+  elements.libraryList.innerHTML = `<div class="library-grid${selectMode ? " is-selecting" : ""}">${entries.map((entry) => {
     const paper = entry.paper;
-    const theme = themes[index % themes.length];
+    const theme = paperTheme(paper);
     const authors = formatAuthors(paper.authors);
     const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
     const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
@@ -2263,8 +2798,9 @@ function openDetails(id) {
   const papers = [...state.papers, ...state.library.map((entry) => entry.paper)];
   const paper = papers.find((item) => item.id === id);
   if (!paper) return;
+  const noveltyText = noveltyBullets(paper).join(" • ");
   const details = [
-    ["解决什么", paper.digest?.problem], ["新在哪里", paper.digest?.novelty],
+    ["解决什么", paper.digest?.problem], ["新在哪里", noveltyText],
     ["方法", paper.digest?.method], ["结果", paper.digest?.result],
     ["适合谁读", paper.digest?.audience], ["阅读重点", paper.digest?.reading_focus],
   ];
@@ -2290,69 +2826,109 @@ function openLibraryCard(id) {
   const theme = paperTheme(paper);
   const authors = formatAuthors(paper.authors);
   const authorInitials = getInitials(paper.authors?.[0]?.name || "PS");
-  const venue = [paper.venue, paper.year].filter(Boolean).join(" · ") || "Publication pending verification";
+  const venueName = paper.venue || paper.source || "";
+  const venueYear = paper.year || "";
+  const venueFull = [venueName, venueYear].filter(Boolean).join(" · ") || "Publication pending";
+  const venueBadge = venueYear ? `${venueName} ${venueYear}` : (venueName || "Publication");
   const tags = deriveTags(paper);
-  const paperLink = safeURL(paper.url) ? `<a href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Original</a>` : "";
-  const pdfLink = safeURL(paper.pdf_url) ? `<a href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i>PDF</a>` : "";
-  const highlights = [
-    { label: "研究问题", icon: "search", text: paper.digest?.problem || "摘要未提供明确的研究问题" },
-    { label: "核心方法", icon: "book-open", text: paper.digest?.method || paper.digest?.novelty || "摘要未提供明确的方法说明" },
-    { label: "主要结果", icon: "sparkles", text: paper.digest?.result || "摘要未提供可核验的研究结果" },
-  ];
+  const bestFor = deriveBestFor(paper);
+  const c = {
+    subtitle: pickSubtitle(paper),
+    problem: paper.digest?.problem || "Check the introduction for the research question.",
+    method: paper.digest?.method || firstNoveltyBullet(paper) || "Core method details need verification from the full text.",
+    result: paper.digest?.result || "Key results not available in the abstract — check the experiments section.",
+    noveltyBullets: noveltyBullets(paper),
+    whyImportant: paper.digest?.why_keep || "Matches the search direction — skim before committing to a deep read.",
+    whyRead: paper.digest?.audience || paper.digest?.reading_focus || "Relevant for researchers in this area.",
+  };
+
   elements.libraryCardDialogContent.innerHTML = `
-    <article class="paper-card library-pop-card ${theme}" data-library-pop-card>
-      <div class="card-flip">
+    <article class="card ${theme} library-pop-card" data-library-pop-card>
+      <button class="library-pop-close" type="button" data-close-dialog="library-card-dialog" aria-label="Close"><i data-lucide="x"></i></button>
+      <div class="card-inner">
         <div class="card-face card-front">
-          <header class="knowledge-hero card-front-hero">
-            <div class="knowledge-topline">
-              <span>Knowledge Card · ${escapeHTML(paper.source || state.source)}</span>
+          <div class="card-hero">
+            <div class="card-top-wrap">
+              <div class="card-topline">
+                <span class="card-badge">${escapeHTML(venueBadge)}</span>
+              </div>
+              <div class="card-fields">${tags.map(escapeHTML).join(" · ")}</div>
             </div>
-            <div class="front-main">
-              <h2 class="knowledge-title">${escapeHTML(paper.title)}</h2>
-              <p class="front-tldr">${escapeHTML(paper.digest?.tldr || paper.digest?.verdict || "点击卡片查看详细分析")}</p>
+            <div class="flip-hint-front">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+              Tap to flip
             </div>
-            <div class="knowledge-byline">
-              <span class="author-avatar">${escapeHTML(authorInitials)}</span>
-              <div><strong>${escapeHTML(authors)}</strong><span>${escapeHTML(venue)}</span></div>
+            <div class="card-body">
+              <p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
+              <h2 class="card-title">${escapeHTML(paper.title)}</h2>
             </div>
-          </header>
+            <div class="card-byline">
+              <span class="avatar">${escapeHTML(authorInitials)}</span>
+              <div class="byline-text"><strong>${escapeHTML(authors)}</strong>${escapeHTML(venueFull)}</div>
+            </div>
+          </div>
         </div>
         <div class="card-face card-back">
-          <div class="card-scroll">
-            <div class="back-topbar">
-              <button class="flip-back-button" type="button" data-close-dialog="library-card-dialog" aria-label="关闭卡片"><i data-lucide="arrow-left"></i><span>返回</span></button>
-              <strong>${escapeHTML(paper.title)}</strong>
+          <div class="card-back-face">
+            <div class="back-hero">
+              <h2 class="back-title">${escapeHTML(paper.title)}</h2>
+              <div class="back-byline">${escapeHTML(authors)}</div>
             </div>
-            <div class="knowledge-body">
-              <section class="knowledge-section">
-                <h3>Highlights</h3>
-                <div class="core-idea" aria-label="AI 提取的论文要点">
-                  ${highlights.map((item) => `
-                    <div class="highlight-item">
-                      <span class="core-node"><i data-lucide="${item.icon}"></i></span>
-                      <div><strong>${item.label}</strong><p>${escapeHTML(item.text)}</p></div>
-                    </div>`).join("")}
+            <div class="back-details">
+              <div class="detail-section">
+                <div class="detail-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Highlights
                 </div>
-              </section>
-              <section class="knowledge-section">
-                <h3>Key Contributions</h3>
-                <div class="contribution-tags">${tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
-              </section>
-              <section class="knowledge-section">
-                <h3>Why it matters?</h3>
-                <p class="insight-copy">${escapeHTML(paper.digest?.why_keep || paper.digest?.result || "与当前研究主题高度相关，适合进入下一轮精读。")}</p>
-              </section>
-              <section class="knowledge-section">
-                <h3>Application</h3>
-                <div class="application-copy"><i data-lucide="briefcase-business"></i><span>${escapeHTML(paper.digest?.audience || paper.digest?.reading_focus || "适合关注该方向的方法研究者")}</span></div>
-              </section>
-              <div class="paper-meta">
-                <span><i data-lucide="gauge"></i>Match ${numberOrZero(paper.match_score)}</span>
-                <span><i data-lucide="clock-3"></i>${numberOrZero(paper.read_minutes)} min</span>
-                <span><i data-lucide="quote"></i>${numberOrZero(paper.citation_count)} citations</span>
-                ${paperLink}${pdfLink}
+                <div class="highlight-list">
+                  <div class="hl-item"><span class="hl-badge problem">Problem</span><p>${boldMarkup(escapeHTML(truncateText(c.problem)))}</p></div>
+                  <div class="hl-item"><span class="hl-badge method">Method</span><p>${boldMarkup(escapeHTML(truncateText(c.method)))}</p></div>
+                  <div class="hl-item"><span class="hl-badge result">Results</span><p>${boldMarkup(escapeHTML(truncateText(c.result)))}</p></div>
+                </div>
               </div>
-              <button class="detail-trigger" type="button" data-detail-id="${escapeAttribute(paper.id)}"><i data-lucide="panel-right-open"></i><span>查看判断依据与原始摘要</span></button>
+              <div class="back-divider"></div>
+              <div class="detail-section">
+                <div class="detail-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  What's New
+                </div>
+                <ul class="detail-bullets">${(c.noveltyBullets || []).map((b) => `<li>${boldMarkup(escapeHTML(b))}</li>`).join("")}</ul>
+              </div>
+              <div class="back-divider"></div>
+              <div class="detail-section">
+                <div class="detail-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  Why It Matters
+                </div>
+                <div class="why-grid">
+                  <div class="why-col"><span class="why-tag">For the field</span><p>${escapeHTML(c.whyImportant)}</p></div>
+                  <div class="why-col"><span class="why-tag">For you</span><p>${escapeHTML(c.whyRead)}</p></div>
+                </div>
+              </div>
+              <div class="back-divider"></div>
+              <div class="detail-section">
+                <div class="detail-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                  Best for
+                </div>
+                <div class="best-for-row">${bestFor.map((t) => `<span class="best-chip">${escapeHTML(t)}</span>`).join("")}</div>
+              </div>
+              <div class="source-links">
+                <span class="source-stat"><span class="source-stat-emoji">📖</span>${numberOrZero(paper.read_minutes)} min</span>
+                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${numberOrZero(paper.citation_count)} cites</span>
+                ${safeURL(paper.url) ? `<a class="source-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Original
+                </a>` : ""}
+                ${safeURL(paper.pdf_url) ? `<a class="source-link" href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  PDF
+                </a>` : ""}
+              </div>
+              <div class="flip-hint-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+                Tap to flip back
+              </div>
             </div>
           </div>
         </div>
@@ -2361,13 +2937,26 @@ function openLibraryCard(id) {
   refreshIcons();
   elements.libraryCardDialog.showModal();
   const popCard = elements.libraryCardDialogContent.querySelector(".library-pop-card");
-  if (popCard) requestAnimationFrame(() => requestAnimationFrame(() => popCard.classList.add("is-flipped")));
+  const popInner = popCard && popCard.querySelector(".card-inner");
+  if (popCard && popInner) {
+    let downX = 0, downY = 0;
+    popCard.addEventListener("pointerdown", (event) => { downX = event.clientX; downY = event.clientY; });
+    popCard.addEventListener("click", (event) => {
+      if (event.target.closest("[data-stop-click], [data-close-dialog]")) return;
+      const dx = Math.abs(event.clientX - downX);
+      const dy = Math.abs(event.clientY - downY);
+      if (dx > 6 || dy > 6) return;
+      popInner.classList.toggle("is-flipped");
+    });
+  }
 }
 
 function updateProgress() {
   const total = state.papers.length;
-  elements.paperPosition.textContent = total ? Math.min(state.index + 1, total) : "0";
-  elements.paperTotal.textContent = String(total);
+  const pos = total ? Math.min(state.index + 1, total) : 0;
+  if (elements.posLabel) elements.posLabel.textContent = String(pos);
+  if (elements.totalLabel) elements.totalLabel.textContent = String(total);
+  if (elements.progressFill) elements.progressFill.style.width = total ? ((pos / total) * 100) + "%" : "0%";
 }
 
 function updateLibraryCounts() {
@@ -2392,9 +2981,28 @@ function currentPaper() {
 
 function formatAuthors(authors) {
   const names = (authors || []).map((author) => author.name).filter(Boolean);
-  if (!names.length) return "作者信息待核验";
+  if (!names.length) return "Author info pending";
   if (names.length <= 2) return names.join(", ");
-  return `${names.slice(0, 2).join(", ")} 等 ${names.length} 位作者`;
+  return `${names.slice(0, 2).join(", ")}, et al.`;
+}
+
+function noveltyBullets(paper) {
+  const raw = paper.digest?.novelty;
+  const fallback = paper.digest?.why_keep || "Matches current research interests.";
+  let items = [];
+  if (Array.isArray(raw)) {
+    items = raw;
+  } else if (typeof raw === "string" && raw.trim()) {
+    items = raw.split(/(?:\r?\n|(?<=[.!?])\s+(?=[A-Z]))/);
+  }
+  items = items.map((s) => String(s || "").trim().replace(/^[-*•\s]+/, "")).filter(Boolean);
+  if (!items.length) items = [fallback];
+  return items.slice(0, 4);
+}
+
+function firstNoveltyBullet(paper) {
+  const bullets = noveltyBullets(paper);
+  return bullets[0] || "";
 }
 
 function getInitials(name) {

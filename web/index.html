@@ -162,28 +162,47 @@
         </div>
 
         <h1 id="discover-title" class="sr-only">论文发现</h1>
-        <div class="feed-meta">
-          <div><span id="result-source">正在连接论文源</span><small id="result-query"></small></div>
-          <div class="feed-engine"><i></i><span id="ai-status">本地摘要</span></div>
-        </div>
-        <div id="search-note" class="search-note" role="status" aria-live="polite"></div>
 
-        <div id="deck-area" class="deck-area" aria-live="polite">
-          <div class="deck-stack" aria-hidden="true"></div>
-          <article id="paper-card" class="paper-card is-loading">
-            <div class="skeleton-hero"></div>
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-panel"></div>
-          </article>
-          <div class="paper-progress"><strong id="paper-position">0</strong><span>/</span><span id="paper-total">0</span></div>
+        <div id="deck-area" class="stage-wrapper" aria-live="polite">
+          <div class="stage" id="stage">
+            <div class="stack-layer stack-1"></div>
+            <div class="stack-layer stack-2"></div>
+            <div class="card theme-violet is-loading" id="card">
+              <div class="stamp dismiss">NOPE</div>
+              <div class="stamp save">YES</div>
+              <div class="stamp priority">TOP</div>
+              <div class="stamp read">DONE</div>
+              <div class="card-inner" id="cardInner">
+                <div class="card-face card-front" id="cardFront">
+                  <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:16px;font-weight:800;">
+                    Loading papers...
+                  </div>
+                </div>
+                <div class="card-face card-back" id="cardBack">
+                  <div class="card-back-face">
+                    <div class="back-hero theme-violet">
+                      <h2 class="back-title">Loading...</h2>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div id="action-bar" class="action-dock" aria-label="论文筛选操作">
-          <button id="dismiss-button" class="action-button dismiss" type="button" aria-label="跳过论文" title="跳过"><i data-lucide="x"></i></button>
-          <button id="priority-button" class="action-button priority" type="button" aria-label="标为重点论文" title="重点"><i data-lucide="star"></i></button>
-          <button id="read-button" class="action-button read" type="button" aria-label="标为已读" title="已读"><i data-lucide="check"></i></button>
-          <button id="save-button" class="action-button save" type="button" aria-label="感兴趣并收藏" title="感兴趣"><i data-lucide="heart"></i></button>
+        <div class="sr-only">
+          <div id="result-source"></div>
+          <div id="result-query"></div>
+          <div id="search-note"></div>
+          <span id="ai-status"></span>
+          <span id="posLabel"></span>
+          <span id="totalLabel"></span>
+          <div id="progressFill"></div>
+          <div id="hint"></div>
+          <button id="dismiss-button" type="button" aria-hidden="true" tabindex="-1"></button>
+          <button id="priority-button" type="button" aria-hidden="true" tabindex="-1"></button>
+          <button id="read-button" type="button" aria-hidden="true" tabindex="-1"></button>
+          <button id="save-button" type="button" aria-hidden="true" tabindex="-1"></button>
         </div>
       </section>
 

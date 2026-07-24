@@ -25,7 +25,7 @@ func TestSummarizeBatchesLargeDeck(t *testing.T) {
 			return
 		}
 		prompt := request.Messages[len(request.Messages)-1].Content
-		marker := strings.LastIndex(prompt, "论文：")
+		marker := strings.LastIndex(prompt, "Papers: ")
 		if marker < 0 {
 			http.Error(w, "missing papers", http.StatusBadRequest)
 			return
@@ -33,13 +33,13 @@ func TestSummarizeBatchesLargeDeck(t *testing.T) {
 		var batch []struct {
 			ID string `json:"id"`
 		}
-		if err := json.Unmarshal([]byte(prompt[marker+len("论文："):]), &batch); err != nil || len(batch) != summaryBatchSize {
+		if err := json.Unmarshal([]byte(prompt[marker+len("Papers: "):]), &batch); err != nil || len(batch) != summaryBatchSize {
 			http.Error(w, "unexpected batch", http.StatusBadRequest)
 			return
 		}
 		items := make([]llmDigest, 0, len(batch))
 		for _, paper := range batch {
-			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Verdict: "AI 摘要", Problem: "研究问题"}})
+			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Verdict: "AI summary", Problem: "Research question"}})
 		}
 		content, _ := json.Marshal(llmDigestResponse{Papers: items})
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -62,7 +62,7 @@ func TestSummarizeBatchesLargeDeck(t *testing.T) {
 		t.Fatalf("applied=%v requests=%d", applied, requests.Load())
 	}
 	for _, paper := range result {
-		if paper.Digest.Verdict != "AI 摘要" {
+		if paper.Digest.Verdict != "AI summary" {
 			t.Fatalf("paper %s did not receive its AI digest", paper.ID)
 		}
 	}

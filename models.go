@@ -1,21 +1,62 @@
 package main
 
-import "time"
+import (
+	"encoding/json"
+	"strings"
+	"time"
+)
 
 type Author struct {
 	Name string `json:"name"`
 }
 
+// Bullets is a list of short lines that also accepts a single string for
+// backward compatibility with older LLM responses and persisted state.
+type Bullets []string
+
+func (b *Bullets) UnmarshalJSON(data []byte) error {
+	trimmed := strings.TrimSpace(string(data))
+	if trimmed == "" || trimmed == "null" {
+		*b = nil
+		return nil
+	}
+	if trimmed[0] == '[' {
+		var list []string
+		if err := json.Unmarshal(data, &list); err != nil {
+			return err
+		}
+		cleaned := make([]string, 0, len(list))
+		for _, item := range list {
+			if s := strings.TrimSpace(item); s != "" {
+				cleaned = append(cleaned, s)
+			}
+		}
+		*b = cleaned
+		return nil
+	}
+	var single string
+	if err := json.Unmarshal(data, &single); err != nil {
+		return err
+	}
+	single = strings.TrimSpace(single)
+	if single == "" {
+		*b = nil
+		return nil
+	}
+	*b = Bullets{single}
+	return nil
+}
+
 type Digest struct {
-	Verdict      string `json:"verdict"`
-	TLDR         string `json:"tldr"`
-	Problem      string `json:"problem"`
-	Novelty      string `json:"novelty"`
-	Method       string `json:"method"`
-	Result       string `json:"result"`
-	Audience     string `json:"audience"`
-	WhyKeep      string `json:"why_keep"`
-	ReadingFocus string `json:"reading_focus"`
+	Verdict      string  `json:"verdict"`
+	Hook         string  `json:"hook"`
+	Problem      string  `json:"problem"`
+	Novelty      Bullets `json:"novelty"`
+	Method       string  `json:"method"`
+	Result       string  `json:"result"`
+	Audience     string  `json:"audience"`
+	WhyKeep      string  `json:"why_keep"`
+	ReadingFocus string  `json:"reading_focus"`
 }
 
 type Paper struct {
