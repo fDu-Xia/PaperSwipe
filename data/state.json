@@ -108,8 +108,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T15:57:28.847751Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T05:24:42.1597741Z"
     },
     "arxiv:2402.11651v2": {
       "paper": {
@@ -164,8 +164,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-24T15:57:26.981852Z"
+      "action": "save",
+      "updated_at": "2026-07-25T05:22:15.8394031Z"
     },
     "arxiv:2402.14679v2": {
       "paper": {
@@ -258,8 +258,8 @@
         "external_ids": {
           "ArXiv": "2405.11357v3"
         },
-        "match_score": 75,
-        "read_minutes": 6,
+        "match_score": 77,
+        "read_minutes": 39,
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
@@ -275,8 +275,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-24T08:02:43.467394Z"
+      "action": "save",
+      "updated_at": "2026-07-25T05:22:18.0880754Z"
     },
     "arxiv:2501.05032v2": {
       "paper": {
@@ -306,7 +306,7 @@
           "ArXiv": "2501.05032v2"
         },
         "match_score": 74,
-        "read_minutes": 6,
+        "read_minutes": 38,
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
@@ -322,8 +322,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T15:04:54.41361Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T05:24:51.2615946Z"
     },
     "arxiv:2510.09720v1": {
       "paper": {
@@ -831,12 +831,12 @@
   },
   "recent_searches": [
     {
-      "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-24T16:42:36.892171Z"
+      "query": "large language model agents large language models long-term memory",
+      "created_at": "2026-07-25T05:26:56.2573213Z"
     },
     {
-      "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-24T16:21:24.136272Z"
+      "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
+      "created_at": "2026-07-24T16:42:36.892171Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update complex task performance",

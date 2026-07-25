@@ -207,13 +207,11 @@
       </section>
 
       <section id="library-view" class="view library-view" aria-labelledby="library-title" hidden>
-        <header class="page-topbar">
-          <button id="library-export-toggle" class="topbar-button" type="button" aria-label="导出到 BibTeX / Zotero" title="导出"><i data-lucide="download"></i></button>
-          <h1 id="library-title">Library</h1>
-          <div class="topbar-actions">
-          </div>
-        </header>
-
+        <div class="library-search-bar">
+          <i data-lucide="search"></i>
+          <input id="library-search-input" type="text" placeholder="Search your library..." autocomplete="off" maxlength="80">
+          <button id="library-search-clear" type="button" hidden aria-label="Clear search"><i data-lucide="x"></i></button>
+        </div>
         <div class="library-tabs" role="tablist" aria-label="阅读清单分类">
           <button class="is-active" type="button" data-filter="save" role="tab"><i data-lucide="heart"></i><span>Interested</span><b id="saved-count">0</b></button>
           <button type="button" data-filter="priority" role="tab"><i data-lucide="star"></i><span>Key</span><b id="priority-count">0</b></button>
@@ -239,6 +237,7 @@
           <div id="library-tags" class="library-tags" aria-label="按主题筛选"></div>
         </div>
         <div id="library-list" class="library-list"></div>
+        <button id="library-export-fab" class="library-export-fab" type="button" aria-label="Export / Select papers" title="Export"><i data-lucide="download"></i></button>
       </section>
 
 
