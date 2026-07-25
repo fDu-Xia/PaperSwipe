@@ -7,7 +7,462 @@
 <meta name="description" content="PaperSwipe：用 AI 把读论文变成刷论文。AI 先认识你，再替你发现论文；5 秒判断值不值得读；自动规划阅读日程；实时追踪全球研究热点。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap">
-<link rel="stylesheet" href="styles.css">
+<style>
+/* =====================================================
+   PaperSwipe — Landing Page
+   ===================================================== */
+
+:root {
+  --bg: #f4f5f7;
+  --bg-alt: #eceef2;
+  --ink: #11131a;
+  --ink-dim: #565a68;
+  --ink-faint: #8a8e9c;
+  --line: #dfe2e8;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+
+  --violet: #7c6cff;
+  --violet-strong: #6657e8;
+  --cyan: #2fd0c9;
+  --coral: #ff7a63;
+  --yellow: #f6c453;
+  --green: #3ecf8e;
+
+  --grad-brand: linear-gradient(120deg, var(--violet) 0%, var(--cyan) 55%, var(--green) 100%);
+  --grad-warm: linear-gradient(120deg, var(--coral) 0%, var(--yellow) 100%);
+  --grad-logo: linear-gradient(135deg, #8a7aef 0%, #c98fb0 55%, #ff9d84 100%);
+
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --font: "Inter", "Manrope", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+img { max-width: 100%; display: block; }
+u { text-decoration: none; border-bottom: 3px solid var(--coral); }
+b { font-weight: 800; }
+.br-desktop { display: inline; }
+
+/* ---------- background ambience ---------- */
+.bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .22; }
+.orb-a { width: 620px; height: 620px; top: -220px; left: -180px; background: radial-gradient(circle at 35% 35%, var(--violet), transparent 70%); }
+.orb-b { width: 560px; height: 560px; top: 40%; right: -240px; background: radial-gradient(circle at 60% 40%, var(--cyan), transparent 70%); }
+.orb-c { width: 500px; height: 500px; bottom: -220px; left: 20%; background: radial-gradient(circle at 50% 50%, var(--coral), transparent 70%); }
+
+main, header, footer { position: relative; z-index: 1; }
+
+/* ---------- nav ---------- */
+.nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(16px) saturate(1.4); background: rgba(244,245,247,.72); border-bottom: 1px solid var(--line); }
+.nav-inner { max-width: 1160px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav-brand { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; letter-spacing: -.2px; }
+.nav-logo { font-size: 19px; transform: rotate(-6deg); transition: transform .25s ease; }
+.nav-brand:hover .nav-logo { transform: rotate(2deg) scale(1.08); }
+.nav-brand-text {
+  font-weight: 900;
+  letter-spacing: -.3px;
+  background: var(--grad-logo);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { color: var(--ink-dim); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .18s ease; }
+.nav-links a:hover, .nav-links a.is-active { color: var(--ink); }
+.nav-cta {
+  position: relative; overflow: hidden; isolation: isolate;
+  font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 100px;
+  background: linear-gradient(120deg, rgba(124,108,255,.22) 0%, rgba(47,208,201,.16) 55%, rgba(62,207,142,.16) 100%);
+  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  backdrop-filter: blur(8px) saturate(1.05);
+  border: 1px solid rgba(124,108,255,.24);
+  color: var(--violet-strong); text-decoration: none;
+  box-shadow:
+    0 6px 16px rgba(124,108,255,.16),
+    inset 0 -3px 6px rgba(124,108,255,.06),
+    inset 0 2px 3px rgba(255,255,255,.55);
+  transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease, background .28s ease;
+  animation: nav-cta-breathe 2.6s ease-in-out infinite;
+}
+.nav-cta span { position: relative; z-index: 2; }
+.nav-cta::before {
+  content: ""; position: absolute; top: 8%; left: 12%; width: 38%; height: 42%; z-index: 1;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.nav-cta::after {
+  content: ""; position: absolute; bottom: -35%; right: -12%; width: 60%; height: 60%; z-index: 1;
+  background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%);
+  pointer-events: none;
+}
+.nav-cta:hover {
+  transform: translateY(-3px) scale(1.06);
+  background: linear-gradient(120deg, rgba(124,108,255,.3) 0%, rgba(47,208,201,.22) 55%, rgba(62,207,142,.22) 100%);
+  box-shadow:
+    0 10px 22px rgba(124,108,255,.24),
+    inset 0 -3px 6px rgba(124,108,255,.08),
+    inset 0 2px 3px rgba(255,255,255,.65);
+}
+.nav-cta:active { transform: translateY(-1px) scale(.94); }
+@keyframes nav-cta-breathe {
+  0%, 100% { box-shadow: 0 6px 16px rgba(124,108,255,.16), inset 0 -3px 6px rgba(124,108,255,.06), inset 0 2px 3px rgba(255,255,255,.55); }
+  50% { box-shadow: 0 8px 20px rgba(124,108,255,.24), inset 0 -3px 6px rgba(124,108,255,.06), inset 0 2px 3px rgba(255,255,255,.62); }
+}
+
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+}
+
+/* ---------- shared section styles ---------- */
+section { padding: 120px 28px; position: relative; }
+/* Extra breathing room between features so trio-layered images have space. */
+#schedule { padding-top: 200px; }
+#trending { padding-bottom: 200px; }
+.philosophy { padding-top: 260px; }
+@media (max-width: 980px) {
+  #schedule { padding-top: 140px; }
+  #trending { padding-bottom: 140px; }
+  .philosophy { padding-top: 160px; }
+}
+.section-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--violet); margin: 0 0 18px;
+}
+.section-kicker::before { content: ""; width: 20px; height: 2px; background: var(--violet); display: inline-block; }
+.section-kicker--light { color: var(--violet-strong); }
+.section-kicker--light::before { background: var(--violet-strong); }
+
+.grad-text {
+  background: var(--grad-brand);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.ghost-text { color: transparent; -webkit-text-stroke: 1.5px rgba(17,19,26,.28); }
+.strike { position: relative; display: inline-block; }
+.strike::after { content: ""; position: absolute; left: -2%; right: -2%; top: 52%; height: 3px; background: var(--coral); transform: rotate(-3deg); border-radius: 2px; }
+
+h1, h2, h3 { font-family: var(--font); letter-spacing: -0.5px; margin: 0; }
+
+/* reveal animation */
+[data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+[data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+
+/* ---------- buttons ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 15px 26px; border-radius: 100px; font-weight: 700; font-size: 15px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; white-space: nowrap; }
+.btn-primary {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(120deg, rgba(124,108,255,.22) 0%, rgba(47,208,201,.16) 55%, rgba(62,207,142,.16) 100%);
+  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  backdrop-filter: blur(8px) saturate(1.05);
+  border: 1px solid rgba(124,108,255,.24);
+  color: var(--violet-strong);
+  box-shadow:
+    0 6px 16px rgba(124,108,255,.16),
+    inset 0 -3px 6px rgba(124,108,255,.06),
+    inset 0 2px 3px rgba(255,255,255,.55);
+  transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease, background .28s ease;
+  animation: btn-primary-breathe 2.6s ease-in-out infinite;
+}
+.btn-primary span { position: relative; z-index: 2; }
+.btn-primary::before {
+  content: ""; position: absolute; top: 8%; left: 12%; width: 38%; height: 42%; z-index: 1;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.btn-primary::after {
+  content: ""; position: absolute; bottom: -35%; right: -12%; width: 60%; height: 60%; z-index: 1;
+  background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%);
+  pointer-events: none;
+}
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.06);
+  background: linear-gradient(120deg, rgba(124,108,255,.3) 0%, rgba(47,208,201,.22) 55%, rgba(62,207,142,.22) 100%);
+  box-shadow:
+    0 10px 22px rgba(124,108,255,.24),
+    inset 0 -3px 6px rgba(124,108,255,.08),
+    inset 0 2px 3px rgba(255,255,255,.65);
+}
+.btn-primary:active { transform: translateY(-1px) scale(.94); }
+@keyframes btn-primary-breathe {
+  0%, 100% { box-shadow: 0 6px 16px rgba(124,108,255,.16), inset 0 -3px 6px rgba(124,108,255,.06), inset 0 2px 3px rgba(255,255,255,.55); }
+  50% { box-shadow: 0 8px 20px rgba(124,108,255,.24), inset 0 -3px 6px rgba(124,108,255,.06), inset 0 2px 3px rgba(255,255,255,.62); }
+}
+.btn-ghost { color: var(--ink); background: rgba(17,19,26,.045); border: 1px solid var(--line); }
+.btn-ghost:hover { background: rgba(17,19,26,.08); }
+.btn-lg { padding: 18px 34px; font-size: 17px; }
+.btn-arrow { transition: transform .2s ease; }
+.btn:hover .btn-arrow { transform: translateX(4px); }
+
+/* =====================================================
+   HERO
+   ===================================================== */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  align-items: center;
+  gap: 40px;
+  padding: 160px 28px 80px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.hero-inner { max-width: 560px; }
+.eyebrow { display: inline-block; margin: 0 0 22px; padding: 7px 16px; border-radius: 100px; background: rgba(124,108,255,.1); border: 1px solid rgba(124,108,255,.28); color: var(--violet-strong); font-size: 13px; font-weight: 700; }
+.hero h1 { font-size: 60px; line-height: 1.06; font-weight: 900; }
+.hero-sub { margin: 26px 0 34px; font-size: 18px; color: var(--ink-dim); line-height: 1.65; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 52px; }
+.hero-stats { display: flex; gap: 36px; }
+.hero-stats div { display: flex; flex-direction: column; gap: 4px; }
+.hero-stats b { font-size: 28px; font-weight: 900; background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-stats span { font-size: 12.5px; color: var(--ink-faint); max-width: 110px; }
+
+.hero-phones { position: relative; justify-self: center; width: 100%; max-width: 420px; height: 560px; }
+.hero-phones .phone { position: absolute; width: 280px; border-radius: 32px; box-shadow: 0 40px 90px rgba(17,19,26,.22), 0 0 0 1px rgba(17,19,26,.06); }
+.phone-back { top: 40px; right: 0; opacity: .55; transform: rotate(9deg) scale(.94); filter: saturate(.8); }
+.phone-front { top: 0; left: 10px; transform: rotate(-6deg); animation: float-card 6s ease-in-out infinite; aspect-ratio: 856 / 1652; object-fit: cover; background: #000; }
+.hero-glow { position: absolute; inset: -40px; background: radial-gradient(circle at 45% 35%, rgba(124,108,255,.35), transparent 60%); filter: blur(30px); z-index: -1; }
+@keyframes float-card { 0%, 100% { transform: rotate(-6deg) translateY(0); } 50% { transform: rotate(-4deg) translateY(-14px); } }
+
+@media (max-width: 980px) {
+  .hero { grid-template-columns: 1fr; padding-top: 120px; text-align: center; }
+  .hero-inner { max-width: 100%; margin: 0 auto; }
+  .hero h1 { font-size: 42px; }
+  .hero-actions, .hero-stats { justify-content: center; }
+  .hero-phones { height: 420px; margin-top: 20px; }
+  .hero-phones .phone { width: 220px; }
+  .phone-back { right: 20px; }
+  .br-desktop { display: none; }
+}
+
+/* =====================================================
+   PAIN POINT
+   ===================================================== */
+.pain {
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,90,60,.13), transparent 52%),
+    radial-gradient(circle at 100% 100%, rgba(246,196,83,.12), transparent 50%),
+    var(--bg-alt);
+}
+.pain::before, .pain::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 70px; pointer-events: none; z-index: 1;
+}
+.pain::before { top: 0; background: linear-gradient(to bottom, var(--bg), transparent); }
+.pain::after { bottom: 0; background: linear-gradient(to top, var(--bg), transparent); }
+.pain-inner { position: relative; z-index: 2; max-width: 1120px; margin: 0 auto; text-align: center; }
+.pain h2 { font-size: 38px; line-height: 1.28; font-weight: 800; margin-bottom: 46px; }
+
+.pain-demo { display: grid; grid-template-columns: 1.15fr .85fr; gap: 52px; align-items: center; text-align: left; margin: 0 0 44px; }
+
+.browser-frame { border-radius: 16px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 30px 70px rgba(17,19,26,.16); }
+.browser-frame-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; background: var(--bg-alt); border-bottom: 1px solid var(--line); }
+.browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+.browser-dot--red { background: #ff5f57; }
+.browser-dot--yellow { background: #febc2e; }
+.browser-dot--green { background: #28c840; }
+.browser-frame-url {
+  margin-left: 10px; padding: 5px 12px; border-radius: 7px;
+  background: var(--surface); border: 1px solid var(--line);
+  font-size: 11.5px; color: var(--ink-faint); font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.browser-frame-video { width: 100%; height: auto; display: block; }
+
+.pain-story { display: flex; flex-direction: column; gap: 12px; }
+.pain-step { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--line); color: var(--ink-dim); font-size: 15.5px; box-shadow: 0 1px 3px rgba(17,19,26,.04); }
+.pain-num { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: rgba(17,19,26,.05); font-size: 12px; font-weight: 800; color: var(--ink-faint); }
+.pain-step--result { background: linear-gradient(90deg, rgba(255,122,99,.14), rgba(246,196,83,.1)); border-color: rgba(255,122,99,.3); color: var(--ink); font-weight: 600; }
+.pain-step--result .pain-num { background: transparent; font-size: 18px; }
+.pain-quote { color: var(--ink-faint); font-size: 15px; line-height: 1.8; max-width: 700px; margin: 0 auto; text-align: center; }
+
+@media (max-width: 900px) {
+  .pain-demo { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* =====================================================
+   BOLD IDEA
+   ===================================================== */
+.idea { text-align: center; background: radial-gradient(circle at 50% 0%, rgba(124,108,255,.18), transparent 60%); }
+.idea-inner { max-width: 720px; margin: 0 auto; }
+.idea h2 { font-size: 44px; line-height: 1.2; font-weight: 900; margin-bottom: 26px; }
+.idea p { font-size: 17px; color: var(--ink-dim); line-height: 1.8; }
+.idea-brand { margin-top: 30px; font-size: 24px; font-weight: 800; color: var(--ink); }
+
+/* =====================================================
+   FEATURE SECTIONS
+   ===================================================== */
+.feature { max-width: 1200px; margin: 0 auto; }
+.feature-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; }
+.feature--reverse .feature-inner { grid-template-columns: 1fr 1fr; }
+.feature--reverse .feature-copy { order: 2; }
+.feature--reverse .feature-visual { order: 1; }
+
+.feature-copy h2 { font-size: 36px; line-height: 1.22; font-weight: 800; margin-bottom: 18px; }
+.feature-lede { color: var(--ink-dim); font-size: 16px; line-height: 1.75; margin-bottom: 26px; }
+.feature-list { list-style: none; margin: 0 0 28px; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+.feature-list li { position: relative; padding-left: 24px; font-size: 14.5px; color: var(--ink-dim); line-height: 1.6; }
+.feature-list li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--green); font-weight: 800; font-size: 13px; }
+.feature-list li b { color: var(--ink); }
+.feature-list li i { color: var(--ink); font-style: normal; font-weight: 600; }
+.feature-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+.feature-tags span { font-size: 12.5px; font-weight: 700; padding: 6px 13px; border-radius: 100px; background: rgba(17,19,26,.045); border: 1px solid var(--line); color: var(--ink-faint); }
+
+.feature-visual { position: relative; height: 500px; }
+.feature-visual--stack { overflow: hidden; border-radius: 26px; }
+.feature-visual--stack .shot { position: absolute; border-radius: 26px; box-shadow: 0 30px 70px rgba(17,19,26,.18), 0 0 0 1px rgba(17,19,26,.06); transition: transform .4s ease; }
+.feature-visual--stack .shot-1 { width: 62%; left: 4%; top: 6%; z-index: 3; }
+.feature-visual--stack .shot-2 { width: 46%; right: 0; top: 0; z-index: 2; opacity: .92; transform: rotate(6deg); }
+.feature-visual--stack .shot-3 { width: 46%; right: 6%; bottom: 0; z-index: 1; opacity: .8; transform: rotate(-8deg) scale(.94); }
+.feature-visual--stack:hover .shot-1 { transform: translateY(-6px); }
+
+/* Single-shot showcase (Trending) — matches hero video framing */
+.feature-visual--showcase { display: flex; align-items: center; justify-content: center; overflow: visible; }
+.feature-visual--showcase .shot-2,
+.feature-visual--showcase .shot-3 { display: none; }
+.feature-visual--showcase .shot-1,
+.feature-visual--showcase .showcase-shot {
+  position: static !important;
+  width: min(84%, 320px);
+  height: auto;
+  display: block;
+  border-radius: 22px;
+  box-shadow: 0 40px 80px rgba(17,19,26,.28);
+  transform: perspective(1200px) rotateX(4deg);
+  animation: float-card 6s ease-in-out infinite;
+  -webkit-box-reflect: below 6px linear-gradient(to bottom, rgba(255,255,255,0) 45%, rgba(255,255,255,.35) 100%);
+  opacity: 1 !important;
+  left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
+}
+
+/* Three-shot layered showcase (Library) — hero at center, two side panels tilted */
+.feature-visual--trio { position: relative; height: 560px; overflow: visible; }
+.feature-visual--trio .shot {
+  position: absolute;
+  border-radius: 26px;
+  box-shadow: 0 30px 70px rgba(17,19,26,.20), 0 0 0 1px rgba(17,19,26,.04);
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+  will-change: transform;
+}
+.feature-visual--trio .shot-1 {
+  width: 44%;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  box-shadow: 0 40px 90px rgba(17,19,26,.28), 0 0 0 1px rgba(17,19,26,.06);
+  animation: float-card 6s ease-in-out infinite;
+}
+.feature-visual--trio .shot-2 {
+  width: 38%;
+  left: 6%; top: 20%;
+  transform: rotate(-8deg);
+  z-index: 2;
+  opacity: .92;
+}
+.feature-visual--trio .shot-3 {
+  width: 38%;
+  right: 6%; bottom: 14%;
+  transform: rotate(8deg);
+  z-index: 1;
+  opacity: .88;
+}
+.feature-visual--trio:hover .shot-2 { transform: rotate(-10deg) translateY(-6px); }
+.feature-visual--trio:hover .shot-3 { transform: rotate(10deg) translateY(-6px); }
+
+.feature-visual--carousel { height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+.pw-carousel { position: relative; width: 100%; max-width: 300px; }
+.pw-carousel-track {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  border-radius: 26px; box-shadow: 0 30px 70px rgba(17,19,26,.18), 0 0 0 1px rgba(17,19,26,.06);
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.pw-carousel-track::-webkit-scrollbar { display: none; }
+.pw-carousel-slide { flex: 0 0 100%; scroll-snap-align: center; }
+.pw-carousel-slide img { width: 100%; height: auto; display: block; border-radius: 26px; }
+.pw-carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 4px; }
+.pw-carousel-dot { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(17,19,26,.15); cursor: pointer; transition: transform .25s ease, background .25s ease; }
+.pw-carousel-dot.is-active { background: var(--violet); transform: scale(1.35); }
+.pw-carousel-arrow {
+  display: none !important;
+}
+@media (max-width: 980px) {
+  .feature-visual--carousel { height: auto; margin-top: 10px; }
+  .pw-carousel-arrow { display: none; }
+}
+
+.feature-visual--video { display: flex; align-items: center; justify-content: center; }
+.showcase-video {
+  position: relative; z-index: 1;
+  width: min(84%, 320px);
+  height: auto;
+  display: block;
+  border-radius: 22px;
+  box-shadow: 0 40px 80px rgba(17,19,26,.28);
+  transform: perspective(1200px) rotateX(4deg);
+  animation: float-card 6s ease-in-out infinite;
+  -webkit-box-reflect: below 6px linear-gradient(to bottom, rgba(255,255,255,0) 45%, rgba(255,255,255,.35) 100%);
+}
+
+@media (max-width: 980px) {
+  .feature-inner, .feature--reverse .feature-inner { grid-template-columns: 1fr; gap: 40px; }
+  .feature--reverse .feature-copy, .feature--reverse .feature-visual { order: initial; }
+  .feature-visual { height: 380px; }
+  .feature-visual--trio { height: 420px; }
+  .feature-visual--trio .shot-1 { width: 48%; }
+  .feature-visual--trio .shot-2 { width: 36%; left: 4%; }
+  .feature-visual--trio .shot-3 { width: 36%; right: 4%; }
+  .feature-copy h2 { font-size: 28px; }
+}
+
+/* =====================================================
+   PHILOSOPHY
+   ===================================================== */
+.philosophy {
+  margin-top: 60px;
+  background: var(--bg-alt);
+  text-align: center;
+  padding: 160px 28px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.philosophy::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(47,208,201,.18), transparent 55%);
+}
+.philosophy-inner { position: relative; max-width: 720px; margin: 0 auto; }
+.philosophy h2 { font-size: 46px; line-height: 1.3; font-weight: 900; margin-bottom: 30px; }
+.philosophy-sub { color: var(--ink-dim); font-size: 16px; line-height: 1.9; }
+
+@media (max-width: 720px) {
+  .philosophy h2 { font-size: 32px; }
+}
+
+/* =====================================================
+   CTA
+   ===================================================== */
+.cta { text-align: center; padding-bottom: 100px; }
+.cta-inner { max-width: 640px; margin: 0 auto; }
+.cta h2 { font-size: 38px; font-weight: 900; line-height: 1.28; margin-bottom: 22px; }
+.cta p { color: var(--ink-dim); font-size: 16px; line-height: 1.8; margin-bottom: 34px; }
+.cta-footnote { margin-top: 26px; font-size: 13px; color: var(--ink-faint); }
+
+.site-footer { text-align: center; padding: 30px 28px 50px; color: var(--ink-faint); font-size: 12.5px; border-top: 1px solid var(--line); }
+
+</style>
 </head>
 <body>
 
@@ -28,7 +483,7 @@
       <a href="#schedule">Schedule</a>
       <a href="#trending">Trending</a>
     </nav>
-    <a class="nav-cta" href="#cta">立即体验</a>
+    <a class="nav-cta" href="PaperSwipe-Contact.html"><span>立即体验</span></a>
   </div>
 </header>
 
@@ -37,18 +492,18 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="hero-inner">
-      <p class="eyebrow" data-reveal>把读论文，变成刷论文</p>
+      <p class="eyebrow" data-reveal>What if Google Scholar felt like TikTok?</p>
       <h1 data-reveal>
         别再<span class="strike">搜</span>论文了，<br>
         开始<span class="grad-text">刷</span>论文。
       </h1>
       <p class="hero-sub" data-reveal>
-        AI 先认识你，再替你发现论文——像刷抖音、刷 Tinder 一样，<br class="br-desktop">
-        左右滑动，几分钟做完过去要花几小时才能做完的筛选。
+        AI 先认识你，再替你发现论文。<br class="br-desktop">
+        像刷 Tiktok 和 Tinder 一样，<br class="br-desktop">
+        几分钟做完过去要花几小时才能做完的筛选。
       </p>
       <div class="hero-actions" data-reveal>
-        <a href="#cta" class="btn btn-primary">开始刷论文 <span class="btn-arrow">→</span></a>
-        <a href="#pain" class="btn btn-ghost">这问题我也有 ↓</a>
+        <a href="PaperSwipe-Contact.html" class="btn btn-primary"><span>开始刷论文</span> <span class="btn-arrow">→</span></a>
       </div>
       <div class="hero-stats" data-reveal>
         <div><b>5s</b><span>判断一篇论文值不值得读</span></div>
@@ -57,8 +512,8 @@
       </div>
     </div>
     <div class="hero-phones" data-reveal>
-      <img class="phone phone-back" src="images/explore-back.png" alt="PaperSwipe 论文卡片背面：完整精读笔记">
-      <video class="phone phone-front" src="videos/explore-swipe.mp4" poster="images/explore-front.png" autoplay muted loop playsinline aria-label="PaperSwipe 刷论文过程演示"></video>
+      <img class="phone phone-back" src="images/explore-back.png">
+      <video class="phone phone-front" src="videos/explore-swipe.mp4" poster="images/explore-front.png" autoplay muted loop playsinline aria-label="PaperSwipe 刷论文过程演示" preload="metadata"></video>
       <div class="hero-glow" aria-hidden="true"></div>
     </div>
   </section>
@@ -67,7 +522,7 @@
   <section class="pain" id="pain">
     <div class="pain-inner">
       <p class="section-kicker">痛点</p>
-      <h2 data-reveal>读论文最贵的成本，<br>从来不是「读」，而是<u>找</u>。</h2>
+      <h2 data-reveal>读论文最贵的成本，<br>不仅仅是「读」，还有<u>找</u>。</h2>
 
       <div class="pain-demo" data-reveal>
         <div class="pain-demo-visual">
@@ -78,7 +533,7 @@
               <span class="browser-dot browser-dot--green"></span>
               <span class="browser-frame-url">scholar.google.com</span>
             </div>
-            <video class="browser-frame-video" src="videos/googlescholar.mp4" autoplay muted loop playsinline aria-label="传统 Google Scholar 搜索发现论文的过程演示"></video>
+            <video class="browser-frame-video" src="videos/googlescholar.mp4" autoplay muted loop playsinline aria-label="传统 Google Scholar 搜索发现论文的过程演示" preload="metadata"></video>
           </div>
         </div>
         <div class="pain-story">
@@ -123,7 +578,7 @@
         </div>
       </div>
       <div class="feature-visual feature-visual--video" data-reveal>
-        <video class="showcase-video" src="videos/initialize.mp4" autoplay muted loop playsinline aria-label="PaperSwipe 初始化：AI 认识你的过程演示"></video>
+        <video class="showcase-video" src="videos/initialize.mp4" autoplay muted loop playsinline aria-label="PaperSwipe 初始化：AI 认识你的过程演示" preload="metadata"></video>
       </div>
     </div>
   </section>
@@ -131,10 +586,10 @@
   <!-- ============ FEATURE: LIBRARY ============ -->
   <section class="feature feature--reverse" id="library">
     <div class="feature-inner">
-      <div class="feature-visual feature-visual--stack" data-reveal>
-        <img class="shot shot-1" src="images/library-home.png" alt="Library 三栏分类首页">
+      <div class="feature-visual feature-visual--trio" data-reveal>
         <img class="shot shot-2" src="images/library-filter.png" alt="Library 按主题标签筛选">
         <img class="shot shot-3" src="images/library-card-detail.png" alt="Library 卡片详情">
+        <img class="shot shot-1" src="images/library-home.png" alt="Library 三栏分类首页">
       </div>
       <div class="feature-copy" data-reveal>
         <p class="section-kicker">02 · Library</p>
@@ -170,10 +625,25 @@
           <span>#不再拖延</span><span>#对话式规划</span><span>#成体系学习</span>
         </div>
       </div>
-      <div class="feature-visual feature-visual--stack" data-reveal>
-        <img class="shot shot-1" src="images/schedule-home.png" alt="Schedule 阅读周计划">
-        <img class="shot shot-2" src="images/robot-example-today.png" alt="AI 助手：今日最值得读的论文">
-        <img class="shot shot-3" src="images/robot-example-roadmap.png" alt="AI 助手：规划阅读 roadmap">
+      <div class="feature-visual feature-visual--carousel" data-reveal>
+        <div class="pw-carousel" data-pw-carousel>
+          <div class="pw-carousel-track" data-pw-track>
+            <div class="pw-carousel-slide"><img class="shot" src="images/schedule-home.png" alt="Schedule 阅读周计划"></div>
+            <div class="pw-carousel-slide"><img class="shot" src="images/robot-home.png" alt="AI 助手对话首页"></div>
+            <div class="pw-carousel-slide"><img class="shot" src="images/robot-example-calendar.png" alt="AI 助手：规划学习日历"></div>
+            <div class="pw-carousel-slide"><img class="shot" src="images/robot-example-today.png" alt="AI 助手：今日最值得读的论文"></div>
+            <div class="pw-carousel-slide"><img class="shot" src="images/robot-example-roadmap.png" alt="AI 助手：规划阅读 roadmap"></div>
+          </div>
+          <button class="pw-carousel-arrow pw-carousel-arrow--prev" type="button" aria-label="上一张">‹</button>
+          <button class="pw-carousel-arrow pw-carousel-arrow--next" type="button" aria-label="下一张">›</button>
+          <div class="pw-carousel-dots" data-pw-dots>
+            <button class="pw-carousel-dot is-active" type="button" aria-label="第 1 张"></button>
+            <button class="pw-carousel-dot" type="button" aria-label="第 2 张"></button>
+            <button class="pw-carousel-dot" type="button" aria-label="第 3 张"></button>
+            <button class="pw-carousel-dot" type="button" aria-label="第 4 张"></button>
+            <button class="pw-carousel-dot" type="button" aria-label="第 5 张"></button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -181,10 +651,10 @@
   <!-- ============ FEATURE: TRENDING ============ -->
   <section class="feature feature--reverse" id="trending">
     <div class="feature-inner">
-      <div class="feature-visual feature-visual--stack" data-reveal>
-        <img class="shot shot-1" src="images/trending-home.png" alt="Trending 全球热点榜">
+      <div class="feature-visual feature-visual--trio" data-reveal>
         <img class="shot shot-2" src="images/trending-topic-expand.png" alt="展开最火 Topic 的五篇论文">
         <img class="shot shot-3" src="images/trending-card-open.png" alt="打开热点论文卡片">
+        <img class="shot shot-1" src="images/trending-home.png" alt="Trending 全球热点榜">
       </div>
       <div class="feature-copy" data-reveal>
         <p class="section-kicker">04 · Trending</p>
@@ -226,7 +696,7 @@
       <h2>把「找论文」的力气，<br>还给「读论文」本身。</h2>
       <p>传统方式：搜索、翻页、翻译、收藏、然后忘记。<br>
       <b>PaperSwipe：AI 帮你发现、5 秒帮你判断、自动帮你安排。</b></p>
-      <a href="#top" class="btn btn-primary btn-lg">别再搜论文了，开始刷论文 <span class="btn-arrow">→</span></a>
+      <a href="PaperSwipe-Contact.html" class="btn btn-primary btn-lg"><span>别再搜论文了，开始刷论文</span> <span class="btn-arrow">→</span></a>
       <p class="cta-footnote">欢迎大家提建议，我们还在持续迭代中 ❤️</p>
     </div>
   </section>
@@ -237,6 +707,107 @@
   <span>© PaperSwipe — Discover, not Search.</span>
 </footer>
 
-<script src="script.js"></script>
+<script>
+// Scroll-reveal for elements marked [data-reveal]
+const revealEls = document.querySelectorAll("[data-reveal]");
+
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15, rootMargin: "0px 0px -60px 0px" }
+  );
+  revealEls.forEach((el) => observer.observe(el));
+} else {
+  revealEls.forEach((el) => el.classList.add("is-visible"));
+}
+
+// Active nav link highlight based on scroll position
+const sections = ["explore", "library", "schedule", "trending"]
+  .map((id) => document.getElementById(id))
+  .filter(Boolean);
+const navLinks = Array.from(document.querySelectorAll(".nav-links a"));
+
+if (sections.length && navLinks.length) {
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach((link) => {
+            link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+          });
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+  sections.forEach((section) => navObserver.observe(section));
+}
+
+// Swipeable image carousel (Schedule &amp; AI section, extendable to others)
+document.querySelectorAll("[data-pw-carousel]").forEach((carousel) => {
+  const track = carousel.querySelector("[data-pw-track]");
+  const dots = Array.from(carousel.querySelectorAll("[data-pw-dots] .pw-carousel-dot"));
+  const prevBtn = carousel.parentElement.querySelector(".pw-carousel-arrow--prev");
+  const nextBtn = carousel.parentElement.querySelector(".pw-carousel-arrow--next");
+  const slides = Array.from(track.children);
+  let index = 0;
+  let autoplayTimer = null;
+  let scrollEndTimer = null;
+
+  function updateDots() {
+    dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index));
+  }
+  function goTo(i, smooth = true) {
+    index = (i + slides.length) % slides.length;
+    track.scrollTo({ left: slides[index].offsetLeft, behavior: smooth ? "smooth" : "auto" });
+    updateDots();
+  }
+  function next() { goTo(index + 1); }
+  function prev() { goTo(index - 1); }
+  function startAutoplay() {
+    stopAutoplay();
+    autoplayTimer = setInterval(next, 3200);
+  }
+  function stopAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    autoplayTimer = null;
+  }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener("click", () => { goTo(i); startAutoplay(); });
+  });
+  prevBtn?.addEventListener("click", () => { prev(); startAutoplay(); });
+  nextBtn?.addEventListener("click", () => { next(); startAutoplay(); });
+
+  track.addEventListener("pointerdown", stopAutoplay);
+  track.addEventListener("pointerup", () => startAutoplay());
+  track.addEventListener("mouseleave", () => startAutoplay());
+
+  track.addEventListener("scroll", () => {
+    clearTimeout(scrollEndTimer);
+    scrollEndTimer = setTimeout(() => {
+      let closest = 0;
+      let minDist = Infinity;
+      slides.forEach((slide, i) => {
+        const dist = Math.abs(slide.offsetLeft - track.scrollLeft);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      index = closest;
+      updateDots();
+    }, 120);
+  }, { passive: true });
+
+  updateDots();
+  startAutoplay();
+});
+</script>
 </body>
 </html>

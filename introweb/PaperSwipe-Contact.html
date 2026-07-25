@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PaperSwipe — 来我们展位</title>
+<meta name="description" content="PaperSwipe 展位联系方式：小红书、微信二维码，欢迎来现场体验 demo。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root {
+  --bg: #f4f5f7;
+  --bg-alt: #eceef2;
+  --ink: #11131a;
+  --ink-dim: #565a68;
+  --ink-faint: #8a8e9c;
+  --line: #dfe2e8;
+  --surface: #ffffff;
+
+  --violet: #7c6cff;
+  --violet-strong: #6657e8;
+  --cyan: #2fd0c9;
+  --coral: #ff7a63;
+  --yellow: #f6c453;
+  --green: #3ecf8e;
+
+  --grad-brand: linear-gradient(120deg, var(--violet) 0%, var(--cyan) 55%, var(--green) 100%);
+  --grad-logo: linear-gradient(135deg, #8a7aef 0%, #c98fb0 55%, #ff9d84 100%);
+
+  --font: "Inter", "Manrope", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ambience */
+.bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .22; }
+.orb-a { width: 620px; height: 620px; top: -220px; left: -180px; background: radial-gradient(circle at 35% 35%, var(--violet), transparent 70%); }
+.orb-b { width: 560px; height: 560px; top: 40%; right: -240px; background: radial-gradient(circle at 60% 40%, var(--cyan), transparent 70%); }
+.orb-c { width: 500px; height: 500px; bottom: -220px; left: 20%; background: radial-gradient(circle at 50% 50%, var(--coral), transparent 70%); }
+
+main, header, footer { position: relative; z-index: 1; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(16px) saturate(1.4); background: rgba(244,245,247,.72); border-bottom: 1px solid var(--line); }
+.nav-inner { max-width: 1160px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav-brand { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; letter-spacing: -.2px; }
+.nav-logo { font-size: 19px; transform: rotate(-6deg); transition: transform .25s ease; }
+.nav-brand:hover .nav-logo { transform: rotate(2deg) scale(1.08); }
+.nav-brand-text {
+  font-weight: 900; letter-spacing: -.3px;
+  background: var(--grad-logo);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.nav-back {
+  font-size: 13px; font-weight: 700; padding: 10px 18px; border-radius: 100px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.nav-back:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(17,19,26,.08); }
+.nav-back:active { transform: scale(.96); }
+
+main { flex: 1; padding: 60px 28px 40px; }
+
+.hero {
+  max-width: 900px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+.kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--violet); margin: 0 0 20px;
+}
+.kicker::before { content: ""; width: 20px; height: 2px; background: var(--violet); display: inline-block; }
+.grad-text {
+  background: var(--grad-brand);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+h1 { font-size: 48px; letter-spacing: -0.5px; margin: 0 0 16px; line-height: 1.15; font-weight: 800; }
+.lede { color: var(--ink-dim); font-size: 17px; line-height: 1.7; margin: 0 auto; max-width: 640px; }
+.lede b { color: var(--ink); font-weight: 800; }
+
+.qr-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.qr-card {
+  position: relative;
+  padding: 28px 24px 24px;
+  border-radius: 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(17,19,26,.08), 0 2px 6px rgba(17,19,26,.04);
+  text-align: center;
+  overflow: hidden;
+  transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s ease;
+}
+.qr-card:hover { transform: translateY(-6px); box-shadow: 0 32px 80px rgba(17,19,26,.12), 0 2px 8px rgba(17,19,26,.05); }
+.qr-card::before {
+  content: ""; position: absolute; inset: -1px -1px auto -1px; height: 6px;
+  border-radius: 26px 26px 0 0;
+}
+.qr-card--xhs::before { background: linear-gradient(90deg, #ff3366, #ff7a63); }
+.qr-card--wx::before { background: linear-gradient(90deg, #3ecf8e, #2fd0c9); }
+.qr-card--group::before { background: linear-gradient(90deg, #7c6cff, #c98fb0 55%, #ff9d84); }
+
+/* Hero card — the community group takes centre stage. */
+.qr-card--hero {
+  padding: 36px 30px 30px;
+  border-color: rgba(124,108,255,.28);
+  box-shadow: 0 30px 70px rgba(124,108,255,.16), 0 0 0 1px rgba(124,108,255,.10);
+  background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+}
+.qr-card--hero::before { height: 8px; }
+.qr-card--hero .qr-img-wrap { width: 300px; }
+.qr-card--hero h2 { font-size: 22px; }
+
+.qr-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 100px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .3px;
+  margin: 0 0 18px;
+}
+.qr-badge--xhs { background: rgba(255,51,102,.10); color: #ff3366; }
+.qr-badge--wx { background: rgba(62,207,142,.12); color: #1a9a5c; }
+.qr-badge--group { background: rgba(124,108,255,.12); color: var(--violet-strong); }
+
+.qr-img-wrap {
+  width: 260px;
+  margin: 0 auto 18px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 2px 4px rgba(17,19,26,.03);
+}
+.qr-img-wrap img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+}
+
+.qr-card h2 { margin: 0 0 6px; font-size: 20px; font-weight: 800; letter-spacing: -.2px; }
+.qr-card p { margin: 0; color: var(--ink-dim); font-size: 13.5px; line-height: 1.6; }
+
+.footnote {
+  max-width: 900px;
+  margin: 60px auto 0;
+  padding: 24px 28px;
+  border-radius: 20px;
+  background: rgba(124,108,255,.06);
+  border: 1px solid rgba(124,108,255,.16);
+  text-align: center;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.footnote b { color: var(--ink); font-weight: 800; }
+
+footer { text-align: center; padding: 24px 28px; color: var(--ink-faint); font-size: 12px; }
+
+@media (max-width: 1024px) {
+  .qr-grid { grid-template-columns: 1fr 1fr; }
+  .qr-card--hero { grid-column: 1 / -1; order: -1; }
+  .qr-card--hero .qr-img-wrap { width: 260px; }
+}
+@media (max-width: 720px) {
+  h1 { font-size: 32px; }
+  main { padding: 32px 20px; }
+  .qr-grid { grid-template-columns: 1fr; gap: 20px; }
+  .qr-card--hero { grid-column: auto; }
+  .qr-img-wrap { width: 220px; }
+  .qr-card--hero .qr-img-wrap { width: 240px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="./">
+      <span class="nav-logo">📚</span>
+      <span class="nav-brand-text">PaperSwipe</span>
+    </a>
+    <a class="nav-back" href="./">← 返回首页</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker">Say hi 👋</p>
+    <h1>来我们展位<br>亲手体验 <span class="grad-text">PaperSwipe</span></h1>
+    <p class="lede">加入用户群、关注小红书、添加 Creator 微信——<b>展位现场见，demo 一试就懂</b>。</p>
+  </section>
+
+  <section class="qr-grid">
+    <article class="qr-card qr-card--xhs">
+      <span class="qr-badge qr-badge--xhs">📕 小红书</span>
+      <div class="qr-img-wrap">
+        <img src="images/xiaohongshu.jpg" alt="PaperSwipe 小红书官方号二维码">
+      </div>
+      <h2>关注我们的小红书</h2>
+      <p>产品更新、幕后花絮、用户案例，<br>第一时间在小红书发布。</p>
+    </article>
+
+    <article class="qr-card qr-card--group qr-card--hero">
+      <span class="qr-badge qr-badge--group">🎉 用户群</span>
+      <div class="qr-img-wrap">
+        <img src="images/wechat-group.jpg" alt="PaperSwipe 用户微信群二维码">
+      </div>
+      <h2>加入 PaperSwipe 用户群</h2>
+      <p>和早期用户一起聊 idea、追新特性、<br>抢先体验内测版本。</p>
+    </article>
+
+    <article class="qr-card qr-card--wx">
+      <span class="qr-badge qr-badge--wx">💬 Creator 微信</span>
+      <div class="qr-img-wrap">
+        <img src="images/wechat.jpg" alt="PaperSwipe Creator 微信二维码">
+      </div>
+      <h2>加 Creator 微信</h2>
+      <p>产品建议、合作意向、内测申请，<br>直接私聊我们，24 小时内回复。</p>
+    </article>
+  </section>
+
+  <div class="footnote">
+    <b>可以来我们的展位现场体验 demo！</b><br>
+    我们会带上最新版 PaperSwipe，也想听听你们真实的科研痛点 ❤️
+  </div>
+</main>
+
+<footer>© PaperSwipe — Discover, not Search.</footer>
+
+</body>
+</html>

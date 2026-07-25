@@ -1,6 +1,67 @@
 {
   "version": 1,
   "actions": {
+    "0bf3a1867f7245b8a702093901c66b08b518eafc": {
+      "paper": {
+        "id": "0bf3a1867f7245b8a702093901c66b08b518eafc",
+        "title": "Evaluating Very Long-Term Conversational Memory of LLM Agents",
+        "abstract": "Existing works on long-term open-domain dialogues focus on evaluating model responses within contexts spanning no more than five chat sessions. Despite advancements in long-context large language models (LLMs) and retrieval augmented generation (RAG) techniques, their efficacy in very long-term dialogues remains unexplored. To address this research gap, we introduce a machine-human pipeline to generate high-quality, very long-term dialogues by leveraging LLM-based agent architectures and grounding their dialogues on personas and temporal event graphs. Moreover, we equip each agent with the capability of sharing and reacting to images. The generated conversations are verified and edited by human annotators for long-range consistency and grounding to the event graphs. Using this pipeline, we collect LoCoMo, a dataset of very long-term conversations, each encompassing 300 turns and 9K tokens on avg., over up to 35 sessions. Based on LoCoMo, we present a comprehensive evaluation benchmark to measure long-term memory in models, encompassing question answering, event summarization, and multi-modal dialogue generation tasks. Our experimental results indicate that LLMs exhibit challenges in understanding lengthy conversations and comprehending long-range temporal and causal dynamics within dialogues. Employing strategies like long-context LLMs or RAG can offer improvements but these models still substantially lag behind human performance.",
+        "authors": [
+          {
+            "name": "Adyasha Maharana"
+          },
+          {
+            "name": "Dong-Ho Lee"
+          },
+          {
+            "name": "S. Tulyakov"
+          },
+          {
+            "name": "Mohit Bansal"
+          },
+          {
+            "name": "Francesco Barbieri"
+          },
+          {
+            "name": "Yuwei Fang"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-27",
+        "venue": "Annual Meeting of the Association for Computational Linguistics",
+        "citation_count": 658,
+        "influential_citation_count": 139,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/0bf3a1867f7245b8a702093901c66b08b518eafc",
+        "external_ids": {
+          "ArXiv": "2402.17753",
+          "CorpusId": "2.68041615e+08",
+          "DBLP": "journals/corr/abs-2402-17753",
+          "DOI": "10.48550/arXiv.2402.17753"
+        },
+        "match_score": 77,
+        "read_minutes": 46,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆挑战，对话更真实！",
+          "problem": "现有方法在**非常长期对话**中的有效性未得到充分探索。",
+          "novelty": [
+            "构建**LoCoMo**数据集，包含非常长期对话。",
+            "提出综合评估基准，涵盖问答、事件摘要和多模态对话生成。"
+          ],
+          "method": "使用LLM架构生成对话，并基于角色和事件图进行对话。",
+          "result": "LLM在理解长对话和因果动态方面存在挑战。",
+          "audience": "对LLM对话系统感兴趣的读者。",
+          "why_keep": "为非常长期对话中的记忆评估提供新基准。",
+          "reading_focus": "关注LoCoMo数据集和评估基准。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-25T14:56:17.509879Z"
+    },
     "1d9c21a0fdb1cc16a32c5d490ebaf98436a23382": {
       "paper": {
         "id": "1d9c21a0fdb1cc16a32c5d490ebaf98436a23382",
@@ -57,6 +118,107 @@
       },
       "action": "dismiss",
       "updated_at": "2026-07-24T15:04:52.896757Z"
+    },
+    "43b3ccf35dc3c65053ad4b2c930b4b9a3af87081": {
+      "paper": {
+        "id": "43b3ccf35dc3c65053ad4b2c930b4b9a3af87081",
+        "title": "Hierarchical Memory for High-Efficiency Long-Term Reasoning in LLM Agents",
+        "abstract": "Long-term memory is one of the key factors influencing the reasoning capabilities of Large Language Model Agents (LLM Agents). Incorporating a memory mechanism that effectively integrates past interactions can significantly enhance decision-making and contextual coherence of LLM Agents. While recent works have made progress in memory storage and retrieval, such as encoding memory into dense vectors for similarity-based search or organizing knowledge in the form of graph, these approaches often fall short in structured memory organization and efficient retrieval. To address these limitations, we propose a Hierarchical Memory (H-MEM) architecture for LLM Agents that organizes and updates memory in a multi-level fashion based on the degree of semantic abstraction. Each memory vector is embedded with a positional index encoding pointing to its semantically related sub-memories in the next layer. During the reasoning phase, an index-based routing mechanism enables efficient, layer-by-layer retrieval without performing exhaustive similarity computations. We evaluate our method on five task settings from the LoCoMo dataset. Experimental results show that our approach consistently outperforms five baseline methods, demonstrating its effectiveness in long-term dialogue scenarios.",
+        "authors": [
+          {
+            "name": "Haoran Sun"
+          },
+          {
+            "name": "Shaoning Zeng"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-07-23",
+        "venue": "Conference of the European Chapter of the Association for Computational Linguistics",
+        "citation_count": 46,
+        "influential_citation_count": 2,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/43b3ccf35dc3c65053ad4b2c930b4b9a3af87081",
+        "external_ids": {
+          "ArXiv": "2507.22925",
+          "CorpusId": "2.80401166e+08",
+          "DBLP": "journals/corr/abs-2507-22925",
+          "DOI": "10.48550/arXiv.2507.22925"
+        },
+        "match_score": 79,
+        "read_minutes": 44,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆分层，对话更高效！",
+          "problem": "现有方法在**结构化记忆组织**和**高效检索**方面存在不足。",
+          "novelty": [
+            "提出**H-MEM**架构，多层级组织记忆。",
+            "使用**位置索引编码**，实现高效检索。"
+          ],
+          "method": "基于语义抽象程度的多层级记忆组织，使用位置索引编码。",
+          "result": "在五个任务设置上优于五个基线方法。",
+          "audience": "对LLM对话系统感兴趣的读者。",
+          "why_keep": "为长期对话中的记忆管理提供新方法。",
+          "reading_focus": "关注H-MEM架构和实验结果。"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-25T14:56:11.04339Z"
+    },
+    "64d391ce7ab2474d2549911fc6d7ba0087ac31f4": {
+      "paper": {
+        "id": "64d391ce7ab2474d2549911fc6d7ba0087ac31f4",
+        "title": "Preference-Aware Memory Update for Long-Term LLM Agents",
+        "abstract": "One of the key factors influencing the reasoning capabilities of LLM-based agents is their ability to leverage long-term memory. Integrating long-term memory mechanisms allows agents to make informed decisions grounded in historical interactions. While recent advances have significantly improved the storage and retrieval components, by encoding memory into dense vectors for similarity search or organizing memory as structured knowledge graphs most existing approaches fall short in memory updating. In particular, they lack mechanisms for dynamically refining preference memory representations in response to evolving user behaviors and contexts. To address this gap, we propose a Preference-Aware Memory Update Mechanism (PAMU) that enables dynamic and personalized memory refinement. By integrating sliding window averages (SW) with exponential moving averages (EMA), PAMU constructs a fused preference-aware representation that captures both short-term fluctuations and long-term user tendencies. We conduct experiments on five task scenarios of the LoCoMo dataset, and the results show that our mechanism can significantly improve the output quality of LLM in five baselines, validating its effectiveness in long-term conversations.",
+        "authors": [
+          {
+            "name": "Haoran Sun"
+          },
+          {
+            "name": "Zekun Zhang"
+          },
+          {
+            "name": "Shaoning Zeng"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-10-10",
+        "venue": "Annual Meeting of the Association for Computational Linguistics",
+        "citation_count": 9,
+        "influential_citation_count": 0,
+        "fields": [
+          "Computer Science"
+        ],
+        "url": "https://www.semanticscholar.org/paper/64d391ce7ab2474d2549911fc6d7ba0087ac31f4",
+        "external_ids": {
+          "ArXiv": "2510.09720",
+          "CorpusId": "2.820586e+08",
+          "DBLP": "journals/corr/abs-2510-09720",
+          "DOI": "10.48550/arXiv.2510.09720"
+        },
+        "match_score": 80,
+        "read_minutes": 43,
+        "source": "Semantic Scholar",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆升级，越聊越聪明！",
+          "problem": "现有方法在**动态更新**用户偏好记忆方面存在不足。",
+          "novelty": [
+            "提出**PAMU**机制，动态调整记忆表示。",
+            "结合**滑动窗口平均**和**指数移动平均**，捕捉短期波动和长期趋势。"
+          ],
+          "method": "构建融合的偏好感知表示，结合滑动窗口平均和指数移动平均。",
+          "result": "在五个基准上显著提高LLM输出质量。",
+          "audience": "对AI对话系统感兴趣的读者。",
+          "why_keep": "为长期对话中的记忆更新提供新思路。",
+          "reading_focus": "关注PAMU机制和实验结果。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-25T14:56:05.810339Z"
     },
     "arxiv:1811.08772v1": {
       "paper": {
@@ -494,21 +656,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆升级，像人一样理解世界",
-          "problem": "AI 缺乏长期记忆，难以处理复杂任务。",
+          "problem": "AI 难以形成长期记忆，影响复杂任务处理。",
           "novelty": [
             "M3-Agent 拥有长期记忆，处理视觉和听觉输入。",
             "记忆组织在实体中心，多模态方式。",
             "M3-Bench 基准测试，评估记忆和推理能力。"
           ],
           "method": "M3-Agent 通过强化学习训练，使用 M3-Bench 进行评估。",
-          "result": "M3-Agent 在 M3-Bench 上优于基线模型，准确率提高 6.7%-7.7%。",
+          "result": "M3-Agent 在 M3-Bench 上优于基线模型，分别提高 6.7%、7.7% 和 5.3% 的准确率。",
           "audience": "对 AI 长期记忆和复杂任务处理感兴趣的研究者。",
-          "why_keep": "为多模态 AI 提供长期记忆解决方案。",
-          "reading_focus": "关注 M3-Agent 的记忆结构和训练方法。"
+          "why_keep": "为 AI 长期记忆和复杂任务处理提供新思路。",
+          "reading_focus": "关注 M3-Agent 的记忆结构和 M3-Bench 的评估方法。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-25T06:09:32.174603Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T10:44:50.493706Z"
     },
     "arxiv:2510.06426v1": {
       "paper": {
@@ -603,21 +765,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆升级，越聊越聪明！",
-          "problem": "现有方法在长期记忆更新方面存在不足，难以适应用户行为和上下文的变化。",
+          "problem": "现有方法在长期记忆更新上存在不足，无法动态调整偏好记忆表示。",
           "novelty": [
             "提出偏好感知记忆更新机制 (PAMU)",
             "结合滑动窗口平均 (SW) 和指数移动平均 (EMA)",
             "显著提高 LLM 在长期对话中的输出质量"
           ],
-          "method": "设计 PAMU 机制，通过滑动窗口平均和指数移动平均融合偏好感知表示。",
+          "method": "提出偏好感知记忆更新机制 (PAMU)，结合滑动窗口平均 (SW) 和指数移动平均 (EMA) 构建融合的偏好感知表示。",
           "result": "在五个任务场景中，PAMU 显著提高了 LLM 的输出质量。",
-          "audience": "对 AI 长期记忆和对话系统感兴趣的读者。",
-          "why_keep": "为 LLM 长期记忆更新提供了新的思路和方法。",
-          "reading_focus": "关注 PAMU 机制的设计和实验结果。"
+          "audience": "对 AI 长期记忆和对话系统感兴趣的研究人员和开发者。",
+          "why_keep": "为长期记忆更新提供了新的思路和方法。",
+          "reading_focus": "关注 PAMU 机制和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T06:09:27.750416Z"
+      "updated_at": "2026-07-25T12:09:34.694222Z"
     },
     "arxiv:2604.07863v1": {
       "paper": {
@@ -761,21 +923,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 外部化，让记忆更强大",
-          "problem": "LLM 依赖模型权重，缺乏外部认知基础设施。",
+          "problem": "LLM 代理依赖模型权重，难以扩展能力。",
           "novelty": [
-            "外部化记忆、技能、协议和 harness 工程化。",
-            "外部化将认知负担转化为模型可解决的形式。",
-            "外部化促进模型与外部基础设施的协同进化。"
+            "外部化记忆、技能、协议和 harness 工程提高效率。",
+            "记忆外部化状态，技能外部化程序知识。",
+            "协议外部化交互结构，harness 工程统一协调。"
           ],
           "method": "通过外部化，将认知负担转化为模型可解决的形式。",
-          "result": "提供系统级框架，解释外部化对 AI 进步的影响。",
-          "audience": "对 LLM 外部化和认知基础设施感兴趣的研究者。",
-          "why_keep": "为 LLM 外部化提供理论框架。",
-          "reading_focus": "关注外部化的不同形式及其相互作用。"
+          "result": "提供系统级框架，解释代理进步依赖模型和外部认知基础设施。",
+          "audience": "对 LLM 代理和认知基础设施感兴趣的研究者。",
+          "why_keep": "为 LLM 代理的长期发展提供理论框架。",
+          "reading_focus": "关注外部化概念和系统级框架。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-25T06:09:33.35536Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-25T10:46:03.515342Z"
     },
     "arxiv:2605.06924v1": {
       "paper": {
@@ -867,22 +1029,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆导航，对话更流畅",
-          "problem": "LLM 在长期对话中，记忆上下文冗余，限制其有效性。",
+          "hook": "AI 记忆反思，对话更流畅",
+          "problem": "LLM 在长期对话中记忆冗余，影响效果。",
           "novelty": [
-            "MGRetrieval 基于语义结构进行反射式检索。",
+            "MGRetrieval 基于语义结构进行反思检索。",
             "构建更精确的检索路径，保留关键记忆。",
-            "MGRetrieval 在 LoCoMo 上优于基线模型，F1 和 BLEU-1 提高显著。"
+            "通过记忆引导检索和关键记忆传播。"
           ],
-          "method": "MGRetrieval 通过语义结构和关键记忆进行检索。",
-          "result": "MGRetrieval 在 LoCoMo 上平均 F1 和 BLEU-1 提高 8.91% 和 11.11%。",
-          "audience": "对 LLM 长期对话和记忆维护感兴趣的研究者。",
-          "why_keep": "为 LLM 长期对话提供有效的记忆检索机制。",
+          "method": "MGRetrieval 通过语义结构和关键记忆传播进行检索。",
+          "result": "MGRetrieval 在 LoCoMo 上平均优于基线模型 8.91% 和 11.11%。",
+          "audience": "对 LLM 对话和记忆维护感兴趣的研究者。",
+          "why_keep": "为 LLM 长期对话提供有效的记忆维护方法。",
           "reading_focus": "关注 MGRetrieval 的检索策略和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T06:09:34.29132Z"
+      "updated_at": "2026-07-25T10:46:17.352701Z"
     },
     "arxiv:2606.06036v1": {
       "paper": {
@@ -979,22 +1141,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆追踪，揭示隐藏错误！",
+          "hook": "AI 记忆追踪，揭示隐藏的真相！",
           "problem": "现有方法无法全面评估长期记忆的准确性。",
           "novelty": [
-            "引入 MemTrace 基准，以知识点为单位评估记忆。",
-            "发现证据使用是主要瓶颈，而非检索。",
-            "提出改进长期记忆的方法：更好地使用可到达的证据。"
+            "引入 MemTrace 基准，以知识点为单位评估记忆",
+            "发现证据使用是瓶颈，而非检索",
+            "提高长期记忆需要更好地利用可获取的证据"
           ],
-          "method": "设计 MemTrace 基准，评估长期记忆的准确性。",
-          "result": "发现证据使用是主要瓶颈，而非检索。",
-          "audience": "对 AI 长期记忆和评估感兴趣的读者。",
-          "why_keep": "为 LLM 长期记忆评估提供了新的视角和方法。",
-          "reading_focus": "关注 MemTrace 基准的设计和实验结果。"
+          "method": "引入 MemTrace 基准，以知识点为单位评估记忆，并分析证据使用。",
+          "result": "发现证据使用是瓶颈，而非检索。",
+          "audience": "对 AI 长期记忆评估和改进感兴趣的研究人员和开发者。",
+          "why_keep": "为长期记忆评估和改进提供了新的视角。",
+          "reading_focus": "关注 MemTrace 基准和实验结果。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T06:09:30.564158Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-25T12:09:44.508348Z"
     },
     "arxiv:2606.24322v1": {
       "paper": {
@@ -1024,22 +1186,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆安全，防毒攻击新招！",
-          "problem": "LLM 长期记忆易受毒攻击，现有防御方法存在漏洞。",
+          "hook": "AI 记忆安全，防毒攻于未然！",
+          "problem": "LLM 代理的长期记忆易受毒攻，现有防御方法存在漏洞。",
           "novelty": [
             "提出非可变、起源绑定权威机制 (TMA-NM)",
-            "证明机器检查分离定理",
+            "防止内容或血缘信息篡改",
             "在所有模型和渠道上实现 0% 攻击成功率"
           ],
-          "method": "设计 TMA-NM 机制，实现非可变信息流控制。",
-          "result": "在八个前沿模型上，TMA-NM 在直接和洗钱攻击中均达到 0% 攻击成功率。",
-          "audience": "对 AI 安全和长期记忆感兴趣的读者。",
-          "why_keep": "为 LLM 长期记忆安全提供了新的解决方案。",
-          "reading_focus": "关注 TMA-NM 机制的设计和实验结果。"
+          "method": "提出非可变信息流控制 (IFC) 的 TMA-NM 机制，防止内容或血缘信息篡改。",
+          "result": "在八个前沿模型上，TMA-NM 实现了 0% 攻击成功率。",
+          "audience": "对 AI 安全和长期记忆保护感兴趣的研究人员和开发者。",
+          "why_keep": "为 LLM 代理的长期记忆安全提供了新的解决方案。",
+          "reading_focus": "关注 TMA-NM 机制和实验结果。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T06:09:29.055546Z"
+      "action": "save",
+      "updated_at": "2026-07-25T12:09:40.091545Z"
     },
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
@@ -1370,29 +1532,83 @@
         "read_minutes": 32,
         "source": "arXiv",
         "digest": {
-          "verdict": "Foundational read on LLM long-term memory — save and study the paging protocol.",
-          "hook": "A hierarchical memory OS that lets an LLM page its own context in and out — unlocking effectively unbounded conversations.",
-          "problem": "LLMs have a **fixed context window** that caps how much history or document text they can reason over at once.",
+          "verdict": "LLM 长期记忆的奠基之作，值得收藏细读分页机制。",
+          "hook": "让大模型像操作系统一样管理记忆，对话不再受限。",
+          "problem": "LLM 的**上下文窗口大小固定**，能同时处理的历史或文档信息有限。",
           "novelty": [
-            "Treats the context window as **RAM** and external stores as **disk**, with the LLM issuing its own paging calls.",
-            "Introduces a **function-calling protocol** letting the model self-manage memory operations.",
-            "Demonstrates coherent conversations spanning **thousands of turns** without losing key facts."
+            "把上下文窗口当作**内存**，外部存储当作**磁盘**，让模型自己发起换页调用。",
+            "引入**函数调用协议**，让模型自主管理记忆操作。",
+            "展示了长达**数千轮**的连贯对话，且关键信息不丢失。"
           ],
-          "method": "A tiered memory hierarchy (main context, recall storage, archival storage) mediated by tool calls the model itself issues to swap information in and out.",
-          "result": "Sustained coherence across **10× longer** conversations and materially better long-document QA than context-only baselines.",
-          "audience": "Researchers and engineers building agentic systems that must remember across many turns or documents.",
-          "why_keep": "This is the reference design for LLM long-term memory — most later work builds on or contrasts with it.",
-          "reading_focus": "The memory-management function schema and eviction/recall policies in Sections 3–4."
+          "method": "构建分层记忆体系（主上下文、召回存储、归档存储），模型通过工具调用在其间自主换入换出信息。",
+          "result": "对话连贯性提升至**10倍**长度，长文档问答效果也明显优于仅靠上下文的基线方法。",
+          "audience": "正在构建需要跨多轮或多文档保持记忆的智能体系统的研究者和工程师。",
+          "why_keep": "这是 LLM 长期记忆的参考设计，后续很多工作都基于它或与它对比。",
+          "reading_focus": "第 3-4 节中记忆管理的函数模式及换入换出策略。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T16:23:35.427539Z"
+      "updated_at": "2026-07-25T14:57:32.734167Z"
+    },
+    "trend-mem-3": {
+      "paper": {
+        "id": "trend-mem-3",
+        "title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+        "abstract": "Reflexion equips language agents with a verbal self-critique loop: after each trial the agent writes a natural-language reflection about what went wrong, stores it in an episodic memory, and consults it on the next attempt. This lightweight, gradient-free feedback drives large gains on HumanEval, HotpotQA, and AlfWorld.",
+        "authors": [
+          {
+            "name": "Noah Shinn"
+          },
+          {
+            "name": "Federico Cassano"
+          },
+          {
+            "name": "Ashwin Gopinath"
+          },
+          {
+            "name": "Karthik R. Narasimhan"
+          },
+          {
+            "name": "Shunyu Yao"
+          }
+        ],
+        "year": 2023,
+        "venue": "NeurIPS",
+        "citation_count": 1810,
+        "influential_citation_count": 260,
+        "fields": [
+          "LLM Agents",
+          "Reinforcement Learning"
+        ],
+        "url": "https://arxiv.org/abs/2303.11366",
+        "pdf_url": "https://arxiv.org/pdf/2303.11366",
+        "match_score": 92,
+        "read_minutes": 28,
+        "source": "NeurIPS",
+        "digest": {
+          "verdict": "轻量、无需梯度更新的改进方案，记忆当训练信号的思路值得一读。",
+          "hook": "不靠梯度更新，AI 靠给自己写检讨笔记就能越战越强。",
+          "problem": "提升语言智能体通常需要**梯度更新**或高成本强化学习，在 LLM 规模下代价很大。",
+          "novelty": [
+            "用**语言化自我反思**作为更新信号，完全不改模型权重。",
+            "把反思保存进**episodic 记忆**，供下次重试时查阅。",
+            "仅靠**提示词设计**即可用于决策、编程和问答等任务。"
+          ],
+          "method": "采用「执行者-评估者-反思者」三元结构：LLM 执行任务，评估者打分，反思者生成自然语言批评并存入记忆供后续调用。",
+          "result": "相比强 ReAct 基线，HumanEval 提升 **22%**，HotpotQA 提升 20%，AlfWorld 提升 14%。",
+          "audience": "无法微调、只能在推理阶段做提升的智能体开发者。",
+          "why_keep": "证明了 episodic 记忆本身也能承载学习信号，是许多自我提升型智能体的模板。",
+          "reading_focus": "反思提示词模板，以及记忆注入执行循环的具体位置。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-25T14:57:40.551094Z"
     }
   },
   "recent_searches": [
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-25T07:09:12.437095Z"
+      "created_at": "2026-07-25T14:54:08.390675Z"
     },
     {
       "query": "memory",
