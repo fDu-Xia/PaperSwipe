@@ -23,12 +23,17 @@ const (
 
 var llmCallSeq atomic.Uint64
 
-func llmDebugPromptEnabled() bool {
-	return strings.TrimSpace(os.Getenv("LLM_DEBUG_PROMPT")) == "1"
+func logFlow(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, "[流程] "+format+"\n", args...)
 }
 
-func logLLM(format string, args ...any) {
-	fmt.Fprintf(os.Stderr, "[llm] "+format+"\n", args...)
+// cardRangeLabel 把 0-based [start,end) 转成「卡片1、卡片2、卡片3」
+func cardRangeLabel(start, end int) string {
+	parts := make([]string, 0, end-start)
+	for i := start; i < end; i++ {
+		parts = append(parts, fmt.Sprintf("卡片%d", i+1))
+	}
+	return strings.Join(parts, "、")
 }
 
 type Summarizer struct {
@@ -90,23 +95,23 @@ func (s *Summarizer) applyProviderOptions(payload map[string]any) {
 func (s *Summarizer) PlanTopic(ctx context.Context, description string) (TopicPlan, bool) {
 	fallback := heuristicTopicPlan(description)
 	if !s.Enabled() {
-		logLLM("PlanTopic skipped (ai_enabled=false) — heuristic keywords=%v", fallback.Keywords)
+		logFlow("【选题】AI 未启用，改用本地启发式拆词 → 关键词=%v", fallback.Keywords)
 		return fallback, false
 	}
 
-	logLLM("PlanTopic START description=%q model=%s", description, s.model)
+	logFlow("【选题】AI 开始：把研究兴趣拆成检索词 | 模型=%s | 描述=%q", s.model, description)
 	started := time.Now()
 	plan, err := s.planTopicWithLLM(ctx, description)
 	if err != nil {
-		logLLM("PlanTopic FAILED after %s: %v — falling back to heuristic", time.Since(started).Round(time.Millisecond), err)
+		logFlow("【选题】AI 失败（耗时 %s）：%v → 回退本地启发式", time.Since(started).Round(time.Millisecond), err)
 		return fallback, false
 	}
 	plan = normalizeTopicPlan(description, plan)
 	if plan.SearchQuery == "" || len(plan.Keywords) == 0 {
-		logLLM("PlanTopic returned empty plan (query=%q keywords=%v) — falling back", plan.SearchQuery, plan.Keywords)
+		logFlow("【选题】AI 返回空结果（query=%q keywords=%v）→ 回退本地启发式", plan.SearchQuery, plan.Keywords)
 		return fallback, false
 	}
-	logLLM("PlanTopic DONE duration=%s query=%q keywords=%v", time.Since(started).Round(time.Millisecond), plan.SearchQuery, plan.Keywords)
+	logFlow("【选题】AI 完成（耗时 %s）→ 检索词=%q | 关键词=%v", time.Since(started).Round(time.Millisecond), plan.SearchQuery, plan.Keywords)
 	return plan, true
 }
 
@@ -123,6 +128,10 @@ func (s *Summarizer) planTopicWithLLM(ctx context.Context, description string) (
 	}
 	s.applyProviderOptions(payload)
 	body, _ := json.Marshal(payload)
+	callID := llmCallSeq.Add(1)
+	logFlow("【选题】调用 #%d 发送请求 → %s | 模型=%s | 载荷=%d 字节", callID, s.baseURL+"/chat/completions", s.model, len(body))
+	logFlow("【选题】调用 #%d Prompt ↓↓↓\n%s\n↑↑↑ Prompt 结束", callID, prompt)
+	sendStart := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.baseURL+"/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return TopicPlan{}, err
@@ -130,13 +139,17 @@ func (s *Summarizer) planTopicWithLLM(ctx context.Context, description string) (
 	req.Header.Set("Authorization", "Bearer "+s.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
+	logFlow("【选题】调用 #%d 等待 AI 返回选题结果中…", callID)
 	resp, err := s.client.Do(req)
 	if err != nil {
+		logFlow("【选题】调用 #%d 网络错误（耗时 %s）：%v", callID, time.Since(sendStart).Round(time.Millisecond), err)
 		return TopicPlan{}, err
 	}
 	defer resp.Body.Close()
+	logFlow("【选题】调用 #%d 已收到响应头 status=%d（耗时 %s），正在读取正文…", callID, resp.StatusCode, time.Since(sendStart).Round(time.Millisecond))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		message, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		logFlow("【选题】调用 #%d HTTP 错误正文：%s", callID, strings.TrimSpace(string(message)))
 		return TopicPlan{}, fmt.Errorf("LLM status %d: %s", resp.StatusCode, strings.TrimSpace(string(message)))
 	}
 	var response struct {
@@ -147,13 +160,19 @@ func (s *Summarizer) planTopicWithLLM(ctx context.Context, description string) (
 		} `json:"choices"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&response); err != nil {
+		logFlow("【选题】调用 #%d 解析响应失败（耗时 %s）：%v", callID, time.Since(sendStart).Round(time.Millisecond), err)
 		return TopicPlan{}, err
 	}
 	if len(response.Choices) == 0 {
+		logFlow("【选题】调用 #%d AI 返回空 choices（耗时 %s）", callID, time.Since(sendStart).Round(time.Millisecond))
 		return TopicPlan{}, fmt.Errorf("LLM returned no choices")
 	}
+	rawContent := response.Choices[0].Message.Content
+	logFlow("【选题】调用 #%d AI 已返回（耗时 %s，%d 字节）", callID, time.Since(sendStart).Round(time.Millisecond), len(rawContent))
+	logFlow("【选题】调用 #%d AI 返回内容 ↓↓↓\n%s\n↑↑↑ AI 内容结束", callID, rawContent)
 	var plan TopicPlan
-	if err := json.Unmarshal([]byte(response.Choices[0].Message.Content), &plan); err != nil {
+	if err := json.Unmarshal([]byte(rawContent), &plan); err != nil {
+		logFlow("【选题】调用 #%d JSON 解析失败：%v", callID, err)
 		return TopicPlan{}, err
 	}
 	return plan, nil
@@ -262,13 +281,13 @@ func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper
 		papers[i].Digest = heuristicDigest(query, papers[i])
 	}
 	if !s.Enabled() || len(papers) == 0 {
-		logLLM("Summarize skipped (ai_enabled=%v papers=%d) — using heuristic digest", s.Enabled(), len(papers))
+		logFlow("【卡片】AI 未启用或无论文（ai=%v papers=%d）→ 使用本地启发式摘要", s.Enabled(), len(papers))
 		return papers, false
 	}
 
 	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
-	logLLM("Summarize START query=%q papers=%d batches=%d batch_size=%d concurrency=%d model=%s thinking=%s",
-		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model, s.thinking)
+	logFlow("【卡片】AI 开始生成摘要 | 检索词=%q | 共 %d 篇 → %d 批（每批最多 %d 篇，并发 %d）| 模型=%s",
+		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model)
 	started := time.Now()
 	digests := s.summarizeInBatches(ctx, query, papers)
 	applied := false
@@ -281,8 +300,8 @@ func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper
 			applied = true
 		}
 	}
-	logLLM("Summarize DONE query=%q duration=%s applied=%v ai_digests=%d/%d",
-		query, time.Since(started).Round(time.Millisecond), applied, len(digests), len(papers))
+	logFlow("【卡片】AI 摘要全部完成（耗时 %s）| 成功 %d/%d 篇 applied=%v",
+		time.Since(started).Round(time.Millisecond), len(digests), len(papers), applied)
 	return papers, applied
 }
 
@@ -307,7 +326,7 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 		papers[i].Digest = heuristicDigest(query, papers[i])
 	}
 	if !s.Enabled() || len(papers) == 0 {
-		logLLM("SummarizeStream skipped (ai_enabled=%v papers=%d) — emitting heuristic digest", s.Enabled(), len(papers))
+		logFlow("【卡片】AI 未启用或无论文（ai=%v papers=%d）→ 直接下发本地启发式摘要", s.Enabled(), len(papers))
 		if len(papers) > 0 {
 			emit(papers)
 		}
@@ -315,8 +334,8 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 	}
 
 	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
-	logLLM("SummarizeStream START query=%q papers=%d batches=%d batch_size=%d concurrency=%d model=%s thinking=%s",
-		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model, s.thinking)
+	logFlow("【卡片】AI 开始流式生成摘要 | 检索词=%q | 共 %d 篇 → %d 批（每批最多 %d 篇，并发 %d）| 模型=%s",
+		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model)
 	started := time.Now()
 
 	// One 1-buffered channel per batch; the batch worker writes exactly once,
@@ -331,26 +350,29 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 		end := min(start+summaryBatchSize, len(papers))
 		batchIdx := start / summaryBatchSize
 		batch := append([]Paper(nil), papers[start:end]...)
-		go func(idx int, batch []Paper) {
+		go func(idx, cardStart, cardEnd int, batch []Paper) {
 			select {
 			case semaphore <- struct{}{}:
 				defer func() { <-semaphore }()
 			case <-ctx.Done():
-				logLLM("batch %d/%d skipped (ctx canceled before start)", idx+1, batchCount)
+				logFlow("【卡片】第 %d/%d 批（%s）已取消，跳过", idx+1, batchCount, cardRangeLabel(cardStart, cardEnd))
 				slots[idx] <- nil
 				return
 			}
 			batchStart := time.Now()
-			logLLM("batch %d/%d SENDING papers=%d", idx+1, batchCount, len(batch))
-			digests, err := s.summarizeWithLLM(ctx, query, batch)
+			logFlow("【卡片】第 %d/%d 批：正在为 %s 生成 AI 摘要…", idx+1, batchCount, cardRangeLabel(cardStart, cardEnd))
+			for i := range batch {
+				logFlow("【卡片】等待 %s 返回中…（标题：%s）", fmt.Sprintf("卡片%d", cardStart+i+1), truncateRunes(batch[i].Title, 72))
+			}
+			digests, err := s.summarizeWithLLM(ctx, query, batch, cardStart)
 			if err != nil {
-				logLLM("batch %d/%d FAILED after %s: %v", idx+1, batchCount, time.Since(batchStart).Round(time.Millisecond), err)
+				logFlow("【卡片】第 %d/%d 批（%s）失败（耗时 %s）：%v", idx+1, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), err)
 				slots[idx] <- nil
 				return
 			}
-			logLLM("batch %d/%d OK  duration=%s digests=%d/%d", idx+1, batchCount, time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
+			logFlow("【卡片】第 %d/%d 批（%s）完成（耗时 %s）| 成功 %d/%d", idx+1, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
 			slots[idx] <- digests
-		}(batchIdx, batch)
+		}(batchIdx, start, end, batch)
 	}
 
 	applied := false
@@ -368,10 +390,13 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 					}
 					applied = true
 					totalDigests++
+					logFlow("【卡片】%s 摘要已就绪 → %s", fmt.Sprintf("卡片%d", i+1), truncateRunes(papers[i].Title, 72))
+				} else {
+					logFlow("【卡片】%s 未拿到 AI 摘要，保留本地启发式 → %s", fmt.Sprintf("卡片%d", i+1), truncateRunes(papers[i].Title, 72))
 				}
 			}
 		case <-ctx.Done():
-			logLLM("SummarizeStream aborted at batch %d/%d: %v", idx+1, batchCount, ctx.Err())
+			logFlow("【卡片】流式摘要在第 %d/%d 批中止：%v", idx+1, batchCount, ctx.Err())
 			// Emit remaining heuristic-only slices so the caller still sees the deck.
 			for j := idx; j < batchCount; j++ {
 				s2 := j * summaryBatchSize
@@ -383,8 +408,8 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 		emit(papers[start:end])
 	}
 
-	logLLM("SummarizeStream DONE query=%q duration=%s applied=%v ai_digests=%d/%d",
-		query, time.Since(started).Round(time.Millisecond), applied, totalDigests, len(papers))
+	logFlow("【卡片】AI 摘要全部完成（耗时 %s）| 成功 %d/%d 篇 applied=%v",
+		time.Since(started).Round(time.Millisecond), totalDigests, len(papers), applied)
 	return applied
 }
 
@@ -402,6 +427,8 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 		end := min(start+summaryBatchSize, len(papers))
 		batch := append([]Paper(nil), papers[start:end]...)
 		batchIdx := start/summaryBatchSize + 1
+		cardStart := start
+		cardEnd := end
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
@@ -409,19 +436,22 @@ func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, paper
 			case semaphore <- struct{}{}:
 				defer func() { <-semaphore }()
 			case <-ctx.Done():
-				logLLM("batch %d/%d skipped (ctx canceled before start)", batchIdx, batchCount)
+				logFlow("【卡片】第 %d/%d 批（%s）已取消，跳过", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd))
 				results <- batchResult{}
 				return
 			}
 			batchStart := time.Now()
-			logLLM("batch %d/%d SENDING papers=%d", batchIdx, batchCount, len(batch))
-			digests, err := s.summarizeWithLLM(ctx, query, batch)
+			logFlow("【卡片】第 %d/%d 批：正在为 %s 生成 AI 摘要…", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd))
+			for i := range batch {
+				logFlow("【卡片】等待 %s 返回中…（标题：%s）", fmt.Sprintf("卡片%d", cardStart+i+1), truncateRunes(batch[i].Title, 72))
+			}
+			digests, err := s.summarizeWithLLM(ctx, query, batch, cardStart)
 			if err != nil {
-				logLLM("batch %d/%d FAILED after %s: %v", batchIdx, batchCount, time.Since(batchStart).Round(time.Millisecond), err)
+				logFlow("【卡片】第 %d/%d 批（%s）失败（耗时 %s）：%v", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), err)
 				results <- batchResult{}
 				return
 			}
-			logLLM("batch %d/%d OK  duration=%s digests=%d/%d", batchIdx, batchCount, time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
+			logFlow("【卡片】第 %d/%d 批（%s）完成（耗时 %s）| 成功 %d/%d", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
 			results <- batchResult{digests: digests}
 		}()
 	}
@@ -450,7 +480,7 @@ type llmDigestResponse struct {
 	Papers []llmDigest `json:"papers"`
 }
 
-func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers []Paper) (map[string]llmDigest, error) {
+func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers []Paper, cardStart int) (map[string]llmDigest, error) {
 	type compactPaper struct {
 		ID       string `json:"id"`
 		Title    string `json:"title"`
@@ -463,25 +493,25 @@ func (s *Summarizer) summarizeWithLLM(ctx context.Context, query string, papers 
 	inputJSON, _ := json.Marshal(input)
 	prompt := fmt.Sprintf(`You are a science journalist writing for an academic card-swiping app (like Tinder for papers). The user's research direction is %q.
 
-For each paper, generate a concise English digest card based ONLY on the title and abstract. Do not invent results, numbers, or conclusions.
+For each paper, generate a concise digest card based ONLY on the title and abstract. Do not invent results, numbers, or conclusions.
 
-CRITICAL — the "hook" field must follow this exact style (like a New Scientist headline):
-- ONE sentence, under 140 characters
-- Pattern: "A [adjective] [concept] that [dramatic impact]."
-- Examples of the target style:
-  "A simple method that dramatically improves LLM reasoning by showing intermediate steps."
-  "The transformer architecture that reshaped modern deep learning entirely."
-  "A new generative paradigm that matches GANs in image quality without adversarial training."
-- Focus on the BIG PICTURE — what makes this paper exciting? Not technical details.
-- Use plain English. Avoid jargon. Avoid "We propose...", "This paper...", "In this work..."
+CRITICAL — the "hook" field is the front-of-card one-liner and MUST be in Simplified Chinese:
+- 一句中文，口语化、通俗易懂，让非专业读者也一眼看懂这篇论文在讲什么、核心贡献是什么
+- 要抓眼球：突出最劲爆/最关键的一点（核心贡献或关键影响），像短视频标题或科普推文，不要学术腔
+- 字数：25～40 个汉字（含标点），至少20字，绝不超过 40 字；只写一句，不要分句堆砌
+- 专有名词可保留英文（如 Transformer、RAG），但整句必须是中文
+- 风格示例（仅示意语气与长度，勿照抄）：
+  "大模型第一次学会了"越聊越聪明"。让 AI 把每次犯过的错都变成经验，下次决策更准确。"
+  "AI 学会了"吃一堑长一智"——给 AI 装上分层记忆，让每一次对话都成为下一次的经验。"
+  "这篇论文，开启了 Diffusion 时代——不靠对抗训练，也能生成堪比 GAN 的逼真图像。"
 
-Other fields (each under 280 chars unless noted):
+Other fields stay in English (each under 280 chars unless noted):
 - verdict: 1-line screening recommendation
 - problem: what problem they tackle
 - novelty: 2-4 short bullet points listing what is new / the key insights (JSON array of strings, each under 160 chars, no leading dashes)
 - method: how they solved it
 - result: key quantitative outcome (include numbers if available)
-- audience: who should read this
+- audience: why this matters to the you
 - why_keep: why this matters to the field
 - reading_focus: what to pay attention to when reading (max 100 chars)
 
@@ -494,7 +524,7 @@ Papers: %s`, query, inputJSON)
 	payload := map[string]any{
 		"model": s.model,
 		"messages": []map[string]string{
-			{"role": "system", "content": "Return valid JSON only. Write like a science journalist for a general audience. The hook field is the most important — it must be a single punchy sentence under 140 chars."},
+			{"role": "system", "content": "Return valid JSON only. The hook field MUST be one punchy Simplified Chinese sentence of 18-36 Chinese characters; other digest fields stay in English."},
 			{"role": "user", "content": prompt},
 		},
 		"temperature":     0.2,
@@ -503,14 +533,9 @@ Papers: %s`, query, inputJSON)
 	s.applyProviderOptions(payload)
 	body, _ := json.Marshal(payload)
 	callID := llmCallSeq.Add(1)
-	paperIDs := make([]string, 0, len(papers))
-	for _, p := range papers {
-		paperIDs = append(paperIDs, p.ID)
-	}
-	logLLM("call #%d POST %s model=%s payload=%d bytes papers=%v", callID, s.baseURL+"/chat/completions", s.model, len(body), paperIDs)
-	if llmDebugPromptEnabled() {
-		logLLM("call #%d PROMPT ↓↓↓\n%s\n↑↑↑ end prompt", callID, prompt)
-	}
+	cards := cardRangeLabel(cardStart, cardStart+len(papers))
+	logFlow("【卡片】调用 #%d 发送 AI 请求（%s）→ %s | 模型=%s | 载荷=%d 字节", callID, cards, s.baseURL+"/chat/completions", s.model, len(body))
+	logFlow("【卡片】调用 #%d Prompt ↓↓↓（%s）\n%s\n↑↑↑ Prompt 结束", callID, cards, prompt)
 	sendStart := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.baseURL+"/chat/completions", bytes.NewReader(body))
 	if err != nil {
@@ -519,15 +544,17 @@ Papers: %s`, query, inputJSON)
 	req.Header.Set("Authorization", "Bearer "+s.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
+	logFlow("【卡片】调用 #%d 等待 %s 的 AI 返回中…", callID, cards)
 	resp, err := s.client.Do(req)
 	if err != nil {
-		logLLM("call #%d NETWORK error after %s: %v", callID, time.Since(sendStart).Round(time.Millisecond), err)
+		logFlow("【卡片】调用 #%d 网络错误（%s，耗时 %s）：%v", callID, cards, time.Since(sendStart).Round(time.Millisecond), err)
 		return nil, err
 	}
 	defer resp.Body.Close()
-	logLLM("call #%d headers received status=%d after %s", callID, resp.StatusCode, time.Since(sendStart).Round(time.Millisecond))
+	logFlow("【卡片】调用 #%d 已收到响应头 status=%d（%s，耗时 %s），正在读取正文…", callID, resp.StatusCode, cards, time.Since(sendStart).Round(time.Millisecond))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		message, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		logFlow("【卡片】调用 #%d HTTP 错误正文：%s", callID, strings.TrimSpace(string(message)))
 		return nil, fmt.Errorf("LLM status %d: %s", resp.StatusCode, strings.TrimSpace(string(message)))
 	}
 	var response struct {
@@ -543,16 +570,20 @@ Papers: %s`, query, inputJSON)
 		} `json:"usage"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<20)).Decode(&response); err != nil {
+		logFlow("【卡片】调用 #%d 解析响应失败（%s，耗时 %s）：%v", callID, cards, time.Since(sendStart).Round(time.Millisecond), err)
 		return nil, err
 	}
 	if len(response.Choices) == 0 {
+		logFlow("【卡片】调用 #%d AI 返回空 choices（%s，耗时 %s）", callID, cards, time.Since(sendStart).Round(time.Millisecond))
 		return nil, fmt.Errorf("LLM returned no choices")
 	}
 	rawContent := response.Choices[0].Message.Content
-	logLLM("call #%d body parsed prompt_tok=%d comp_tok=%d total_tok=%d content=%d bytes", callID, response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens, len(rawContent))
+	logFlow("【卡片】调用 #%d AI 已返回（%s，耗时 %s）| prompt_tok=%d comp_tok=%d total_tok=%d | %d 字节",
+		callID, cards, time.Since(sendStart).Round(time.Millisecond), response.Usage.PromptTokens, response.Usage.CompletionTokens, response.Usage.TotalTokens, len(rawContent))
+	logFlow("【卡片】调用 #%d AI 返回内容 ↓↓↓（%s）\n%s\n↑↑↑ AI 内容结束", callID, cards, rawContent)
 	var parsed llmDigestResponse
 	if err := json.Unmarshal([]byte(rawContent), &parsed); err != nil {
-		logLLM("call #%d JSON parse FAILED: %v | first 400 chars: %q", callID, err, truncateRunes(rawContent, 400))
+		logFlow("【卡片】调用 #%d JSON 解析失败：%v | 前 400 字：%q", callID, err, truncateRunes(rawContent, 400))
 		return nil, err
 	}
 	requestedIDs := make(map[string]string, len(papers))
@@ -581,9 +612,9 @@ Papers: %s`, query, inputJSON)
 		output[key] = item
 	}
 	if len(unmatched) > 0 {
-		logLLM("call #%d ID MISMATCH: returned %d, matched %d/%d; unmatched=%v", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers), unmatched)
+		logFlow("【卡片】调用 #%d ID 对不上：返回 %d 条，匹配 %d/%d；未匹配=%v", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers), unmatched)
 	}
-	logLLM("call #%d parsed %d digest entries (matched=%d/%d)", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers))
+	logFlow("【卡片】调用 #%d 解析出 %d 条摘要（匹配 %d/%d）| %s", callID, len(parsed.Papers), len(output)-len(unmatched), len(papers), cards)
 	return output, nil
 }
 
@@ -629,8 +660,8 @@ func heuristicDigest(query string, paper Paper) Digest {
 		verdict = "Peripheral match — confirm relevance before investing time"
 	}
 
-	// Build a synthesized hook from the best available digest sentence
-	hook := buildHook(noveltyLead, method, result, paper)
+	// Build a synthesized Chinese hook for the card front (AI will overwrite when available)
+	hook := buildChineseHook(noveltyLead, method, result, paper)
 
 	trimmedBullets := make(Bullets, 0, len(noveltyBullets))
 	for _, item := range noveltyBullets {
@@ -684,6 +715,36 @@ func pickNoveltyBullets(sentences []string, method string) Bullets {
 		add(method)
 	}
 	return bullets
+}
+
+// buildChineseHook makes a short Simplified-Chinese front-card line for
+// heuristic digests (used before / when AI is unavailable). Keep under ~36 runes.
+func buildChineseHook(novelty, method, result string, paper Paper) string {
+	concept := strings.TrimSpace(paper.Title)
+	if idx := strings.IndexAny(concept, ":：-—–"); idx > 8 {
+		concept = strings.TrimSpace(concept[:idx])
+	}
+	for _, p := range []string{"On the ", "Towards ", "Toward ", "A ", "An ", "The "} {
+		if strings.HasPrefix(strings.ToLower(concept), strings.ToLower(p)) {
+			concept = strings.TrimSpace(concept[len(p):])
+			break
+		}
+	}
+	concept = truncateRunes(concept, 28)
+	if concept == "" {
+		return "这篇论文提出了一个值得关注的新思路。"
+	}
+	lower := strings.ToLower(novelty + " " + method + " " + result)
+	switch {
+	case strings.Contains(lower, "memory") || strings.Contains(lower, "记忆"):
+		return truncateRunes(fmt.Sprintf("给 AI 装上更好的记忆机制：%s。", concept), 36)
+	case strings.Contains(lower, "retriev") || strings.Contains(lower, "检索"):
+		return truncateRunes(fmt.Sprintf("让检索更准一步：%s。", concept), 36)
+	case strings.Contains(lower, "agent"):
+		return truncateRunes(fmt.Sprintf("让智能体更会办事：%s。", concept), 36)
+	default:
+		return truncateRunes(fmt.Sprintf("一文读懂：%s 想解决什么。", concept), 36)
+	}
 }
 
 // buildHook synthesizes a card-swipe-demo-style punchy one-liner.

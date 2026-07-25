@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PaperSwipe — 别再搜论文了，开始刷论文</title>
+<meta name="description" content="PaperSwipe：用 AI 把读论文变成刷论文。AI 先认识你，再替你发现论文；5 秒判断值不值得读；自动规划阅读日程；实时追踪全球研究热点。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg-orbs" aria-hidden="true">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top">
+      <span class="nav-logo" aria-hidden="true">🎉</span><span class="nav-brand-text">PaperSwipe</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#explore">Explore</a>
+      <a href="#library">Library</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#trending">Trending</a>
+    </nav>
+    <a class="nav-cta" href="#cta">立即体验</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow" data-reveal>把读论文，变成刷论文</p>
+      <h1 data-reveal>
+        别再<span class="strike">搜</span>论文了，<br>
+        开始<span class="grad-text">刷</span>论文。
+      </h1>
+      <p class="hero-sub" data-reveal>
+        AI 先认识你，再替你发现论文——像刷抖音、刷 Tinder 一样，<br class="br-desktop">
+        左右滑动，几分钟做完过去要花几小时才能做完的筛选。
+      </p>
+      <div class="hero-actions" data-reveal>
+        <a href="#cta" class="btn btn-primary">开始刷论文 <span class="btn-arrow">→</span></a>
+        <a href="#pain" class="btn btn-ghost">这问题我也有 ↓</a>
+      </div>
+      <div class="hero-stats" data-reveal>
+        <div><b>5s</b><span>判断一篇论文值不值得读</span></div>
+        <div><b>0</b><span>次手动翻译摘要</span></div>
+        <div><b>3</b><span>大权威论文库实时接入</span></div>
+      </div>
+    </div>
+    <div class="hero-phones" data-reveal>
+      <img class="phone phone-back" src="images/explore-back.png" alt="PaperSwipe 论文卡片背面：完整精读笔记">
+      <video class="phone phone-front" src="videos/explore-swipe.mp4" poster="images/explore-front.png" autoplay muted loop playsinline aria-label="PaperSwipe 刷论文过程演示"></video>
+      <div class="hero-glow" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ PAIN POINT ============ -->
+  <section class="pain" id="pain">
+    <div class="pain-inner">
+      <p class="section-kicker">痛点</p>
+      <h2 data-reveal>读论文最贵的成本，<br>从来不是「读」，而是<u>找</u>。</h2>
+
+      <div class="pain-demo" data-reveal>
+        <div class="pain-demo-visual">
+          <div class="browser-frame">
+            <div class="browser-frame-bar">
+              <span class="browser-dot browser-dot--red"></span>
+              <span class="browser-dot browser-dot--yellow"></span>
+              <span class="browser-dot browser-dot--green"></span>
+              <span class="browser-frame-url">scholar.google.com</span>
+            </div>
+            <video class="browser-frame-video" src="videos/googlescholar.mp4" autoplay muted loop playsinline aria-label="传统 Google Scholar 搜索发现论文的过程演示"></video>
+          </div>
+        </div>
+        <div class="pain-story">
+          <div class="pain-step"><span class="pain-num">01</span>Google Scholar 搜一个关键词，出来几千篇论文</div>
+          <div class="pain-step"><span class="pain-num">02</span>打开第一篇，翻译摘要，看完关掉</div>
+          <div class="pain-step"><span class="pain-num">03</span>打开第二篇，翻译摘要，看完关掉…如此重复几十次</div>
+          <div class="pain-step pain-step--result"><span class="pain-num">🤯</span>终于收藏 20 篇，最后真正读完的：<b>0 篇</b></div>
+        </div>
+      </div>
+
+      <p class="pain-quote" data-reveal>问题不是论文不够多，而是从「几千篇结果」到「值得读的那一篇」之间，<br class="br-desktop">隔着太多重复、低效、几乎没有信息增量的体力劳动。</p>
+    </div>
+  </section>
+
+  <!-- ============ BOLD IDEA ============ -->
+  <section class="idea">
+    <div class="idea-inner" data-reveal>
+      <p class="section-kicker section-kicker--light">一个大胆的想法</p>
+      <h2>如果找论文，<br>能像刷 <span class="grad-text">TikTok</span> 一样呢？</h2>
+      <p>不用你输入关键词、翻几十页搜索结果、逐篇打开判断相关性。<br class="br-desktop">
+      AI 先理解你是谁、最近在研究什么、已经读过哪些论文，<br class="br-desktop">
+      然后直接把你最可能感兴趣的论文推到你面前——你只需要滑一下。</p>
+      <p class="idea-brand">于是有了 <span class="nav-brand-text">PaperSwipe</span> 🎉</p>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE: EXPLORE ============ -->
+  <section class="feature" id="explore">
+    <div class="feature-inner">
+      <div class="feature-copy" data-reveal>
+        <p class="section-kicker">01 · Explore</p>
+        <h2>AI 先认识你，<br>再替你发现论文</h2>
+        <p class="feature-lede">不用每次重新搜索关键词。告诉 AI 你的研究方向，它会自动拆解成精准检索词，实时联通 Semantic Scholar、arXiv、OpenAlex，把你最该看的新论文直接推到眼前。</p>
+        <ul class="feature-list">
+          <li><b>说人话就行</b>——AI 帮你把想法翻译成专业检索策略</li>
+          <li><b>一句话读懂一篇论文</b>——AI 摘要卡片正面：核心贡献一句话说清</li>
+          <li><b>翻到背面</b>——问题、方法、成果、创新点、适合谁读，全部拆解好</li>
+          <li><b>四向滑动</b>——左滑跳过 · 右滑收藏 · 上滑标重点 · 下滑标已读</li>
+        </ul>
+        <div class="feature-tags">
+          <span>#5秒决策</span><span>#全网实时检索</span><span>#通俗中文摘要</span>
+        </div>
+      </div>
+      <div class="feature-visual feature-visual--video" data-reveal>
+        <video class="showcase-video" src="videos/initialize.mp4" autoplay muted loop playsinline aria-label="PaperSwipe 初始化：AI 认识你的过程演示"></video>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE: LIBRARY ============ -->
+  <section class="feature feature--reverse" id="library">
+    <div class="feature-inner">
+      <div class="feature-visual feature-visual--stack" data-reveal>
+        <img class="shot shot-1" src="images/library-home.png" alt="Library 三栏分类首页">
+        <img class="shot shot-2" src="images/library-filter.png" alt="Library 按主题标签筛选">
+        <img class="shot shot-3" src="images/library-card-detail.png" alt="Library 卡片详情">
+      </div>
+      <div class="feature-copy" data-reveal>
+        <p class="section-kicker">02 · Library</p>
+        <h2>划走的每一篇论文，<br>有了一个真正属于你的家</h2>
+        <p class="feature-lede">收藏不是存进一个杂乱的文件夹然后忘记。Library 把你滑过的论文自动分类归档，完整保留 AI 当时的精读笔记，随时回来都能秒懂。</p>
+        <ul class="feature-list">
+          <li><b>三栏分类</b>——感兴趣 · 重点 · 已读，进度一眼看清</li>
+          <li><b>主题标签筛选</b>——AI 自动提炼标签，秒速定位方向</li>
+          <li><b>长按即可归档或安排阅读</b>——删除或一键排进日程</li>
+          <li><b>一键导出</b>——BibTeX / Zotero，无缝接入你的文献工作流</li>
+        </ul>
+        <div class="feature-tags">
+          <span>#不再吃灰</span><span>#一键导出</span><span>#Zotero联动</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE: SCHEDULE + AI ASSISTANT ============ -->
+  <section class="feature" id="schedule">
+    <div class="feature-inner">
+      <div class="feature-copy" data-reveal>
+        <p class="section-kicker">03 · Schedule &amp; AI 助手</p>
+        <h2>AI 帮你规划阅读，<br>论文不再躺在收藏夹吃灰</h2>
+        <p class="feature-lede">告诉 AI 你的研究目标、DDL 和空闲时间，它会自动从 Library 里挑选论文，按优先级规划阅读路线，安排进每天的日历——收藏不再是终点，而是真正被读完的起点。</p>
+        <ul class="feature-list">
+          <li><b>一周阅读计划</b>——按优先级自动铺满你的每一天</li>
+          <li>“<i>今天最值得读的论文是哪篇？</i>”——AI 秒回答案和理由</li>
+          <li>“<i>帮我规划这个方向的阅读 roadmap</i>”——AI 帮你排出成体系的学习路径</li>
+          <li><b>拖拽调整</b>——不满意随时改期、调整优先级</li>
+        </ul>
+        <div class="feature-tags">
+          <span>#不再拖延</span><span>#对话式规划</span><span>#成体系学习</span>
+        </div>
+      </div>
+      <div class="feature-visual feature-visual--stack" data-reveal>
+        <img class="shot shot-1" src="images/schedule-home.png" alt="Schedule 阅读周计划">
+        <img class="shot shot-2" src="images/robot-example-today.png" alt="AI 助手：今日最值得读的论文">
+        <img class="shot shot-3" src="images/robot-example-roadmap.png" alt="AI 助手：规划阅读 roadmap">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE: TRENDING ============ -->
+  <section class="feature feature--reverse" id="trending">
+    <div class="feature-inner">
+      <div class="feature-visual feature-visual--stack" data-reveal>
+        <img class="shot shot-1" src="images/trending-home.png" alt="Trending 全球热点榜">
+        <img class="shot shot-2" src="images/trending-topic-expand.png" alt="展开最火 Topic 的五篇论文">
+        <img class="shot shot-3" src="images/trending-card-open.png" alt="打开热点论文卡片">
+      </div>
+      <div class="feature-copy" data-reveal>
+        <p class="section-kicker">04 · Trending</p>
+        <h2>今天，全世界都在看什么</h2>
+        <p class="feature-lede">不用天天刷 Twitter，不用每天逛 arXiv。PaperSwipe 实时告诉你哪些方向正在爆发、哪篇论文开始被疯狂引用、哪个赛道现在值得投入——永远站在信息最前沿。</p>
+        <ul class="feature-list">
+          <li><b>实时热点榜</b>——按领域滚动更新的高热度论文</li>
+          <li><b>一键展开</b>——最火 Topic 下的代表性论文一次看全</li>
+          <li><b>引用飙升提醒</b>——重要工作出现的第一时间知道</li>
+          <li><b>My Fields / Global</b>——只看你的领域，或看全球大势</li>
+        </ul>
+        <div class="feature-tags">
+          <span>#永不滞后</span><span>#实时热点</span><span>#领域雷达</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHILOSOPHY ============ -->
+  <section class="philosophy">
+    <div class="philosophy-inner" data-reveal>
+      <p class="section-kicker section-kicker--light">我们的理念</p>
+      <h2>
+        未来发现论文的方式，<br>
+        不应该是 <span class="ghost-text">Search</span>，<br>
+        而应该是 <span class="grad-text">Discover</span>。
+      </h2>
+      <p class="philosophy-sub">
+        Search 要你先知道自己要找什么，再一页页去验证。<br class="br-desktop">
+        Discover 是你只需要说清楚自己是谁，剩下的交给 AI——<br class="br-desktop">
+        让「知道有这篇论文存在」这件事本身，变得毫不费力。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta" id="cta">
+    <div class="cta-inner" data-reveal>
+      <h2>把「找论文」的力气，<br>还给「读论文」本身。</h2>
+      <p>传统方式：搜索、翻页、翻译、收藏、然后忘记。<br>
+      <b>PaperSwipe：AI 帮你发现、5 秒帮你判断、自动帮你安排。</b></p>
+      <a href="#top" class="btn btn-primary btn-lg">别再搜论文了，开始刷论文 <span class="btn-arrow">→</span></a>
+      <p class="cta-footnote">欢迎大家提建议，我们还在持续迭代中 ❤️</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span>© PaperSwipe — Discover, not Search.</span>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

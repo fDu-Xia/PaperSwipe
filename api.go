@@ -125,6 +125,8 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 28*time.Second)
+	logFlow("========== 新检索开始 ==========")
+	logFlow("【总览】检索词=%q | limit=%d | AI 摘要=%v | 模型=%s", query, limit, a.summarizer.Enabled(), a.summarizer.Model())
 	a.logger.Info("search start", "query", query, "limit", limit)
 	searchStart := time.Now()
 	papers, source, err := a.searcher.Search(searchCtx, query, limit)
@@ -133,8 +135,11 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	warning := ""
 	if err != nil {
 		a.logger.Warn("paper search failed", "query", query, "error", err)
+		logFlow("【总览】检索失败：%v", err)
 		warning = "开放论文源暂时不可用，请稍后重试。"
 		papers = nil
+	} else {
+		logFlow("【总览】检索完成（耗时 %s）→ 来源=%s | 共 %d 篇，接下来交给 AI 生成卡片摘要", time.Since(searchStart).Round(time.Millisecond), source, len(papers))
 	}
 
 	w.Header().Set("Content-Type", "text/event-stream")
@@ -171,6 +176,8 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(papers) == 0 {
+		logFlow("【总览】无论文可摘要，结束")
+		logFlow("========== 检索结束 ==========")
 		writeEvent("done", map[string]any{"ai_applied": false})
 		return
 	}
@@ -183,6 +190,8 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		writeEvent("batch", map[string]any{"papers": batch})
 	})
 	a.logger.Info("summary done", "query", query, "duration", time.Since(summaryStart).Round(time.Millisecond), "ai_applied", aiApplied)
+	logFlow("【总览】全流程完成 | AI 摘要 applied=%v | 摘要耗时 %s", aiApplied, time.Since(summaryStart).Round(time.Millisecond))
+	logFlow("========== 检索结束 ==========")
 
 	writeEvent("done", map[string]any{"ai_applied": aiApplied})
 }

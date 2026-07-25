@@ -58,6 +58,69 @@
       "action": "dismiss",
       "updated_at": "2026-07-24T15:04:52.896757Z"
     },
+    "arxiv:1811.08772v1": {
+      "paper": {
+        "id": "arxiv:1811.08772v1",
+        "title": "Overcoming low-utility facets for complex answer retrieval",
+        "abstract": "Many questions cannot be answered simply; their answers must include numerous nuanced details and additional context. Complex Answer Retrieval (CAR) is the retrieval of answers to such questions. In their simplest form, these questions are constructed from a topic entity (e.g., `cheese') and a facet (e.g., `health effects'). While topic matching has been thoroughly explored, we observe that some facets use general language that is unlikely to appear verbatim in answers. We call these low-utility facets. In this work, we present an approach to CAR that identifies and addresses low-utility facets. We propose two estimators of facet utility. These include exploiting the hierarchical structure of CAR queries and using facet frequency information from training data. To improve the retrieval performance on low-utility headings, we also include entity similarity scores using knowledge graph embeddings. We apply our approaches to a leading neural ranking technique, and evaluate using the TREC CAR dataset. We find that our approach perform significantly better than the unmodified neural ranker and other leading CAR techniques. We also provide a detailed analysis of our results, and verify that low-utility facets are indeed more difficult to match, and that our approach improves the performance for these difficult queries.",
+        "authors": [
+          {
+            "name": "Sean MacAvaney"
+          },
+          {
+            "name": "Andrew Yates"
+          },
+          {
+            "name": "Arman Cohan"
+          },
+          {
+            "name": "Luca Soldaini"
+          },
+          {
+            "name": "Kai Hui"
+          },
+          {
+            "name": "Nazli Goharian"
+          },
+          {
+            "name": "Ophir Frieder"
+          }
+        ],
+        "year": 2018,
+        "publication_date": "2018-11-21",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR"
+        ],
+        "url": "http://arxiv.org/abs/1811.08772v1",
+        "pdf_url": "https://arxiv.org/pdf/1811.08772v1",
+        "external_ids": {
+          "ArXiv": "1811.08772v1"
+        },
+        "match_score": 57,
+        "read_minutes": 46,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "解决复杂问题，AI 更懂细节了！",
+          "problem": "复杂问题检索（CAR）中，低效用方面难以匹配。",
+          "novelty": [
+            "识别并解决低效用方面",
+            "利用CAR查询的层次结构",
+            "使用知识图嵌入的实体相似度得分"
+          ],
+          "method": "提出两种方面效用估计器，结合层次结构和频率信息，并使用知识图嵌入的实体相似度得分。",
+          "result": "在TREC CAR数据集上，性能显著优于未修改的神经排名器和其他领先的CAR技术。",
+          "audience": "对复杂问题检索感兴趣的AI研究者。",
+          "why_keep": "为复杂问题检索提供了新的解决方案。",
+          "reading_focus": "关注低效用方面的识别和解决方法。"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-25T06:09:46.244231Z"
+    },
     "arxiv:2312.05434v1": {
       "paper": {
         "id": "arxiv:2312.05434v1",
@@ -232,6 +295,62 @@
       "action": "save",
       "updated_at": "2026-07-24T15:57:30.206703Z"
     },
+    "arxiv:2402.15276v3": {
+      "paper": {
+        "id": "arxiv:2402.15276v3",
+        "title": "CFIR: Fast and Effective Long-Text To Image Retrieval for Large Corpora",
+        "abstract": "Text-to-image retrieval aims to find the relevant images based on a text query, which is important in various use-cases, such as digital libraries, e-commerce, and multimedia databases. Although Multimodal Large Language Models (MLLMs) demonstrate state-of-the-art performance, they exhibit limitations in handling large-scale, diverse, and ambiguous real-world needs of retrieval, due to the computation cost and the injective embeddings they produce. This paper presents a two-stage Coarse-to-Fine Index-shared Retrieval (CFIR) framework, designed for fast and effective large-scale long-text to image retrieval. The first stage, Entity-based Ranking (ER), adapts to long-text query ambiguity by employing a multiple-queries-to-multiple-targets paradigm, facilitating candidate filtering for the next stage. The second stage, Summary-based Re-ranking (SR), refines these rankings using summarized queries. We also propose a specialized Decoupling-BEiT-3 encoder, optimized for handling ambiguous user needs and both stages, which also enhances computational efficiency through vector-based similarity inference. Evaluation on the AToMiC dataset reveals that CFIR surpasses existing MLLMs by up to 11.06% in Recall@1000, while reducing training and retrieval times by 68.75% and 99.79%, respectively. We will release our code to facilitate future research at https://github.com/longkukuhi/CFIR.",
+        "authors": [
+          {
+            "name": "Zijun Long"
+          },
+          {
+            "name": "Xuri Ge"
+          },
+          {
+            "name": "Richard Mccreadie"
+          },
+          {
+            "name": "Joemon Jose"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-23",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR",
+          "cs.AI",
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2402.15276v3",
+        "pdf_url": "https://arxiv.org/pdf/2402.15276v3",
+        "external_ids": {
+          "ArXiv": "2402.15276v3"
+        },
+        "match_score": 63,
+        "read_minutes": 44,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "快速找到图片，AI 图片检索新突破！",
+          "problem": "现有多模态大语言模型在处理大规模、多样化、模糊的检索需求时存在局限性。",
+          "novelty": [
+            "提出两阶段检索框架，提高检索效率",
+            "实体排名和基于摘要的重排序",
+            "Decoupling-BEiT-3 编码器优化处理模糊需求"
+          ],
+          "method": "设计两阶段检索框架，包括实体排名和基于摘要的重排序，并使用 Decoupling-BEiT-3 编码器。",
+          "result": "在 AToMiC 数据集上，CFIR 比现有 MLLMs 提高召回率 11.06%，同时减少训练和检索时间。",
+          "audience": "对数字图书馆、电子商务和多媒体数据库感兴趣的研究人员和开发者。",
+          "why_keep": "为大规模长文本到图像检索提供了一种高效的方法。",
+          "reading_focus": "关注两阶段检索框架的设计和 Decoupling-BEiT-3 编码器的应用。"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-25T06:09:41.963978Z"
+    },
     "arxiv:2405.11357v3": {
       "paper": {
         "id": "arxiv:2405.11357v3",
@@ -325,6 +444,129 @@
       "action": "dismiss",
       "updated_at": "2026-07-24T15:04:54.41361Z"
     },
+    "arxiv:2508.09736v4": {
+      "paper": {
+        "id": "arxiv:2508.09736v4",
+        "title": "Seeing, Listening, Remembering, and Reasoning: A Multimodal Agent with Long-Term Memory",
+        "abstract": "We introduce M3-Agent, a novel multimodal agent framework equipped with long-term memory. Like humans, M3-Agent can process real-time visual and auditory inputs to build and update episodic and semantic memories, gradually accumulating world knowledge. Its memory is organized in an entity-centric, multimodal manner, enabling deeper and more consistent understanding of the environment. Given an instruction, M3-Agent autonomously performs multi-turn reasoning and retrieves relevant memories to complete tasks. To evaluate memory effectiveness and memory-based reasoning in multimodal agents, we develop M3-Bench, a long-video question answering benchmark comprising 100 newly recorded robot-perspective videos (M3-Bench-robot) and 920 diverse web-sourced videos (M3-Bench-web). We annotate QA pairs designed to test capabilities essential for agent applications, such as person understanding, general knowledge extraction, and cross-modal reasoning. Experimental results show that M3-Agent, trained via reinforcement learning, outperforms the strongest baseline, a prompting agent using Gemini-1.5-pro and GPT-4o, achieving 6.7%, 7.7%, and 5.3% higher accuracy on M3-Bench-robot, M3-Bench-web and VideoMME-long, respectively. Our work advances multimodal agents toward more human-like long-term memory and provides insights for their practical design. Model, code and data are available at https://github.com/bytedance-seed/m3-agent.",
+        "authors": [
+          {
+            "name": "Lin Long"
+          },
+          {
+            "name": "Yichen He"
+          },
+          {
+            "name": "Wentao Ye"
+          },
+          {
+            "name": "Yiyuan Pan"
+          },
+          {
+            "name": "Yuan Lin"
+          },
+          {
+            "name": "Hang Li"
+          },
+          {
+            "name": "Junbo Zhao"
+          },
+          {
+            "name": "Wei Li"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-08-13",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2508.09736v4",
+        "pdf_url": "https://arxiv.org/pdf/2508.09736v4",
+        "external_ids": {
+          "ArXiv": "2508.09736v4"
+        },
+        "match_score": 70,
+        "read_minutes": 44,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆升级，像人一样理解世界",
+          "problem": "AI 缺乏长期记忆，难以处理复杂任务。",
+          "novelty": [
+            "M3-Agent 拥有长期记忆，处理视觉和听觉输入。",
+            "记忆组织在实体中心，多模态方式。",
+            "M3-Bench 基准测试，评估记忆和推理能力。"
+          ],
+          "method": "M3-Agent 通过强化学习训练，使用 M3-Bench 进行评估。",
+          "result": "M3-Agent 在 M3-Bench 上优于基线模型，准确率提高 6.7%-7.7%。",
+          "audience": "对 AI 长期记忆和复杂任务处理感兴趣的研究者。",
+          "why_keep": "为多模态 AI 提供长期记忆解决方案。",
+          "reading_focus": "关注 M3-Agent 的记忆结构和训练方法。"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-25T06:09:32.174603Z"
+    },
+    "arxiv:2510.06426v1": {
+      "paper": {
+        "id": "arxiv:2510.06426v1",
+        "title": "FinLFQA: Evaluating Attributed Text Generation of LLMs in Financial Long-Form Question Answering",
+        "abstract": "Large Language Models (LLMs) frequently hallucinate to long-form questions, producing plausible yet factually incorrect answers. A common mitigation strategy is to provide attribution to LLM outputs. However, existing benchmarks primarily focus on simple attribution that retrieves supporting textual evidence as references. We argue that in real-world scenarios such as financial applications, attribution goes beyond reference retrieval. We introduce FinLFQA, a benchmark designed to evaluate the ability of LLMs to generate long-form answers to complex financial questions with reliable and nuanced attributions. FinLFQA evaluates three critical aspects of attribution through human annotations: (1) supporting evidence extracted from financial reports, (2) intermediate numerical reasoning steps, and (3) domain-specific financial knowledge that informs the reasoning process. We further provide an automatic evaluation framework covering both answer quality and attribution quality. Through extensive experiments on eight LLMs across multiple attribution-generation paradigms, we find that fine-grained metrics are important to distinguish model capabilities, that end-to-end generation achieves comparable performance to post-hoc approaches, and that iterative refinement only helps when guided by external feedback.",
+        "authors": [
+          {
+            "name": "Yitao Long"
+          },
+          {
+            "name": "Tiansheng Hu"
+          },
+          {
+            "name": "Yilun Zhao"
+          },
+          {
+            "name": "Arman Cohan"
+          },
+          {
+            "name": "Chen Zhao"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-10-07",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2510.06426v1",
+        "pdf_url": "https://arxiv.org/pdf/2510.06426v1",
+        "external_ids": {
+          "ArXiv": "2510.06426v1"
+        },
+        "match_score": 56,
+        "read_minutes": 44,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "金融问答，LLM生成答案更可靠！",
+          "problem": "大型语言模型在生成长篇问答时经常出现事实错误。",
+          "novelty": [
+            "FinLFQA，评估LLM在金融长篇问答中的属性文本生成能力",
+            "评估支持证据、中间数值推理步骤和领域特定知识",
+            "提供自动评估框架"
+          ],
+          "method": "FinLFQA通过人类标注评估LLM生成长篇答案的能力，并提供自动评估框架。",
+          "result": "在多个LLM和属性生成范式上，FinLFQA发现细粒度指标对于区分模型能力很重要。",
+          "audience": "对金融问答和LLM能力评估感兴趣的学者和工程师",
+          "why_keep": "FinLFQA为评估LLM在金融长篇问答中的能力提供了新的基准，对相关领域有重要意义。",
+          "reading_focus": "关注FinLFQA的评估方法和在多个LLM上的实验结果。"
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-07-25T06:00:50.39147Z"
+    },
     "arxiv:2510.09720v1": {
       "paper": {
         "id": "arxiv:2510.09720v1",
@@ -359,23 +601,340 @@
         "read_minutes": 43,
         "source": "arXiv",
         "digest": {
-          "verdict": "Highly recommended for AI researchers.",
-          "hook": "A memory update mechanism that sharpens LLM agents' long-term reasoning.",
-          "problem": "LLM agents struggle with updating long-term memory to adapt to changing contexts.",
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆升级，越聊越聪明！",
+          "problem": "现有方法在长期记忆更新方面存在不足，难以适应用户行为和上下文的变化。",
           "novelty": [
-            "Proposes a **Preference-Aware Memory Update Mechanism (PAMU)**.",
-            "Combines **sliding window averages** and **exponential moving averages**.",
-            "Improves LLM output quality in long-term conversations."
+            "提出偏好感知记忆更新机制 (PAMU)",
+            "结合滑动窗口平均 (SW) 和指数移动平均 (EMA)",
+            "显著提高 LLM 在长期对话中的输出质量"
           ],
-          "method": "Develops a mechanism for dynamic and personalized memory refinement.",
-          "result": "Significant improvement in LLM output quality in long-term conversations.",
-          "audience": "AI researchers and developers of LLM agents.",
-          "why_keep": "Addresses a critical gap in LLM memory updating.",
-          "reading_focus": "PAMU mechanism and its impact on long-term conversations."
+          "method": "设计 PAMU 机制，通过滑动窗口平均和指数移动平均融合偏好感知表示。",
+          "result": "在五个任务场景中，PAMU 显著提高了 LLM 的输出质量。",
+          "audience": "对 AI 长期记忆和对话系统感兴趣的读者。",
+          "why_keep": "为 LLM 长期记忆更新提供了新的思路和方法。",
+          "reading_focus": "关注 PAMU 机制的设计和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T16:40:51.013686Z"
+      "updated_at": "2026-07-25T06:09:27.750416Z"
+    },
+    "arxiv:2604.07863v1": {
+      "paper": {
+        "id": "arxiv:2604.07863v1",
+        "title": "Task-Adaptive Retrieval over Agentic Multi-Modal Web Histories via Learned Graph Memory",
+        "abstract": "Retrieving relevant observations from long multi-modal web interaction histories is challenging because relevance depends on the evolving task state, modality (screenshots, HTML text, structured signals), and temporal distance. Prior approaches typically rely on static similarity thresholds or fixed-capacity buffers, which fail to adapt relevance to the current task context. We propose \\textbf{ACGM}, a learned graph-memory retriever that constructs \\emph{task-adaptive} relevance graphs over agent histories using policy-gradient optimization from downstream task success. ACGM captures heterogeneous temporal dynamics with modality-specific decay (visual decays $4.3\\times$ faster than text: $λ_v{=}0.47$ vs.\\ $λ_x{=}0.11$) and learns sparse connectivity (3.2 edges/node), enabling efficient $O(\\log T)$ retrieval. Across WebShop, VisualWebArena, and Mind2Web, ACGM improves retrieval quality to \\textbf{82.7 nDCG@10} (+9.3 over GPT-4o, $p{\u003c}0.001$) and \\textbf{89.2\\% Precision@10} (+7.7), outperforming 19 strong dense, re-ranking, multi-modal, and graph-based baselines. Code to reproduce our results is available at{\\color{blue}\\href{https://github.com/S-Forouzandeh/ACGM-Agentic-Web}{Saman Forouzandeh}}.",
+        "authors": [
+          {
+            "name": "Saman Forouzandeh"
+          },
+          {
+            "name": "Kamal Berahmand"
+          },
+          {
+            "name": "Mahdi Jalili"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-04-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2604.07863v1",
+        "pdf_url": "https://arxiv.org/pdf/2604.07863v1",
+        "external_ids": {
+          "ArXiv": "2604.07863v1"
+        },
+        "match_score": 57,
+        "read_minutes": 41,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI记忆升级，多模态历史检索更智能！",
+          "problem": "从长多模态网络交互历史中检索相关观察结果具有挑战性，因为相关性取决于任务状态、模态和时间距离。",
+          "novelty": [
+            "提出ACGM，一种学习图记忆检索器",
+            "构建任务自适应的相关图",
+            "使用策略梯度优化从下游任务成功中学习"
+          ],
+          "method": "ACGM通过策略梯度优化从下游任务成功中学习，构建任务自适应的相关图，并捕获异构时间动态。",
+          "result": "在WebShop、VisualWebArena和Mind2Web上，ACGM将检索质量提高到82.7 nDCG@10和89.2% Precision@10。",
+          "audience": "对多模态信息检索感兴趣的学者和工程师",
+          "why_keep": "ACGM在多模态历史检索方面取得了显著成果，对相关领域有重要意义。",
+          "reading_focus": "关注ACGM的构建方法和在多个数据集上的应用效果。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-25T05:44:44.243264Z"
+    },
+    "arxiv:2604.08224v1": {
+      "paper": {
+        "id": "arxiv:2604.08224v1",
+        "title": "Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering",
+        "abstract": "Large language model (LLM) agents are increasingly built less by changing model weights than by reorganizing the runtime around them. Capabilities that earlier systems expected the model to recover internally are now externalized into memory stores, reusable skills, interaction protocols, and the surrounding harness that makes these modules reliable in practice. This paper reviews that shift through the lens of externalization. Drawing on the idea of cognitive artifacts, we argue that agent infrastructure matters not merely because it adds auxiliary components, but because it transforms hard cognitive burdens into forms that the model can solve more reliably. Under this view, memory externalizes state across time, skills externalize procedural expertise, protocols externalize interaction structure, and harness engineering serves as the unification layer that coordinates them into governed execution. We trace a historical progression from weights to context to harness, analyze memory, skills, and protocols as three distinct but coupled forms of externalization, and examine how they interact inside a larger agent system. We further discuss the trade-off between parametric and externalized capability, identify emerging directions such as self-evolving harnesses and shared agent infrastructure, and discuss open challenges in evaluation, governance, and the long-term co-evolution of models and external infrastructure. The result is a systems-level framework for explaining why practical agent progress increasingly depends not only on stronger models, but on better external cognitive infrastructure.",
+        "authors": [
+          {
+            "name": "Chenyu Zhou"
+          },
+          {
+            "name": "Huacan Chai"
+          },
+          {
+            "name": "Wenteng Chen"
+          },
+          {
+            "name": "Zihan Guo"
+          },
+          {
+            "name": "Rong Shan"
+          },
+          {
+            "name": "Yuanyi Song"
+          },
+          {
+            "name": "Tianyi Xu"
+          },
+          {
+            "name": "Yingxuan Yang"
+          },
+          {
+            "name": "Aofan Yu"
+          },
+          {
+            "name": "Weiming Zhang"
+          },
+          {
+            "name": "Congming Zheng"
+          },
+          {
+            "name": "Jiachen Zhu"
+          },
+          {
+            "name": "Zeyu Zheng"
+          },
+          {
+            "name": "Zhuosheng Zhang"
+          },
+          {
+            "name": "Xingyu Lou"
+          },
+          {
+            "name": "Changwang Zhang"
+          },
+          {
+            "name": "Zhihui Fu"
+          },
+          {
+            "name": "Jun Wang"
+          },
+          {
+            "name": "Weiwen Liu"
+          },
+          {
+            "name": "Jianghao Lin"
+          },
+          {
+            "name": "Weinan Zhang"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-04-09",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.SE",
+          "cs.MA"
+        ],
+        "url": "http://arxiv.org/abs/2604.08224v1",
+        "pdf_url": "https://arxiv.org/pdf/2604.08224v1",
+        "external_ids": {
+          "ArXiv": "2604.08224v1"
+        },
+        "match_score": 64,
+        "read_minutes": 48,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 外部化，让记忆更强大",
+          "problem": "LLM 依赖模型权重，缺乏外部认知基础设施。",
+          "novelty": [
+            "外部化记忆、技能、协议和 harness 工程化。",
+            "外部化将认知负担转化为模型可解决的形式。",
+            "外部化促进模型与外部基础设施的协同进化。"
+          ],
+          "method": "通过外部化，将认知负担转化为模型可解决的形式。",
+          "result": "提供系统级框架，解释外部化对 AI 进步的影响。",
+          "audience": "对 LLM 外部化和认知基础设施感兴趣的研究者。",
+          "why_keep": "为 LLM 外部化提供理论框架。",
+          "reading_focus": "关注外部化的不同形式及其相互作用。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-25T06:09:33.35536Z"
+    },
+    "arxiv:2605.06924v1": {
+      "paper": {
+        "id": "arxiv:2605.06924v1",
+        "title": "A$^2$RD: Agentic Autoregressive Diffusion for Long Video Consistency",
+        "abstract": "Synthesizing consistent and coherent long video remains a fundamental challenge. Existing methods suffer from semantic drift and narrative collapse over long horizons. We present A$^2$RD, an Agentic Auto-Regressive Diffusion architecture that decouples creative synthesis from consistency enforcement. A$^2$RD formulates long video synthesis as a closed-loop process that synthesizes and self-improves video segment-by-segment through a Retrieve--Synthesize--Refine--Update cycle. It comprises three core components: (i) Multimodal Video Memory that tracks video progression across modalities; (ii) Adaptive Segment Generation that switches among generation modes for natural progression and visual consistency; and (iii) Hierarchical Test-Time Self-Improvement that self-improves each segment at frame and video levels to prevent error propagation. We further introduce LVBench-C, a challenging benchmark with non-linear entity and environment transitions to stress-test long-horizon consistency. Across public and LVBench-C benchmarks spanning one- to ten-minute videos, A$^2$RD outperforms state-of-the-art baselines by up to 30% in consistency and 20% in narrative coherence. Human evaluations corroborate these gains while also highlighting notable improvements in motion and transition smoothness.",
+        "authors": [
+          {
+            "name": "Do Xuan Long"
+          },
+          {
+            "name": "Yale Song"
+          },
+          {
+            "name": "Min-Yen Kan"
+          },
+          {
+            "name": "Tomas Pfister"
+          },
+          {
+            "name": "Long T. Le"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-05-07",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2605.06924v1",
+        "pdf_url": "https://arxiv.org/pdf/2605.06924v1",
+        "external_ids": {
+          "ArXiv": "2605.06924v1"
+        },
+        "match_score": 60,
+        "read_minutes": 43,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "长视频一致性，AI 新突破！",
+          "problem": "现有方法在长时域内存在语义漂移和叙事崩溃问题。",
+          "novelty": [
+            "提出 A$^2$RD 架构，解耦创意合成和一致性执行",
+            "多模态视频记忆跟踪视频进度",
+            "分层测试时自我改进防止错误传播"
+          ],
+          "method": "设计 A$^2$RD 架构，通过 Retrieve-Synthesize-Refine-Update 循环合成和自我改进视频。",
+          "result": "在 LVBench-C 基准测试中，A$^2$RD 在一致性和叙事连贯性方面优于现有基线 30% 和 20%。",
+          "audience": "对长视频合成和一致性感兴趣的研究人员和开发者。",
+          "why_keep": "为长视频一致性提供了一种有效的方法。",
+          "reading_focus": "关注 A$^2$RD 架构的设计和实验结果。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-25T06:09:44.797251Z"
+    },
+    "arxiv:2605.27437v1": {
+      "paper": {
+        "id": "arxiv:2605.27437v1",
+        "title": "MGRetrieval: Memory-Guided Reflective Retrieval for Long-Term Dialogue Agents",
+        "abstract": "Large Language Models (LLMs) have made significant progress in dialogue, yet redundant memory contexts severely limit their effectiveness in long-term dialogue agents. External memory systems have been proposed to improve memory maintenance. However, these systems mainly rely on one-shot retrieval, which limits their ability to retrieve sufficient and relevant evidence. Although recent methods introduce reflection into retrieval, their retrieval paths are generated by the LLM from limited evidence, leading to unstable retrieval and additional latency overhead. %These limitations highlight the need for effective retrieval mechanisms. To address these limitations, we propose MGRetrieval, a retrieval strategy that grounds reflective retrieval in the semantic structure of historical memories. Specifically, MGRetrieval consists of two steps: (1) It references the structure of historical memories to construct a more precise retrieval path. (2) The LLM retains critical memories and determines whether accumulated memories are sufficient to stop further iterative retrieval. This allows the retrieval process to follow semantically meaningful paths. Through memory-guided retrieval and critical memory propagation, MGRetrieval gradually constructs concise and sufficient memory contexts. Extensive experiments on LoCoMo show that MGRetrieval outperforms the strongest baseline by 8.91\\% in F1 and 11.11\\% in BLEU-1 on average across Qwen2.5-14B and Qwen3-14B, while maintaining practical token and latency costs. The code can be found in https://anonymous.4open.science/r/MGRetrieval.",
+        "authors": [
+          {
+            "name": "Tan Wang"
+          },
+          {
+            "name": "Yunwei Dong"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-05-22",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2605.27437v1",
+        "pdf_url": "https://arxiv.org/pdf/2605.27437v1",
+        "external_ids": {
+          "ArXiv": "2605.27437v1"
+        },
+        "match_score": 64,
+        "read_minutes": 47,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆导航，对话更流畅",
+          "problem": "LLM 在长期对话中，记忆上下文冗余，限制其有效性。",
+          "novelty": [
+            "MGRetrieval 基于语义结构进行反射式检索。",
+            "构建更精确的检索路径，保留关键记忆。",
+            "MGRetrieval 在 LoCoMo 上优于基线模型，F1 和 BLEU-1 提高显著。"
+          ],
+          "method": "MGRetrieval 通过语义结构和关键记忆进行检索。",
+          "result": "MGRetrieval 在 LoCoMo 上平均 F1 和 BLEU-1 提高 8.91% 和 11.11%。",
+          "audience": "对 LLM 长期对话和记忆维护感兴趣的研究者。",
+          "why_keep": "为 LLM 长期对话提供有效的记忆检索机制。",
+          "reading_focus": "关注 MGRetrieval 的检索策略和实验结果。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-25T06:09:34.29132Z"
+    },
+    "arxiv:2606.06036v1": {
+      "paper": {
+        "id": "arxiv:2606.06036v1",
+        "title": "Memory is Reconstructed, Not Retrieved: Graph Memory for LLM Agents",
+        "abstract": "Despite recent progress, LLM agents still struggle with reasoning over long interaction histories. While current memory-augmented agents rely on a static retrieve-then-reason paradigm, this rigid pipeline design prevents them from dynamically adapting memory access to intermediate evidence discovered during inference. To bridge this gap, we propose MRAgent, a framework that combines an associative memory graph with an active reconstruction mechanism. We represent memory as a Cue-Tag-Content graph, where associative tags serve as semantic bridges connecting fine-grained cues to memory contents. Operating on this structure, our active reconstruction mechanism integrates LLM reasoning directly into memory access, allowing the agent to iteratively explore and prune retrieval paths based on accumulated evidence. This ensures that memory retrieval is dynamically adapted to the reasoning context while avoiding combinatorial explosion caused by unconstrained expansion. Experiments on the LoCoMo benchmark and LongMemEval benchmark demonstrate significant improvements over strong baselines (up to 23%), while substantially reducing token and runtime cost, highlighting the effectiveness of active and associative reconstruction for long-horizon memory reasoning.",
+        "authors": [
+          {
+            "name": "Shuo Ji"
+          },
+          {
+            "name": "Yibo Li"
+          },
+          {
+            "name": "Bryan Hooi"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-06-04",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.AI",
+          "cs.IR"
+        ],
+        "url": "http://arxiv.org/abs/2606.06036v1",
+        "pdf_url": "https://arxiv.org/pdf/2606.06036v1",
+        "external_ids": {
+          "ArXiv": "2606.06036v1"
+        },
+        "match_score": 62,
+        "read_minutes": 43,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆重构，不再是检索！",
+          "problem": "现有记忆增强代理依赖于静态检索-推理范式，无法动态适应推理过程中的中间证据。",
+          "novelty": [
+            "提出 MRAgent 框架，结合关联记忆图和主动重构机制",
+            "Cue-Tag-Content 图表示记忆",
+            "直接将 LLM 推理集成到记忆访问中"
+          ],
+          "method": "使用关联记忆图和主动重构机制，将 LLM 推理集成到记忆访问中。",
+          "result": "在 LoCoMo 和 LongMemEval 基准测试中，MRAgent 比强基线提高 23%，同时降低 token 和运行时成本。",
+          "audience": "对 LLM 代理和记忆增强技术感兴趣的研究人员。",
+          "why_keep": "为长时记忆推理提供了一种有效的方法。",
+          "reading_focus": "关注 MRAgent 框架的设计和实验结果。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-25T06:09:43.1304Z"
     },
     "arxiv:2606.17328v1": {
       "paper": {
@@ -416,25 +975,26 @@
           "ArXiv": "2606.17328v1"
         },
         "match_score": 71,
-        "read_minutes": 10,
+        "read_minutes": 46,
         "source": "arXiv",
         "digest": {
-          "verdict": "Swipe right to evaluate memory robustness.",
-          "hook": "A new benchmark that exposes hidden failures in agent memory.",
-          "problem": "Standard accuracy metrics hide how memory fails when conditions change, such as when facts are **contradicted-by-false-premise**.",
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆追踪，揭示隐藏错误！",
+          "problem": "现有方法无法全面评估长期记忆的准确性。",
           "novelty": [
-            "Introduces **MemTrace**, measuring performance at the knowledge point level rather than per question.",
-            "Identifies **evidence use** as the dominant bottleneck over retrieval."
+            "引入 MemTrace 基准，以知识点为单位评估记忆。",
+            "发现证据使用是主要瓶颈，而非检索。",
+            "提出改进长期记忆的方法：更好地使用可到达的证据。"
           ],
-          "method": "Probes facts along three dimensions: **memory age**, **question type**, and **evidence condition**.",
-          "result": "Finds evidence was retrievable **10 times more often** than it was missing when systems failed.",
-          "audience": "Benchmark designers and memory system evaluators.",
-          "why_keep": "Reveals that better reasoning with retrieved evidence is more critical than improving storage.",
-          "reading_focus": "The three probing dimensions."
+          "method": "设计 MemTrace 基准，评估长期记忆的准确性。",
+          "result": "发现证据使用是主要瓶颈，而非检索。",
+          "audience": "对 AI 长期记忆和评估感兴趣的读者。",
+          "why_keep": "为 LLM 长期记忆评估提供了新的视角和方法。",
+          "reading_focus": "关注 MemTrace 基准的设计和实验结果。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T12:22:12.815438Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T06:09:30.564158Z"
     },
     "arxiv:2606.24322v1": {
       "paper": {
@@ -463,23 +1023,23 @@
         "read_minutes": 49,
         "source": "arXiv",
         "digest": {
-          "verdict": "Essential for security experts in AI.",
-          "hook": "A defense against memory poisoning in LLM agents with 0% attack success.",
-          "problem": "Memory poisoning in LLM agents allows adversaries to manipulate future actions.",
+          "verdict": "推荐阅读",
+          "hook": "AI 记忆安全，防毒攻击新招！",
+          "problem": "LLM 长期记忆易受毒攻击，现有防御方法存在漏洞。",
           "novelty": [
-            "Introduces **TMA-NM (Tamper-evident Memory Authority, Non-Malleable)**.",
-            "Formalizes malleability for the memory pipeline.",
-            "Achieves 0% attack success across all models and channels."
+            "提出非可变、起源绑定权威机制 (TMA-NM)",
+            "证明机器检查分离定理",
+            "在所有模型和渠道上实现 0% 攻击成功率"
           ],
-          "method": "Constructs non-malleable information-flow control for LLM-agent memory.",
-          "result": "0% attack success on both direct and laundering attacks.",
-          "audience": "Security experts and AI developers.",
-          "why_keep": "Protects LLM agents from memory poisoning attacks.",
-          "reading_focus": "TMA-NM and its effectiveness against laundering attacks."
+          "method": "设计 TMA-NM 机制，实现非可变信息流控制。",
+          "result": "在八个前沿模型上，TMA-NM 在直接和洗钱攻击中均达到 0% 攻击成功率。",
+          "audience": "对 AI 安全和长期记忆感兴趣的读者。",
+          "why_keep": "为 LLM 长期记忆安全提供了新的解决方案。",
+          "reading_focus": "关注 TMA-NM 机制的设计和实验结果。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-24T16:40:55.589512Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T06:09:29.055546Z"
     },
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
@@ -832,7 +1392,11 @@
   "recent_searches": [
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-24T16:42:36.892171Z"
+      "created_at": "2026-07-25T07:09:12.437095Z"
+    },
+    {
+      "query": "memory",
+      "created_at": "2026-07-25T05:09:17.415397Z"
     },
     {
       "query": "large language model agents large language models long-term memory",
@@ -857,10 +1421,6 @@
     {
       "query": "large language models",
       "created_at": "2026-07-24T08:06:26.569101Z"
-    },
-    {
-      "query": "llm memory",
-      "created_at": "2026-07-23T14:19:06.93295Z"
     }
   ]
 }

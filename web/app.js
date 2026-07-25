@@ -94,6 +94,7 @@ const FALLBACK_PAPERS = [
     id: "arxiv:2303.11366v4",
     title: "Reflexion: Language Agents with Verbal Reinforcement Learning",
     abstract: "Large language models (LLMs) have been increasingly used to interact with external environments (e.g., games, compilers, APIs) as goal-driven agents. However, it remains challenging for these language agents to quickly and efficiently learn from trial-and-error as traditional reinforcement learning methods require extensive training samples and expensive model fine-tuning. We propose Reflexion, a novel framework to reinforce language agents not by updating weights, but instead through linguistic feedback. Concretely, Reflexion agents verbally reflect on task feedback signals, then maintain their own reflective text in an episodic memory buffer to induce better decision-making in subsequent trials. Reflexion is flexible enough to incorporate various types (scalar values or free-form language) and sources (external or internally simulated) of feedback signals, and obtains significant improvements over a baseline agent across diverse tasks (sequential decision-making, coding, language reasoning).",
+    hookZh: "让大模型把每次失败写成自省笔记,下一次决策就更聪明。",
     authors: [{ name: "Noah Shinn" }, { name: "Federico Cassano" }, { name: "Ashwin Gopinath" }, { name: "Karthik Narasimhan" }, { name: "Shunyu Yao" }],
     year: 2023,
     publication_date: "2023-03-20",
@@ -112,6 +113,7 @@ const FALLBACK_PAPERS = [
     id: "arxiv:2310.11511v1",
     title: "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection",
     abstract: "Despite their remarkable capabilities, large language models (LLMs) often produce responses containing factual inaccuracies due to their sole reliance on the parametric knowledge they encapsulate. Retrieval-Augmented Generation (RAG), an ad hoc approach that augments LMs with retrieval of relevant knowledge, decreases such issues. However, indiscriminately retrieving and incorporating a fixed number of retrieved passages, regardless of whether retrieval is necessary, or passages are relevant, diminishes LM versatility or can lead to unhelpful response generation. We introduce a new framework called Self-Reflective Retrieval-Augmented Generation (Self-RAG) that enhances an LM's quality and factuality through retrieval and self-reflection. Our framework trains a single arbitrary LM that adaptively retrieves passages on-demand, and generates and reflects on retrieved passages and its own generations using special tokens, called reflection tokens.",
+    hookZh: "教模型自己判断啥时候该查资料,回答少犯事实错误。",
     authors: [{ name: "Akari Asai" }, { name: "Zeqiu Wu" }, { name: "Yizhong Wang" }, { name: "Avirup Sil" }, { name: "Hannaneh Hajishirzi" }],
     year: 2023,
     publication_date: "2023-10-17",
@@ -130,6 +132,7 @@ const FALLBACK_PAPERS = [
     id: "arxiv:2310.08560v1",
     title: "MemGPT: Towards LLMs as Operating Systems",
     abstract: "Large language models (LLMs) have revolutionized AI, but are constrained by limited context windows, hindering their utility in tasks like extended conversations and document analysis. To enable using context beyond limited context windows, we propose virtual context management, a technique drawing inspiration from hierarchical memory systems in traditional operating systems that provide the appearance of large memory resources through data movement between fast and slow memory. Using this technique, we introduce MemGPT (Memory-GPT), a system that intelligently manages different memory tiers in order to effectively provide extended context within the LLM's limited context window, and utilizes interrupts to manage control flow between itself and the user.",
+    hookZh: "把操作系统内存分层的思路搬进大模型,超长对话也不失忆。",
     authors: [{ name: "Charles Packer" }, { name: "Sarah Wooders" }, { name: "Kevin Lin" }, { name: "Vivian Fang" }, { name: "Shishir G. Patil" }, { name: "Ion Stoica" }, { name: "Joseph E. Gonzalez" }],
     year: 2023,
     publication_date: "2023-10-12",
@@ -153,8 +156,8 @@ function withFallbackDigest(paper) {
   return {
     ...paper,
     digest: {
-      verdict: "Strong reference — worth a careful read",
-      hook: firstSentence,
+      verdict: "值得仔细读一读的高影响力工作",
+      hook: paper.hookZh || firstSentence,
       problem: firstSentence,
       novelty: [firstSentence.slice(0, 160)],
       method: firstSentence,
@@ -1231,7 +1234,7 @@ function renderCard() {
   const c = {
     theme: theme,
     title: paper.title,
-    subtitle: pickSubtitle(paper),
+    hook: pickSubtitle(paper),
     initials: getInitials(paper.authors?.[0]?.name || "PS"),
     author: formatAuthors(paper.authors),
     venueFull: venueFull,
@@ -1262,6 +1265,7 @@ function renderCard() {
         <span class="frb-badge-text">${escapeHTML(badge.text)}</span>
       </div>`;
   }
+  console.log("[card-front] id=%s hook=%s title=%s", paper.id, c.hook, c.title);
   elements.card.innerHTML = `
     ${friendBannerHTML}
     <div class="stamp dismiss">NOPE</div>
@@ -1283,8 +1287,8 @@ function renderCard() {
             Tap to flip
           </div>
           <div class="card-body">
-            <p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
-            <h2 class="card-title">${escapeHTML(c.title)}</h2>
+            <p class="card-subtitle" data-field="hook">${escapeHTML(c.hook)}</p>
+            <h2 class="card-title" data-field="title">${escapeHTML(c.title)}</h2>
           </div>
           <div class="card-byline">
             <span class="avatar">${escapeHTML(c.initials)}</span>
@@ -1433,49 +1437,69 @@ function refreshElementRefs() {
   elements.cardHero = document.querySelector("#cardHero");
 }
 
-/* ── Polish a hook to match card-swipe-demo style ── */
+/* ── Polish a hook for the card front subtitle ── */
 function polishHook(raw, title) {
-  if (!raw || raw.length < 10) return null;
-  /* Reject Chinese text / placeholders */
-  if (/[一-鿿]/.test(raw)) return null;
+  if (!raw || raw.length < 6) return null;
   if (/research paper worth checking out|noteworthy paper/i.test(raw) && raw.length < 60) return null;
-  let s = raw.trim();
-  /* Normalize whitespace */
-  s = s.replace(/\s+/g, ' ');
+  let s = raw.trim().replace(/\s+/g, " ");
+  const isChinese = /[\u4e00-\u9fff]/.test(s);
+
+  if (isChinese) {
+    /* Drop empty academic placeholders */
+    if (/^(摘要|确认|建议|未提供|未明确|未报告|值得一看)$/.test(s.replace(/[。！？.!?…]+$/u, ""))) return null;
+    s = s.replace(/[。！？.!?…]+$/u, "").trim();
+    const chars = [...s];
+    if (chars.length < 6) return null;
+    /* Soft-cap at 36 units for the front-of-card line */
+    if (chars.length > 36) {
+      s = chars.slice(0, 36).join("").replace(/[，、；：\s]+$/u, "") + "…";
+    } else if (!/[。！？…]$/.test(s)) {
+      s += "。";
+    }
+    return s;
+  }
+
+  if (s.length < 10) return null;
   /* Strip trailing dots, ensure one clean sentence */
-  s = s.replace(/\.+$/, '').trim();
-  if (!/[.!?]$/.test(s)) s += '.';
+  s = s.replace(/\.+$/, "").trim();
+  if (!/[.!?]$/.test(s)) s += ".";
   /* Truncate to 120 chars at word boundary */
   if (s.length > 120) {
-    const cut = s.lastIndexOf(' ', 117);
-    s = (cut > 60 ? s.slice(0, cut) : s.slice(0, 117)) + '.';
+    const cut = s.lastIndexOf(" ", 117);
+    s = (cut > 60 ? s.slice(0, cut) : s.slice(0, 117)) + ".";
   }
   /* Remove boilerplate starts — rewrite as demo-style "A [concept]..." */
-  s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|demonstrate|show|study|explore|address|develop|describe|investigate|examine|consider|focus on)(s?)\s+(a |an |the )?/i, 'A ');
+  s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|demonstrate|show|study|explore|address|develop|describe|investigate|examine|consider|focus on)(s?)\s+(a |an |the )?/i, "A ");
   /* Remove leading lowercase after "A " replacement */
-  s = s.replace(/^A ([a-z])/, (_, c) => 'A ' + c.toUpperCase());
+  s = s.replace(/^A ([a-z])/, (_, c) => "A " + c.toUpperCase());
   /* Capitalize first letter */
   s = s.charAt(0).toUpperCase() + s.slice(1);
   /* Reject if it's essentially the same as the title (but be lenient) */
   if (title && s.length > 20) {
-    const t = title.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const h = s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    /* Only reject if the hook is contained entirely within the title */
+    const t = title.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    const h = s.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (h.length > 30 && t.includes(h)) return null;
-    /* Also reject if hook is just the title verbatim */
     if (h === t) return null;
   }
   return s;
 }
 
-/* ── Pick the hook subtitle: AI-generated first, then heuristic synthesis ── */
+/* ── Pick the front-card one-liner from digest.hook (AI), else English heuristics ── */
 function pickSubtitle(paper) {
   const title = (paper.title || "").trim();
+  const aiHook = String(paper.digest?.hook || "").trim();
 
-  /* 0) AI / heuristic hook from Go backend */
-  const aiHook = paper.digest?.hook || "";
-  const polished = polishHook(aiHook, title);
-  if (polished) return polished;
+  /* digest.hook is the front-of-card line. Prefer it always when present. */
+  if (aiHook) {
+    const polished = polishHook(aiHook, title);
+    if (polished) return polished;
+    /* Never drop a Chinese AI hook for English fallbacks */
+    if (/[\u4e00-\u9fff]/.test(aiHook)) {
+      const clipped = [...aiHook.replace(/[。！？.!?…]+$/u, "").trim()].slice(0, 36).join("");
+      return clipped ? clipped + "。" : aiHook;
+    }
+    return aiHook;
+  }
 
   /* Fall through to heuristic synthesis (below) */
   const d = paper.digest || {};
@@ -2985,19 +3009,19 @@ const TRENDING_TOPIC_PAPERS = {
       match_score: 96,
       read_minutes: 32,
       digest: {
-        hook: "A hierarchical memory OS that lets an LLM page its own context in and out — unlocking effectively unbounded conversations.",
-        verdict: "Foundational read on LLM long-term memory — save and study the paging protocol.",
-        problem: "LLMs have a **fixed context window** that caps how much history or document text they can reason over at once.",
+        hook: "让大模型像操作系统一样管理记忆，对话不再受限。",
+        verdict: "LLM 长期记忆的奠基之作，值得收藏细读分页机制。",
+        problem: "LLM 的**上下文窗口大小固定**，能同时处理的历史或文档信息有限。",
         novelty: [
-          "Treats the context window as **RAM** and external stores as **disk**, with the LLM issuing its own paging calls.",
-          "Introduces a **function-calling protocol** letting the model self-manage memory operations.",
-          "Demonstrates coherent conversations spanning **thousands of turns** without losing key facts.",
+          "把上下文窗口当作**内存**，外部存储当作**磁盘**，让模型自己发起换页调用。",
+          "引入**函数调用协议**，让模型自主管理记忆操作。",
+          "展示了长达**数千轮**的连贯对话，且关键信息不丢失。",
         ],
-        method: "A tiered memory hierarchy (main context, recall storage, archival storage) mediated by tool calls the model itself issues to swap information in and out.",
-        result: "Sustained coherence across **10× longer** conversations and materially better long-document QA than context-only baselines.",
-        audience: "Researchers and engineers building agentic systems that must remember across many turns or documents.",
-        why_keep: "This is the reference design for LLM long-term memory — most later work builds on or contrasts with it.",
-        reading_focus: "The memory-management function schema and eviction/recall policies in Sections 3–4.",
+        method: "构建分层记忆体系（主上下文、召回存储、归档存储），模型通过工具调用在其间自主换入换出信息。",
+        result: "对话连贯性提升至**10倍**长度，长文档问答效果也明显优于仅靠上下文的基线方法。",
+        audience: "正在构建需要跨多轮或多文档保持记忆的智能体系统的研究者和工程师。",
+        why_keep: "这是 LLM 长期记忆的参考设计，后续很多工作都基于它或与它对比。",
+        reading_focus: "第 3-4 节中记忆管理的函数模式及换入换出策略。",
       },
     },
     {
@@ -3016,19 +3040,19 @@ const TRENDING_TOPIC_PAPERS = {
       match_score: 94,
       read_minutes: 40,
       digest: {
-        hook: "Twenty-five LLM townspeople with reflect-recall-plan memory spontaneously organized a Valentine's Day party — no scripting.",
-        verdict: "Essential read on memory architecture for social agents — study the reflection loop closely.",
-        problem: "LLM agents forget prior interactions and can't sustain **believable long-horizon behavior** in an open world.",
+        hook: "25个AI小镇居民靠记忆自发筹办派对，全程无人编排。",
+        verdict: "社交智能体记忆架构的必读之作，重点研究反思循环。",
+        problem: "LLM 智能体容易遗忘过往交互，难以在开放世界中保持**长期可信的行为**。",
         novelty: [
-          "Adds a **reflection step** that periodically distills raw memories into higher-level abstractions.",
-          "Ranks memory retrieval by a blend of **recency, importance, and relevance** rather than similarity alone.",
-          "Shows that **planning grounded in retrieved memories** produces emergent social coordination.",
+          "增加**反思步骤**，定期把零散记忆提炼成更高层次的认知。",
+          "记忆检索按**时近性、重要性和相关性**综合打分，而非只看相似度。",
+          "证明**基于检索记忆的规划**能催生涌现式的社会协作行为。",
         ],
-        method: "An observation stream feeds a vector store; retrieval is scored by recency×importance×relevance; reflection turns clusters of memories into insights; planning consumes both.",
-        result: "Emergent behaviors including autonomous **party planning**, information diffusion, and consistent daily routines across 25 agents.",
-        audience: "Anyone designing multi-turn, multi-agent, or persona-grounded LLM systems.",
-        why_keep: "Defines the reflect + recall + plan pattern that most subsequent agent-memory papers cite as their baseline.",
-        reading_focus: "Retrieval scoring formula (Section 4) and reflection-tree construction (Section 5).",
+        method: "观察流写入向量库；检索按时近性×重要性×相关性打分；反思把记忆聚类提炼成洞见；规划同时利用两者。",
+        result: "25 个智能体涌现出**自发筹办派对**、信息扩散和稳定的日常作息等行为。",
+        audience: "任何在设计多轮对话、多智能体或人设驱动型 LLM 系统的人。",
+        why_keep: "确立了「反思+召回+规划」的模式，后续多数智能体记忆论文都以此为基线。",
+        reading_focus: "第 4 节的检索打分公式与第 5 节的反思树构建方法。",
       },
     },
     {
@@ -3047,19 +3071,19 @@ const TRENDING_TOPIC_PAPERS = {
       match_score: 92,
       read_minutes: 28,
       digest: {
-        hook: "Instead of gradients, the agent writes down what went wrong — and reads its own notes next time.",
-        verdict: "Compact, gradient-free improvement loop — read for the memory-as-training-signal idea.",
-        problem: "Improving language agents typically needs **gradient updates** or heavy RL, both expensive at LLM scale.",
+        hook: "不靠梯度更新，AI 靠给自己写检讨笔记就能越战越强。",
+        verdict: "轻量、无需梯度更新的改进方案，记忆当训练信号的思路值得一读。",
+        problem: "提升语言智能体通常需要**梯度更新**或高成本强化学习，在 LLM 规模下代价很大。",
         novelty: [
-          "Uses **verbal self-reflection** as the update signal — no weight changes.",
-          "Persists reflections in an **episodic memory** consulted on retries.",
-          "Works on decision-making, coding, and QA tasks with a **single, prompt-only** design.",
+          "用**语言化自我反思**作为更新信号，完全不改模型权重。",
+          "把反思保存进**episodic 记忆**，供下次重试时查阅。",
+          "仅靠**提示词设计**即可用于决策、编程和问答等任务。",
         ],
-        method: "Actor–evaluator–reflector triple: an LLM acts, an evaluator scores the trajectory, a reflector produces a natural-language critique that's stored and retrieved on subsequent attempts.",
-        result: "Absolute gains of **+22% on HumanEval**, +20% on HotpotQA, +14% on AlfWorld over strong ReAct baselines.",
-        audience: "Anyone building agents where fine-tuning is off the table and inference-time improvement is the only lever.",
-        why_keep: "Shows episodic memory can carry a learning signal on its own — a template many later self-improving agents follow.",
-        reading_focus: "The reflection prompt template and the memory-injection point in the actor loop.",
+        method: "采用「执行者-评估者-反思者」三元结构：LLM 执行任务，评估者打分，反思者生成自然语言批评并存入记忆供后续调用。",
+        result: "相比强 ReAct 基线，HumanEval 提升 **22%**，HotpotQA 提升 20%，AlfWorld 提升 14%。",
+        audience: "无法微调、只能在推理阶段做提升的智能体开发者。",
+        why_keep: "证明了 episodic 记忆本身也能承载学习信号，是许多自我提升型智能体的模板。",
+        reading_focus: "反思提示词模板，以及记忆注入执行循环的具体位置。",
       },
     },
     {
@@ -3078,19 +3102,19 @@ const TRENDING_TOPIC_PAPERS = {
       match_score: 90,
       read_minutes: 34,
       digest: {
-        hook: "Instead of hard-coded memory rules, A-Mem learns when to remember, forget, and recall — with 40% fewer tokens.",
-        verdict: "Read for the adaptive controller — a fresh take on the memory-policy design question.",
-        problem: "Existing agent memories rely on **hand-tuned heuristics** for writing and retrieving, and don't scale to varied tasks.",
+        hook: "不靠人工规则，A-Mem 自己学会何时该记、该忘、该回忆。",
+        verdict: "关注其自适应调度器，对记忆策略设计有全新思路。",
+        problem: "现有智能体记忆多依赖**人工调参的启发式规则**来写入和检索，难以适配多样任务。",
         novelty: [
-          "A **lightweight scheduler** decides whether each turn triggers write, retrieve, summarize, or skip.",
-          "Trained with a **cost-aware objective** that penalizes wasted memory ops.",
-          "Generalizes across dialogue, tool use, and code tasks **without task-specific tuning**.",
+          "**轻量级调度器**决定每一轮该写入、检索、总结还是跳过。",
+          "用**成本敏感的目标函数**训练，惩罚无意义的记忆操作。",
+          "无需针对任务专门调参即可泛化到对话、工具调用和代码任务。",
         ],
-        method: "A small policy network sits above the LLM and, given the current state, emits a discrete memory action; the LLM then executes it and returns to reasoning.",
-        result: "Beats MemGPT and Reflexion on **LoCoMo** by 6–11 points while cutting memory-token usage by **~40%**.",
-        audience: "Practitioners building production agents where memory cost matters as much as memory recall.",
-        why_keep: "One of the first end-to-end learned memory controllers — likely a template for the next generation.",
-        reading_focus: "Scheduler architecture (Section 3) and the ablation on cost-aware vs. accuracy-only objectives.",
+        method: "在 LLM 之上叠加一个小型策略网络，根据当前状态输出离散的记忆动作，LLM 执行后继续推理。",
+        result: "在 **LoCoMo** 上超过 MemGPT 和 Reflexion 6-11 分，同时记忆 token 用量减少约 **40%**。",
+        audience: "在生产环境中既要记忆效果又要控制记忆成本的从业者。",
+        why_keep: "是首批端到端学习型记忆控制器之一，可能是下一代方案的模板。",
+        reading_focus: "第 3 节的调度器结构，以及成本敏感目标与纯准确率目标的对比实验。",
       },
     },
     {
@@ -3109,19 +3133,19 @@ const TRENDING_TOPIC_PAPERS = {
       match_score: 88,
       read_minutes: 26,
       digest: {
-        hook: "Borrowing from human forgetting curves, MemoryBank lets less-used memories fade so important ones stay sharp.",
-        verdict: "Elegant, biologically inspired take — worth reading before designing your own consolidation policy.",
-        problem: "Fixed-window or FIFO memories either **overflow** or **discard** important information indiscriminately.",
+        hook: "借鉴人类遗忘曲线，MemoryBank 让不常用的记忆自然淡出。",
+        verdict: "优雅的仿生学思路，设计自己的记忆巩固策略前值得一读。",
+        problem: "固定窗口或先进先出式记忆，往往**要么溢出、要么随意丢弃**重要信息。",
         novelty: [
-          "Applies an **Ebbinghaus-inspired decay** curve to memory strength over time.",
-          "**Rehearsal via retrieval** consolidates useful memories, mimicking human recall.",
-          "Enables **personalization** by preserving user-specific facts across sessions.",
+          "对记忆强度应用**类艾宾浩斯遗忘曲线**的衰减函数。",
+          "**通过检索进行复述**来巩固常用记忆，模拟人类的复习效应。",
+          "跨会话保留用户专属事实，从而实现**个性化**记忆。",
         ],
-        method: "Each memory has an importance score; a decay function reduces strength over time, but successful retrieval boosts it. Retrieval is a blend of relevance and current strength.",
-        result: "Higher fidelity of long-range user-preference recall than sliding-window and vanilla vector-store baselines.",
-        audience: "Builders of long-running personal-assistant agents where user memory must persist across sessions.",
-        why_keep: "A clean bridge between cognitive science and agent memory — good source of ideas for principled forgetting.",
-        reading_focus: "The decay-and-rehearsal equations (Section 3) and the personalization evaluation setup.",
+        method: "每条记忆有一个重要性分数；衰减函数随时间降低强度，但成功检索会提升强度；检索综合相关性与当前强度打分。",
+        result: "长期用户偏好召回的准确度高于滑动窗口和普通向量库基线。",
+        audience: "需要跨会话长期保留用户记忆的个人助理类智能体开发者。",
+        why_keep: "在认知科学与智能体记忆之间架起了一座清晰的桥梁，为「有原则的遗忘」提供了灵感来源。",
+        reading_focus: "第 3 节的衰减与复述公式，以及个性化评估的实验设置。",
       },
     },
   ],

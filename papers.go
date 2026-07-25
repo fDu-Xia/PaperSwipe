@@ -58,25 +58,48 @@ type s2Paper struct {
 }
 
 func (s *PaperSearcher) Search(ctx context.Context, query string, limit int) ([]Paper, string, error) {
+	logFlow("【检索】根据关键词检索论文中（非 AI，开放论文源）| 关键词=%q | 目标=%d 篇", query, limit)
+
 	sourceCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	logFlow("【检索】正在请求 Semantic Scholar…")
 	papers, err := s.searchSemanticScholar(sourceCtx, query, limit)
 	cancel()
 	if err == nil && len(papers) > 0 {
+		logFlow("【检索】Semantic Scholar 完成 → 拿到 %d 篇", len(papers))
 		return papers, "Semantic Scholar", nil
+	}
+	if err != nil {
+		logFlow("【检索】Semantic Scholar 失败：%v → 尝试 arXiv", err)
+	} else {
+		logFlow("【检索】Semantic Scholar 无结果 → 尝试 arXiv")
 	}
 
 	sourceCtx, cancel = context.WithTimeout(ctx, 8*time.Second)
+	logFlow("【检索】正在请求 arXiv…")
 	arxivPapers, arxivErr := s.searchArxiv(sourceCtx, query, limit)
 	cancel()
 	if arxivErr == nil && len(arxivPapers) > 0 {
+		logFlow("【检索】arXiv 完成 → 拿到 %d 篇", len(arxivPapers))
 		return arxivPapers, "arXiv", nil
+	}
+	if arxivErr != nil {
+		logFlow("【检索】arXiv 失败：%v → 尝试 OpenAlex", arxivErr)
+	} else {
+		logFlow("【检索】arXiv 无结果 → 尝试 OpenAlex")
 	}
 
 	sourceCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
+	logFlow("【检索】正在请求 OpenAlex…")
 	openAlexPapers, openAlexErr := s.searchOpenAlex(sourceCtx, query, limit)
 	cancel()
 	if openAlexErr == nil && len(openAlexPapers) > 0 {
+		logFlow("【检索】OpenAlex 完成 → 拿到 %d 篇", len(openAlexPapers))
 		return openAlexPapers, "OpenAlex", nil
+	}
+	if openAlexErr != nil {
+		logFlow("【检索】OpenAlex 失败：%v", openAlexErr)
+	} else {
+		logFlow("【检索】OpenAlex 无结果")
 	}
 
 	if err == nil {
@@ -88,6 +111,7 @@ func (s *PaperSearcher) Search(ctx context.Context, query string, limit int) ([]
 	if openAlexErr == nil {
 		openAlexErr = errors.New("OpenAlex returned no papers")
 	}
+	logFlow("【检索】全部论文源失败")
 	return nil, "", fmt.Errorf("paper sources unavailable: Semantic Scholar: %v; arXiv: %v; OpenAlex: %v", err, arxivErr, openAlexErr)
 }
 

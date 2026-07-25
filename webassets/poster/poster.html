@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>PaperSwipe · Poster</title>
+<style>
+  :root{
+    --app-bg:#f4f5f7;
+    --surface:#ffffff;
+    --ink:#11131a;
+    --muted:#6e7280;
+    --line:#dfe2e8;
+    --accent:#6657e8;
+    --accent-strong:#503bd5;
+    --accent-soft:#ebe8ff;
+    --cyan:#22aeb0;
+    --green:#238666;
+    --coral:#e66a58;
+    --yellow:#f0b734;
+    --pink:#e85bba;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    width:100vw;height:100vh;overflow:hidden;
+    background:#e3e5ea;
+    font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .stage{
+    position:relative;
+    width:100vw;height:100vh;
+    background:var(--app-bg);
+    overflow:hidden;
+  }
+  .stage::before,.stage::after{content:"";position:absolute;z-index:0;pointer-events:none;filter:blur(70px);opacity:.42;}
+  .stage::before{width:34vw;height:34vw;top:-10vh;right:-6vw;background:radial-gradient(circle at 30% 30%,#a688ff 0%,transparent 65%);}
+  .stage::after{width:36vw;height:36vw;bottom:-12vh;left:38vw;background:radial-gradient(circle at 60% 40%,#ffb37a 0%,transparent 60%),radial-gradient(circle at 30% 70%,#7dd6cd 0%,transparent 55%);}
+
+  .layout{position:relative;z-index:1;width:100%;height:100%;display:flex;padding:3vh 2.6vw;gap:1.4vw;}
+
+  /* ============ HERO (left) ============ */
+  .hero{flex:0 0 55%;min-width:0;display:flex;flex-direction:column;height:100%;}
+
+  .brand{display:flex;align-items:center;gap:.7vw;flex:0 0 auto;}
+  .brand-mark{width:4vh;height:4vh;border-radius:1vh;display:grid;place-items:center;background:linear-gradient(145deg,#26c5b5,#7655e8 68%,#e85bba);box-shadow:0 6px 16px rgba(80,59,213,.3);}
+  .brand-mark svg{width:2.1vh;height:2.1vh;}
+  .brand span{font-size:2vh;font-weight:900;letter-spacing:-.02em;color:var(--ink);}
+  .brand small{font-size:1.05vh;font-weight:800;letter-spacing:.18em;color:var(--muted);}
+
+  .slogan{flex:0 0 auto;margin-top:2.6vh;position:relative;}
+  .slogan .line{display:block;font-weight:900;letter-spacing:-.02em;line-height:.98;font-size:8.6vh;color:var(--ink);}
+  .slogan .line.grad{background:linear-gradient(135deg,#6657e8 0%,#8c6df6 45%,#ff8f6b 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+  .slogan-sub{margin-top:1.6vh;max-width:34vw;font-size:1.55vh;line-height:1.6;color:var(--muted);font-weight:500;}
+
+  .pills{margin-top:1.8vh;display:flex;flex-wrap:wrap;gap:.8vh .8vw;flex:0 0 auto;}
+  .pill{display:inline-flex;align-items:center;gap:.5vh;padding:.7vh 1.1vw;border-radius:99px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.8);box-shadow:0 4px 12px rgba(25,29,40,.06);font-size:1.2vh;font-weight:700;color:var(--ink);}
+  .pill i{font-size:1.3vh;}
+
+  /* hero feature card (Explore) */
+  .hero-card{
+    position:relative;margin-top:auto;flex:0 0 auto;
+    display:flex;align-items:center;gap:1.6vw;
+    padding:2.2vh 2vw;border-radius:2.2vh;
+    background:color-mix(in srgb,var(--surface) 90%,transparent);
+    border:1px solid rgba(255,255,255,.8);
+    box-shadow:0 22px 46px rgba(25,29,40,.16),inset 0 1px 0 rgba(255,255,255,.7);
+    transform:rotate(-1.1deg);
+  }
+  .hero-card .num{
+    position:absolute;top:-6vh;left:-1vw;z-index:0;font-size:20vh;font-weight:900;
+    color:var(--accent-soft);opacity:.65;line-height:1;user-select:none;
+  }
+  .hero-card .phone{position:relative;z-index:1;flex:0 0 auto;height:33vh;aspect-ratio:856/1652;border-radius:1.6vh;overflow:hidden;background:#0e0f14;box-shadow:0 14px 30px rgba(25,29,40,.28);transform:rotate(-1.6deg);border:1px solid rgba(0,0,0,.08);}
+  .hero-card .phone img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
+  .hero-card .copy{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:1vh;}
+  .hero-card .kicker{display:inline-flex;align-items:center;gap:.6vh;font-size:1.3vh;font-weight:850;letter-spacing:.14em;text-transform:uppercase;color:var(--coral);}
+  .hero-card .kicker .dot{width:1.1vh;height:1.1vh;border-radius:50%;background:var(--coral);}
+  .hero-card h2{font-size:3.1vh;font-weight:850;line-height:1.14;color:var(--ink);letter-spacing:-.01em;max-width:22vw;}
+  .hero-card ul{list-style:none;display:flex;flex-direction:column;gap:.55vh;margin-top:.3vh;}
+  .hero-card li{display:flex;gap:.6vh;align-items:flex-start;font-size:1.5vh;line-height:1.45;color:var(--muted);font-weight:500;max-width:24vw;}
+  .hero-card li::before{content:"";width:.75vh;height:.75vh;margin-top:.62vh;border-radius:50%;background:var(--coral);flex:0 0 auto;}
+
+  /* ============ SCATTER (right) ============ */
+  .scatter{flex:1 1 auto;min-width:0;position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:.5vh 1vw;}
+  .scatter::before{content:"";position:absolute;top:2%;bottom:2%;left:50%;width:0;border-left:2px dashed rgba(110,90,220,.22);z-index:0;}
+
+  .snip{position:relative;z-index:1;display:flex;align-items:center;gap:1vw;padding:1.3vh 1.2vw;border-radius:1.7vh;background:color-mix(in srgb,var(--surface) 84%,transparent);border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 24px rgba(25,29,40,.1);}
+  .snip .tape{position:absolute;top:-1.1vh;left:50%;width:5.6vw;height:1.6vh;transform:translateX(-50%) rotate(-3deg);border-radius:.3vh;opacity:.9;box-shadow:0 3px 6px rgba(0,0,0,.12);}
+  .snip .phone{flex:0 0 auto;height:14.5vh;aspect-ratio:856/1652;border-radius:1vh;overflow:hidden;background:#0e0f14;box-shadow:0 8px 16px rgba(25,29,40,.24);border:1px solid rgba(0,0,0,.08);}
+  .snip .phone img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
+  .snip .info{min-width:0;display:flex;flex-direction:column;gap:.4vh;}
+  .snip .kicker{display:flex;align-items:center;gap:.5vh;font-size:1.02vh;font-weight:850;letter-spacing:.1em;text-transform:uppercase;}
+  .snip .kicker .n{display:inline-grid;place-items:center;width:1.7vh;height:1.7vh;border-radius:50%;font-size:.95vh;font-weight:900;color:#fff;flex:0 0 auto;}
+  .snip h3{font-size:1.75vh;font-weight:800;color:var(--ink);line-height:1.2;}
+  .snip p{font-size:1.18vh;line-height:1.4;color:var(--muted);max-width:15vw;font-weight:500;}
+
+  .snip--init{align-self:flex-start;width:47%;transform:rotate(-2.2deg);}
+  .snip--init .tape{background:var(--accent);}
+  .snip--init .kicker{color:var(--accent-strong);}
+  .snip--init .kicker .n{background:var(--accent-strong);}
+
+  .snip--library{align-self:flex-end;width:53%;transform:rotate(1.6deg);}
+  .snip--library .phone{height:17vh;}
+  .snip--library .tape{background:var(--green);}
+  .snip--library .kicker{color:var(--green);}
+  .snip--library .kicker .n{background:var(--green);}
+
+  .snip--trending{align-self:flex-start;width:45%;margin-left:6%;transform:rotate(3deg);}
+  .snip--trending .tape{background:var(--cyan);}
+  .snip--trending .kicker{color:var(--cyan);}
+  .snip--trending .kicker .n{background:var(--cyan);}
+
+  .snip--schedule{align-self:flex-end;width:50%;transform:rotate(-2.6deg);}
+  .snip--schedule .tape{background:var(--yellow);}
+  .snip--schedule .kicker{color:#b9860f;}
+  .snip--schedule .kicker .n{background:var(--yellow);}
+
+  .snip--robot{align-self:center;width:56%;transform:rotate(2.2deg);}
+  .snip--robot .phone{height:16vh;}
+  .snip--robot .tape{background:var(--pink);}
+  .snip--robot .kicker{color:var(--pink);}
+  .snip--robot .kicker .n{background:var(--pink);}
+
+  /* footer corners */
+  .foot-l{position:absolute;left:2.6vw;bottom:2vh;z-index:2;font-size:1.25vh;font-weight:800;color:var(--ink);}
+  .foot-l b{background:linear-gradient(135deg,#6657e8,#e66a58);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+  .foot-r{position:absolute;right:2.6vw;bottom:2vh;z-index:2;font-size:1.05vh;color:var(--muted);letter-spacing:.02em;}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="layout">
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="brand">
+          <span class="brand-mark">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 20 32 12l15 8-15 8-15-8Zm0 12 15 8 15-8M17 43l15 8 15-8" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span>PaperSwipe<br><small>DISCOVER · READ · TRACK</small></span>
+        </div>
+
+        <div class="slogan">
+          <span class="line">把读论文</span>
+          <span class="line grad">变成刷论文</span>
+        </div>
+        <p class="slogan-sub">AI 帮你发现、5 秒帮你判断、自动帮你安排 —— 剩下的，交给滑动和阅读。</p>
+
+        <div class="pills">
+          <span class="pill">🔥 全网实时检索</span>
+          <span class="pill">⚡ 一句话读懂摘要</span>
+          <span class="pill">👆 四向滑动决策</span>
+          <span class="pill">🤖 AI 论文管家</span>
+        </div>
+
+        <div class="hero-card">
+          <span class="num">01</span>
+          <span class="phone"><img src="../explore/pics/explore1-卡片正面.png" alt="Explore"></span>
+          <div class="copy">
+            <span class="kicker"><span class="dot"></span>Explore · 核心体验</span>
+            <h2>像刷交友软件一样筛论文</h2>
+            <ul>
+              <li>AI 一句通俗中文读懂摘要，秒判断值不值得看</li>
+              <li>左划跳过 · 右划收藏 · 上划重点 · 下划已读</li>
+              <li>实时联通 Semantic Scholar · arXiv · OpenAlex</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCATTER -->
+      <div class="scatter">
+
+        <div class="snip snip--init">
+          <span class="tape"></span>
+          <span class="phone"><img src="../initialize/pics/initialize-discovery-style.png" alt="Initialize"></span>
+          <div class="info">
+            <span class="kicker"><span class="n">0</span>Initialize</span>
+            <h3>AI 先认识你</h3>
+            <p>选身份 → 说意图 → AI 拆关键词 → 调发现风格</p>
+          </div>
+        </div>
+
+        <div class="snip snip--library">
+          <span class="tape"></span>
+          <span class="phone"><img src="../library/pics/library首页.png" alt="Library"></span>
+          <div class="info">
+            <span class="kicker"><span class="n">2</span>Library</span>
+            <h3>随手一划，变成文献库</h3>
+            <p>感兴趣 / 重点 / 已读三栏归档 · 一键导出 BibTeX / Zotero</p>
+          </div>
+        </div>
+
+        <div class="snip snip--trending">
+          <span class="tape"></span>
+          <span class="phone"><img src="../trending/pics/trending首页.png" alt="Trending"></span>
+          <div class="info">
+            <span class="kicker"><span class="n">3</span>Trending</span>
+            <h3>全世界都在看什么</h3>
+            <p>实时追踪爆发方向 · 热度飙升一眼可见</p>
+          </div>
+        </div>
+
+        <div class="snip snip--schedule">
+          <span class="tape"></span>
+          <span class="phone"><img src="../schedule/pics/schedule首页.png" alt="Schedule"></span>
+          <div class="info">
+            <span class="kicker"><span class="n">4</span>Schedule</span>
+            <h3>收藏不再吃灰</h3>
+            <p>挑日期 + 设优先级 · This Week 一览阅读节奏</p>
+          </div>
+        </div>
+
+        <div class="snip snip--robot">
+          <span class="tape"></span>
+          <span class="phone"><img src="../robot/pics/robot对话首页.png" alt="AI Assistant"></span>
+          <div class="info">
+            <span class="kicker"><span class="n">5</span>AI Assistant</span>
+            <h3>一句话规划阅读</h3>
+            <p>今日读什么 / 读论文 Roadmap / 排进 Schedule</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="foot-l"><b>PaperSwipe</b> · 把"找论文"的苦差事，还给"读论文"本身</div>
+    <div class="foot-r">Semantic Scholar · arXiv · OpenAlex</div>
+  </div>
+</body>
+</html>

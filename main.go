@@ -34,8 +34,9 @@ func main() {
 	images := NewImageGenerator(imageClient)
 	api := NewAPI(searcher, summarizer, images, store, logger)
 
+	devMode := os.Getenv("DEV") == "1"
 	var staticFS fs.FS
-	if os.Getenv("DEV") == "1" {
+	if devMode {
 		staticFS = os.DirFS("web")
 		logger.Info("serving web assets from disk (DEV mode)")
 	} else {
@@ -45,7 +46,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	static := spaFileServer(staticFS)
+	static := spaFileServer(staticFS, devMode)
 	server := &http.Server{
 		Addr:              envOr("ADDR", ":8080"),
 		Handler:           api.Routes(static),
@@ -67,9 +68,18 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
-func spaFileServer(content fs.FS) http.Handler {
+// spaFileServer serves the embedded (or on-disk, in DEV mode) web assets.
+// In DEV mode it disables browser caching for HTML/JS/CSS so that edits to
+// app.js / styles.css always show up on a normal refresh, instead of the
+// browser silently serving a stale cached copy.
+func spaFileServer(content fs.FS, devMode bool) http.Handler {
 	fileServer := http.FileServer(http.FS(content))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if devMode {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+		}
 		if r.URL.Path == "/" {
 			fileServer.ServeHTTP(w, r)
 			return

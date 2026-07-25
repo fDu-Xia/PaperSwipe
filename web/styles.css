@@ -1661,7 +1661,6 @@ html[data-theme="system"] .settings-page::after { display: none; }
   .onboarding-step { padding-top: calc(54px + var(--safe-top)); }
   .onboarding-heading { margin-bottom: 16px; }
   .onboarding-heading h1 { font-size: 31px; }
-  .identity-visual { height: 102px; }
   .identity-control { margin: 16px 0; }
   .topic-composer { min-height: 132px; padding-top: 12px; }
   .topic-composer textarea { min-height: 76px; }
@@ -1881,6 +1880,8 @@ body.is-ai-bot-open .bottom-nav { display: none; }
   border-radius: 20px;
   cursor: grab;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   transform-origin: center center;
   will-change: transform;
   background: transparent;
