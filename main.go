@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -82,6 +81,3 @@ func spaFileServer(content fs.FS) http.Handler {
 	})
 }
 
-func serverURL(addr string) string {
-	return fmt.Sprintf("http://localhost%s", addr)
-}

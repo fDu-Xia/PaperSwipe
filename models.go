@@ -79,17 +79,6 @@ type Paper struct {
 	Digest                   Digest            `json:"digest"`
 }
 
-type SearchResponse struct {
-	Query        string    `json:"query"`
-	Source       string    `json:"source"`
-	GeneratedAt  time.Time `json:"generated_at"`
-	Total        int       `json:"total"`
-	Papers       []Paper   `json:"papers"`
-	Warning      string    `json:"warning,omitempty"`
-	AIEnabled    bool      `json:"ai_enabled"`
-	ImageEnabled bool      `json:"image_enabled"`
-}
-
 type PaperImageRequest struct {
 	PaperID  string `json:"paper_id"`
 	Title    string `json:"title"`

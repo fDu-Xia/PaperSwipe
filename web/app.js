@@ -20,7 +20,6 @@ const state = {
   library: [],
   libraryFilter: "save",
   libraryTags: [],
-  libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
   aiModel: "",
@@ -31,7 +30,6 @@ const state = {
   stats: { saved: 0, priority: 0, read: 0, dismissed: 0 },
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
   todos: [],
-  todoScope: "day",
   weekPlanDone: new Set(),
   weekPlanRemoved: new Set(),
   weekPlanAssign: new Map(), // paperId -> 'YYYY-MM-DD' (manual scheduling)
@@ -45,7 +43,6 @@ const state = {
   librarySelectMode: false,
   librarySelected: new Set(),
   librarySearch: "",
-  friendRecs: new Map(), // paperId -> { boosted:boolean, count:number }
   streaming: false,
 };
 
@@ -84,8 +81,6 @@ function pickFriendRec(paperId) {
   return { badge };
 }
 
-// No-op stub — the badge is not interactive anymore, kept so old callers don't crash.
-function toggleFriendRec(_paperId, _buttonEl) {}
 
 // Fallback papers used silently when the live search returns zero results.
 // These are real, well-known works so users still get browseable content
@@ -269,8 +264,6 @@ function cacheElements() {
     libraryScheduleDialog: document.querySelector("#library-schedule-dialog"),
     scheduleWeekLabel: document.querySelector("#schedule-week-label"),
     scheduleDateGrid: document.querySelector("#schedule-date-grid"),
-    filterDialog: null,
-    forumDialog: document.querySelector("#forum-dialog"),
     aiBotPage: document.querySelector("#ai-bot-page"),
     aiBotMessages: document.querySelector("#ai-bot-messages"),
     aiBotForm: document.querySelector("#ai-bot-form"),
@@ -402,12 +395,6 @@ function bindEvents() {
       decide(cardAction.dataset.cardAction);
       return;
     }
-    const flipToggle = event.target.closest("[data-flip-card]");
-    if (flipToggle) {
-      event.stopPropagation();
-      toggleCardFlip();
-      return;
-    }
     const queryButton = event.target.closest("[data-query]");
     if (queryButton) {
       elements.searchInput.value = queryButton.dataset.query;
@@ -516,11 +503,6 @@ function bindEvents() {
     if (topicRemove) {
       removeSettingsTopic(topicRemove.dataset.settingsTopicRemove);
       return;
-    }
-    const forumItem = event.target.closest(".forum-list button");
-    if (forumItem) {
-      elements.forumDialog.close();
-      showToast("论坛原型已就绪，讨论数据将在后续接入");
     }
   });
 
@@ -2255,10 +2237,6 @@ function buildTopPickReply(papers, query) {
   };
 }
 
-function buildRoadmapReply(papers) {
-  return { type: "roadmap", data: window.__PAPERSWIPE_ROADMAP__ };
-}
-
 function appendBotRoadmap(data) {
   if (!data || !Array.isArray(data.stages) || !data.stages.length) {
     appendBotMessage("I couldn't generate a roadmap right now — please try again later.");
@@ -3562,11 +3540,6 @@ function renderSettings() {
   refreshIcons();
 }
 
-const TODO_STORAGE_KEY = "paperswipe_todos"; // legacy — cleared on next boot
-
-function scopeLabel(scope) {
-  return scope === "day" ? "Today" : scope === "week" ? "This week" : "This month";
-}
 
 const WEEK_PLAN_DAY_TARGET_MIN = 120;
 const WEEK_PLAN_ORDER = ["priority", "save"];
@@ -3824,14 +3797,12 @@ function openSettingsPage() {
   if (!elements.settingsPage) return;
   renderSettings();
   elements.settingsPage.hidden = false;
-  document.body.classList.add("is-settings-open");
   refreshIcons();
 }
 
 function closeSettingsPage() {
   if (!elements.settingsPage) return;
   elements.settingsPage.hidden = true;
-  document.body.classList.remove("is-settings-open");
 }
 
 function removeSettingsTopic(topic) {
@@ -3890,13 +3861,13 @@ function openDetails(id) {
   if (!paper) return;
   const noveltyText = noveltyBullets(paper).join(" • ");
   const details = [
-    ["解决什么", paper.digest?.problem], ["新在哪里", noveltyText],
-    ["方法", paper.digest?.method], ["结果", paper.digest?.result],
-    ["适合谁读", paper.digest?.audience], ["阅读重点", paper.digest?.reading_focus],
+    ["Problem", paper.digest?.problem], ["What's new", noveltyText],
+    ["Method", paper.digest?.method], ["Results", paper.digest?.result],
+    ["Audience", paper.digest?.audience], ["Reading focus", paper.digest?.reading_focus],
   ];
   const links = [
-    safeURL(paper.url) ? `<a class="paper-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>论文页面</span></a>` : "",
-    safeURL(paper.pdf_url) ? `<a class="paper-link" href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i><span>开放 PDF</span></a>` : "",
+    safeURL(paper.url) ? `<a class="paper-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Paper page</span></a>` : "",
+    safeURL(paper.pdf_url) ? `<a class="paper-link" href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener"><i data-lucide="file-down"></i><span>Open PDF</span></a>` : "",
   ].join("");
   elements.dialogContent.innerHTML = `
     <h2>${escapeHTML(paper.title)}</h2>

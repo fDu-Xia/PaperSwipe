@@ -668,7 +668,7 @@
         "year": 2024,
         "publication_date": "2024-05-27",
         "venue": "OpenAlex",
-        "citation_count": 27,
+        "citation_count": 28,
         "influential_citation_count": 0,
         "fields": [
           "Software Testing and Debugging Techniques",
@@ -681,7 +681,7 @@
           "OpenAlex": "https://openalex.org/W4401907288"
         },
         "match_score": 84,
-        "read_minutes": 10,
+        "read_minutes": 48,
         "source": "OpenAlex",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
@@ -698,8 +698,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-23T15:34:07.328261Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-25T05:45:44.2298222Z"
     },
     "openalex:W4412203333": {
       "paper": {
@@ -748,7 +748,7 @@
           "OpenAlex": "https://openalex.org/W4412203333"
         },
         "match_score": 88,
-        "read_minutes": 9,
+        "read_minutes": 46,
         "source": "OpenAlex",
         "digest": {
           "verdict": "Strong match — save and verify with priority",
@@ -765,8 +765,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-23T15:34:03.571211Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-25T05:45:40.8499201Z"
     },
     "trend-mem-1": {
       "paper": {
@@ -831,8 +831,12 @@
   },
   "recent_searches": [
     {
+      "query": "large language models long-term memory",
+      "created_at": "2026-07-25T05:50:23.3588811Z"
+    },
+    {
       "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-25T05:26:56.2573213Z"
+      "created_at": "2026-07-25T05:45:22.9007639Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
@@ -857,10 +861,6 @@
     {
       "query": "large language models",
       "created_at": "2026-07-24T08:06:26.569101Z"
-    },
-    {
-      "query": "llm memory",
-      "created_at": "2026-07-23T14:19:06.93295Z"
     }
   ]
 }
