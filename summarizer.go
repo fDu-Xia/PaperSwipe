@@ -500,7 +500,8 @@ CRITICAL — the "hook" field is the front-of-card one-liner and MUST be in Simp
 - 要抓眼球：突出最劲爆/最关键的一点（核心贡献或关键影响），像短视频标题或科普推文，不要学术腔
 - 字数：25～40 个汉字（含标点），至少20字，绝不超过 40 字；只写一句，不要分句堆砌
 - 专有名词可保留英文（如 Transformer、RAG），但整句必须是中文
-- 风格示例（仅示意语气与长度，勿照抄）：
+- 不要每次都以"AI"开头，希望有 diversity，但是 focus 在当前论文主题上
+- 风格示例（仅示意语气与长度）：
   "大模型第一次学会了"越聊越聪明"。让 AI 把每次犯过的错都变成经验，下次决策更准确。"
   "AI 学会了"吃一堑长一智"——给 AI 装上分层记忆，让每一次对话都成为下一次的经验。"
   "这篇论文，开启了 Diffusion 时代——不靠对抗训练，也能生成堪比 GAN 的逼真图像。"
@@ -524,7 +525,7 @@ Papers: %s`, query, inputJSON)
 	payload := map[string]any{
 		"model": s.model,
 		"messages": []map[string]string{
-			{"role": "system", "content": "Return valid JSON only. The hook field MUST be one punchy Simplified Chinese sentence of 18-36 Chinese characters; other digest fields stay in English."},
+			{"role": "system", "content": "Return valid JSON only. The hook field MUST be one punchy Simplified Chinese sentence, 25-40 Chinese characters (including punctuation), never fewer than 20 and never more than 40; other digest fields stay in English."},
 			{"role": "user", "content": prompt},
 		},
 		"temperature":     0.2,

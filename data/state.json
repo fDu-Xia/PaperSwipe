@@ -267,21 +267,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "解决复杂问题，AI 更懂细节了！",
-          "problem": "复杂问题检索（CAR）中，低效用方面难以匹配。",
+          "problem": "复杂问题答案检索困难，低效特征词影响检索效果。",
           "novelty": [
-            "识别并解决低效用方面",
-            "利用CAR查询的层次结构",
-            "使用知识图嵌入的实体相似度得分"
+            "识别并解决低效特征词问题",
+            "利用查询层次结构和频率信息",
+            "结合知识图谱嵌入提高相似度评分"
           ],
-          "method": "提出两种方面效用估计器，结合层次结构和频率信息，并使用知识图嵌入的实体相似度得分。",
-          "result": "在TREC CAR数据集上，性能显著优于未修改的神经排名器和其他领先的CAR技术。",
-          "audience": "对复杂问题检索感兴趣的AI研究者。",
-          "why_keep": "为复杂问题检索提供了新的解决方案。",
-          "reading_focus": "关注低效用方面的识别和解决方法。"
+          "method": "提出两种特征词效用估计器，结合知识图谱嵌入，改进神经网络排序技术。",
+          "result": "在TREC CAR数据集上，性能显著优于未修改的神经网络排序器和其他领先技术。",
+          "audience": "对复杂问题答案检索感兴趣的读者。",
+          "why_keep": "为复杂问题答案检索提供了一种有效的方法。",
+          "reading_focus": "关注低效特征词的识别和解决方法。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-25T06:09:46.244231Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T15:27:18.118076Z"
     },
     "arxiv:2312.05434v1": {
       "paper": {
@@ -504,14 +504,14 @@
             "Decoupling-BEiT-3 编码器优化处理模糊需求"
           ],
           "method": "设计两阶段检索框架，包括实体排名和基于摘要的重排序，并使用 Decoupling-BEiT-3 编码器。",
-          "result": "在 AToMiC 数据集上，CFIR 比现有 MLLMs 提高召回率 11.06%，同时减少训练和检索时间。",
+          "result": "在 AToMiC 数据集上，Recall@1000 提高至 11.06%，训练和检索时间分别减少 68.75% 和 99.79%。",
           "audience": "对数字图书馆、电子商务和多媒体数据库感兴趣的研究人员和开发者。",
           "why_keep": "为大规模长文本到图像检索提供了一种高效的方法。",
           "reading_focus": "关注两阶段检索框架的设计和 Decoupling-BEiT-3 编码器的应用。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-25T06:09:41.963978Z"
+      "updated_at": "2026-07-25T15:27:14.435321Z"
     },
     "arxiv:2405.11357v3": {
       "paper": {
@@ -656,21 +656,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆升级，像人一样理解世界",
-          "problem": "AI 难以形成长期记忆，影响复杂任务处理。",
+          "problem": "AI 难以像人类一样处理长期记忆和推理任务。",
           "novelty": [
-            "M3-Agent 拥有长期记忆，处理视觉和听觉输入。",
+            "M3-Agent 拥有长期记忆，能处理视觉和听觉输入。",
             "记忆组织在实体中心，多模态方式。",
-            "M3-Bench 基准测试，评估记忆和推理能力。"
+            "M3-Bench 测试平台，包含 1000 个视频数据集。"
           ],
           "method": "M3-Agent 通过强化学习训练，使用 M3-Bench 进行评估。",
-          "result": "M3-Agent 在 M3-Bench 上优于基线模型，分别提高 6.7%、7.7% 和 5.3% 的准确率。",
-          "audience": "对 AI 长期记忆和复杂任务处理感兴趣的研究者。",
-          "why_keep": "为 AI 长期记忆和复杂任务处理提供新思路。",
-          "reading_focus": "关注 M3-Agent 的记忆结构和 M3-Bench 的评估方法。"
+          "result": "M3-Agent 在 M3-Bench 上比基线模型高 6.7% - 7.7% 准确率。",
+          "audience": "对 AI 长期记忆和推理感兴趣的读者。",
+          "why_keep": "为多模态 AI 提供了长期记忆和推理的新思路。",
+          "reading_focus": "关注 M3-Agent 的记忆结构和推理过程。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T10:44:50.493706Z"
+      "updated_at": "2026-07-25T15:25:54.832437Z"
     },
     "arxiv:2510.06426v1": {
       "paper": {
@@ -765,21 +765,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆升级，越聊越聪明！",
-          "problem": "现有方法在长期记忆更新上存在不足，无法动态调整偏好记忆表示。",
+          "problem": "现有方法在长期记忆更新上存在不足，难以适应用户行为变化。",
           "novelty": [
             "提出偏好感知记忆更新机制 (PAMU)",
             "结合滑动窗口平均 (SW) 和指数移动平均 (EMA)",
-            "显著提高 LLM 在长期对话中的输出质量"
+            "显著提升 LLM 在长期对话中的输出质量"
           ],
-          "method": "提出偏好感知记忆更新机制 (PAMU)，结合滑动窗口平均 (SW) 和指数移动平均 (EMA) 构建融合的偏好感知表示。",
-          "result": "在五个任务场景中，PAMU 显著提高了 LLM 的输出质量。",
-          "audience": "对 AI 长期记忆和对话系统感兴趣的研究人员和开发者。",
-          "why_keep": "为长期记忆更新提供了新的思路和方法。",
-          "reading_focus": "关注 PAMU 机制和实验结果。"
+          "method": "通过滑动窗口平均 (SW) 和指数移动平均 (EMA) 构建融合的偏好感知表示。",
+          "result": "在五个任务场景中，PAMU 显著提升了 LLM 的输出质量。",
+          "audience": "对 AI 长期记忆机制感兴趣的研究人员和开发者。",
+          "why_keep": "为 LLM 长期记忆更新提供了一种有效的方法。",
+          "reading_focus": "关注 PAMU 机制的设计和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T12:09:34.694222Z"
+      "updated_at": "2026-07-25T15:44:34.253172Z"
     },
     "arxiv:2604.07863v1": {
       "paper": {
@@ -922,22 +922,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 外部化，让记忆更强大",
-          "problem": "LLM 代理依赖模型权重，难以扩展能力。",
+          "hook": "AI 外部化升级，不再只靠大脑",
+          "problem": "LLM 代理能力提升，依赖外部化组件。",
           "novelty": [
-            "外部化记忆、技能、协议和 harness 工程提高效率。",
-            "记忆外部化状态，技能外部化程序知识。",
-            "协议外部化交互结构，harness 工程统一协调。"
+            "外部化将认知负担转化为模型可解决的形式。",
+            "记忆、技能、协议和 harness 工程是外部化的形式。",
+            "讨论了外部化能力与参数化能力的权衡。"
           ],
           "method": "通过外部化，将认知负担转化为模型可解决的形式。",
-          "result": "提供系统级框架，解释代理进步依赖模型和外部认知基础设施。",
-          "audience": "对 LLM 代理和认知基础设施感兴趣的研究者。",
-          "why_keep": "为 LLM 代理的长期发展提供理论框架。",
-          "reading_focus": "关注外部化概念和系统级框架。"
+          "result": "提供了系统级框架，解释了代理进步的原因。",
+          "audience": "对 AI 代理和外部化感兴趣的读者。",
+          "why_keep": "为 AI 代理的外部化提供了理论框架。",
+          "reading_focus": "关注外部化在 AI 代理中的应用和挑战。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-25T10:46:03.515342Z"
+      "action": "priority",
+      "updated_at": "2026-07-25T15:27:12.07675Z"
     },
     "arxiv:2605.06924v1": {
       "paper": {
@@ -980,22 +980,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "长视频一致性，AI 新突破！",
+          "hook": "长视频一致性，AI 也能做到！",
           "problem": "现有方法在长时域内存在语义漂移和叙事崩溃问题。",
           "novelty": [
             "提出 A$^2$RD 架构，解耦创意合成和一致性执行",
             "多模态视频记忆跟踪视频进度",
             "分层测试时自我改进防止错误传播"
           ],
-          "method": "设计 A$^2$RD 架构，通过 Retrieve-Synthesize-Refine-Update 循环合成和自我改进视频。",
-          "result": "在 LVBench-C 基准测试中，A$^2$RD 在一致性和叙事连贯性方面优于现有基线 30% 和 20%。",
-          "audience": "对长视频合成和一致性感兴趣的研究人员和开发者。",
-          "why_keep": "为长视频一致性提供了一种有效的方法。",
+          "method": "设计 A$^2$RD 架构，通过 Retrieve--Synthesize--Refine--Update 循环实现长视频合成。",
+          "result": "在 LVBench-C 基准测试中，一致性提高 30%，叙事连贯性提高 20%。",
+          "audience": "对长视频合成和一致性技术感兴趣的研究人员。",
+          "why_keep": "为长视频合成提供了一种有效的方法。",
           "reading_focus": "关注 A$^2$RD 架构的设计和实验结果。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T06:09:44.797251Z"
+      "action": "read",
+      "updated_at": "2026-07-25T15:27:17.009657Z"
     },
     "arxiv:2605.27437v1": {
       "paper": {
@@ -1024,27 +1024,27 @@
         "external_ids": {
           "ArXiv": "2605.27437v1"
         },
-        "match_score": 64,
+        "match_score": 65,
         "read_minutes": 47,
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆反思，对话更流畅",
-          "problem": "LLM 在长期对话中记忆冗余，影响效果。",
+          "hook": "AI 对话记忆升级，不再忘东忘西",
+          "problem": "LLM 在长期对话中，记忆维护效果不佳。",
           "novelty": [
-            "MGRetrieval 基于语义结构进行反思检索。",
-            "构建更精确的检索路径，保留关键记忆。",
-            "通过记忆引导检索和关键记忆传播。"
+            "MGRetrieval 基于语义结构进行检索。",
+            "通过记忆引导和关键记忆传播，构建简洁记忆。",
+            "在 LoCoMo 上比基线模型高 8.91% - 11.11% F1 和 BLEU-1。"
           ],
-          "method": "MGRetrieval 通过语义结构和关键记忆传播进行检索。",
-          "result": "MGRetrieval 在 LoCoMo 上平均优于基线模型 8.91% 和 11.11%。",
-          "audience": "对 LLM 对话和记忆维护感兴趣的研究者。",
-          "why_keep": "为 LLM 长期对话提供有效的记忆维护方法。",
-          "reading_focus": "关注 MGRetrieval 的检索策略和实验结果。"
+          "method": "MGRetrieval 通过语义结构构建检索路径，并保留关键记忆。",
+          "result": "MGRetrieval 在 LoCoMo 上平均提高 8.91% - 11.11% F1 和 BLEU-1。",
+          "audience": "对 LLM 长期对话和记忆维护感兴趣的读者。",
+          "why_keep": "为 LLM 长期对话提供了有效的记忆维护方法。",
+          "reading_focus": "关注 MGRetrieval 的检索策略和记忆传播机制。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T10:46:17.352701Z"
+      "action": "save",
+      "updated_at": "2026-07-25T15:26:58.510572Z"
     },
     "arxiv:2606.06036v1": {
       "paper": {
@@ -1082,21 +1082,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆重构，不再是检索！",
-          "problem": "现有记忆增强代理依赖于静态检索-推理范式，无法动态适应推理过程中的中间证据。",
+          "problem": "现有记忆增强代理依赖于静态的检索-推理范式，无法动态适应推理过程中的中间证据。",
           "novelty": [
             "提出 MRAgent 框架，结合关联记忆图和主动重构机制",
             "Cue-Tag-Content 图表示记忆",
-            "直接将 LLM 推理集成到记忆访问中"
+            "直接将 LLM 推理集成到内存访问中"
           ],
-          "method": "使用关联记忆图和主动重构机制，将 LLM 推理集成到记忆访问中。",
-          "result": "在 LoCoMo 和 LongMemEval 基准测试中，MRAgent 比强基线提高 23%，同时降低 token 和运行时成本。",
+          "method": "使用关联记忆图和主动重构机制，将 LLM 推理集成到内存访问中。",
+          "result": "在 LoCoMo 和 LongMemEval 基准测试中，性能比强基线提高 23%，同时显著降低 token 和运行时成本。",
           "audience": "对 LLM 代理和记忆增强技术感兴趣的研究人员。",
           "why_keep": "为长时记忆推理提供了一种有效的方法。",
           "reading_focus": "关注 MRAgent 框架的设计和实验结果。"
         }
       },
       "action": "save",
-      "updated_at": "2026-07-25T06:09:43.1304Z"
+      "updated_at": "2026-07-25T15:27:15.659068Z"
     },
     "arxiv:2606.17328v1": {
       "paper": {
@@ -1141,22 +1141,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆追踪，揭示隐藏的真相！",
-          "problem": "现有方法无法全面评估长期记忆的准确性。",
+          "hook": "AI 记忆追踪，揭示隐藏的缺陷！",
+          "problem": "现有方法难以评估长期记忆中事实的行为变化。",
           "novelty": [
-            "引入 MemTrace 基准，以知识点为单位评估记忆",
-            "发现证据使用是瓶颈，而非检索",
-            "提高长期记忆需要更好地利用可获取的证据"
+            "引入 MemTrace 基准，以知识点为单位评估记忆。",
+            "发现证据使用是主要瓶颈，而非检索。",
+            "提高长期记忆需要更好地利用可访问的证据"
           ],
-          "method": "引入 MemTrace 基准，以知识点为单位评估记忆，并分析证据使用。",
-          "result": "发现证据使用是瓶颈，而非检索。",
+          "method": "通过 MemTrace 基准，从三个维度评估记忆：记忆年龄、问题类型、证据条件。",
+          "result": "发现证据使用是主要瓶颈，而非检索。",
           "audience": "对 AI 长期记忆评估和改进感兴趣的研究人员和开发者。",
-          "why_keep": "为长期记忆评估和改进提供了新的视角。",
-          "reading_focus": "关注 MemTrace 基准和实验结果。"
+          "why_keep": "为 LLM 长期记忆评估和改进提供了新的视角。",
+          "reading_focus": "关注 MemTrace 基准的设计和实验结果。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-25T12:09:44.508348Z"
+      "action": "save",
+      "updated_at": "2026-07-25T15:44:45.127036Z"
     },
     "arxiv:2606.24322v1": {
       "paper": {
@@ -1187,21 +1187,21 @@
         "digest": {
           "verdict": "推荐阅读",
           "hook": "AI 记忆安全，防毒攻于未然！",
-          "problem": "LLM 代理的长期记忆易受毒攻，现有防御方法存在漏洞。",
+          "problem": "LLM 长期记忆易受毒攻，现有防御方法存在漏洞。",
           "novelty": [
-            "提出非可变、起源绑定权威机制 (TMA-NM)",
-            "防止内容或血缘信息篡改",
-            "在所有模型和渠道上实现 0% 攻击成功率"
+            "提出非可变、来源绑定权威机制 (TMA-NM)",
+            "跨模型、跨攻击、跨防御基准测试",
+            "TMA-NM 在所有模型和渠道上均达到 0% 攻击成功率"
           ],
-          "method": "提出非可变信息流控制 (IFC) 的 TMA-NM 机制，防止内容或血缘信息篡改。",
-          "result": "在八个前沿模型上，TMA-NM 实现了 0% 攻击成功率。",
-          "audience": "对 AI 安全和长期记忆保护感兴趣的研究人员和开发者。",
-          "why_keep": "为 LLM 代理的长期记忆安全提供了新的解决方案。",
-          "reading_focus": "关注 TMA-NM 机制和实验结果。"
+          "method": "通过机器检查保证，实现非可变信息流控制。",
+          "result": "TMA-NM 在所有模型和渠道上均达到 0% 攻击成功率。",
+          "audience": "对 AI 安全和长期记忆机制感兴趣的研究人员和开发者。",
+          "why_keep": "为 LLM 长期记忆安全提供了一种新的解决方案。",
+          "reading_focus": "关注 TMA-NM 机制的设计和实验结果。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-25T12:09:40.091545Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-25T15:44:39.935175Z"
     },
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
@@ -1548,7 +1548,7 @@
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T14:57:32.734167Z"
+      "updated_at": "2026-07-25T16:04:28.895045Z"
     },
     "trend-mem-3": {
       "paper": {
@@ -1602,13 +1602,13 @@
         }
       },
       "action": "save",
-      "updated_at": "2026-07-25T14:57:40.551094Z"
+      "updated_at": "2026-07-25T16:04:35.117419Z"
     }
   },
   "recent_searches": [
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-25T14:54:08.390675Z"
+      "created_at": "2026-07-25T16:03:28.866675Z"
     },
     {
       "query": "memory",

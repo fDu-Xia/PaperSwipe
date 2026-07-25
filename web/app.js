@@ -253,6 +253,7 @@ function cacheElements() {
     aiStatus: document.querySelector("#ai-status"),
     libraryList: document.querySelector("#library-list"),
     libraryTags: document.querySelector("#library-tags"),
+    libraryTagsBar: document.querySelector("#library-tags-bar"),
     libraryExportToggle: document.querySelector("#library-export-fab"),
     libraryExportBar: document.querySelector("#library-export-bar"),
     librarySearchInput: document.querySelector("#library-search-input"),
@@ -2660,6 +2661,9 @@ function clearLibrarySelection() {
 function updateLibraryExportBar() {
   if (!elements.libraryExportBar) return;
   elements.libraryExportBar.hidden = !state.librarySelectMode;
+  if (elements.libraryTagsBar) {
+    elements.libraryTagsBar.hidden = state.librarySelectMode;
+  }
   if (elements.libraryExportCount) {
     elements.libraryExportCount.textContent = String(state.librarySelected.size);
   }

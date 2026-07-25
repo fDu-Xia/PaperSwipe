@@ -950,7 +950,7 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   inset: 0;
   z-index: 90;
   display: flex; flex-direction: column;
-  background: color-mix(in srgb, #0a0c14 88%, transparent);
+  background: color-mix(in srgb, var(--app-bg) 92%, transparent);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   padding: calc(20px + var(--safe-top)) 16px calc(20px + var(--safe-bottom));
@@ -965,28 +965,28 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   border: 0;
   border-radius: 50%;
   display: grid; place-items: center;
-  background: rgba(255,255,255,.14);
-  color: #fff;
+  background: var(--surface-muted);
+  color: var(--ink);
   cursor: pointer;
   transition: transform .16s ease, background .16s ease;
 }
-.trend-overlay-close:hover { background: rgba(255,255,255,.22); }
+.trend-overlay-close:hover { background: var(--line); }
 .trend-overlay-close:active { transform: scale(.94); }
 .trend-overlay-close svg { width: 18px; height: 18px; }
 .trend-overlay-meta {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 42px 12px 4px;
-  color: #fff;
+  color: var(--ink);
 }
 .trend-overlay-meta span {
   font-size: 11px; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase;
-  color: rgba(255,255,255,.72);
+  color: var(--muted);
 }
 .trend-overlay-meta b {
   font-size: 12px; font-weight: 800;
-  color: #fff;
-  background: rgba(255,255,255,.14);
+  color: var(--ink);
+  background: var(--surface-muted);
   padding: 3px 10px;
   border-radius: 999px;
 }
@@ -1006,8 +1006,8 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   position: absolute;
   inset: 0;
   border-radius: 20px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.08);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   pointer-events: none;
 }
 .trend-overlay-stage .stack-1 { transform: translateY(10px) scale(.94); opacity: .35; }
