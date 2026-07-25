@@ -20,7 +20,6 @@ const state = {
   library: [],
   libraryFilter: "save",
   libraryTags: [],
-  libraryTagsCollapsed: false,
   librarySort: "recent",
   appearance: "system",
   aiModel: "",
@@ -31,7 +30,6 @@ const state = {
   stats: { saved: 0, priority: 0, read: 0, dismissed: 0 },
   session: { dismiss: 0, save: 0, priority: 0, read: 0 },
   todos: [],
-  todoScope: "day",
   weekPlanDone: new Set(),
   weekPlanRemoved: new Set(),
   weekPlanAssign: new Map(), // paperId -> 'YYYY-MM-DD' (manual scheduling)
@@ -44,7 +42,7 @@ const state = {
   // ↑ legacy placeholder — Profile now uses buildWeekPlan() driven by state.library
   librarySelectMode: false,
   librarySelected: new Set(),
-  friendRecs: new Map(), // paperId -> { boosted:boolean, count:number }
+  librarySearch: "",
   streaming: false,
 };
 
@@ -83,8 +81,6 @@ function pickFriendRec(paperId) {
   return { badge };
 }
 
-// No-op stub — the badge is not interactive anymore, kept so old callers don't crash.
-function toggleFriendRec(_paperId, _buttonEl) {}
 
 // Fallback papers used silently when the live search returns zero results.
 // These are real, well-known works so users still get browseable content
@@ -257,8 +253,10 @@ function cacheElements() {
     aiStatus: document.querySelector("#ai-status"),
     libraryList: document.querySelector("#library-list"),
     libraryTags: document.querySelector("#library-tags"),
-    libraryExportToggle: document.querySelector("#library-export-toggle"),
+    libraryExportToggle: document.querySelector("#library-export-fab"),
     libraryExportBar: document.querySelector("#library-export-bar"),
+    librarySearchInput: document.querySelector("#library-search-input"),
+    librarySearchClear: document.querySelector("#library-search-clear"),
     libraryExportCount: document.querySelector("#library-export-n"),
     dialog: document.querySelector("#paper-dialog"),
     dialogContent: document.querySelector("#dialog-content"),
@@ -269,8 +267,6 @@ function cacheElements() {
     libraryScheduleDialog: document.querySelector("#library-schedule-dialog"),
     scheduleWeekLabel: document.querySelector("#schedule-week-label"),
     scheduleDateGrid: document.querySelector("#schedule-date-grid"),
-    filterDialog: null,
-    forumDialog: document.querySelector("#forum-dialog"),
     aiBotPage: document.querySelector("#ai-bot-page"),
     aiBotMessages: document.querySelector("#ai-bot-messages"),
     aiBotForm: document.querySelector("#ai-bot-form"),
@@ -402,12 +398,6 @@ function bindEvents() {
       decide(cardAction.dataset.cardAction);
       return;
     }
-    const flipToggle = event.target.closest("[data-flip-card]");
-    if (flipToggle) {
-      event.stopPropagation();
-      toggleCardFlip();
-      return;
-    }
     const queryButton = event.target.closest("[data-query]");
     if (queryButton) {
       elements.searchInput.value = queryButton.dataset.query;
@@ -517,11 +507,6 @@ function bindEvents() {
       removeSettingsTopic(topicRemove.dataset.settingsTopicRemove);
       return;
     }
-    const forumItem = event.target.closest(".forum-list button");
-    if (forumItem) {
-      elements.forumDialog.close();
-      showToast("论坛原型已就绪，讨论数据将在后续接入");
-    }
   });
 
   document.querySelector("#dialog-close").addEventListener("click", () => elements.dialog.close());
@@ -535,6 +520,22 @@ function bindEvents() {
 
   if (elements.libraryExportToggle) {
     elements.libraryExportToggle.addEventListener("click", () => toggleLibrarySelectMode());
+  }
+  if (elements.librarySearchInput) {
+    elements.librarySearchInput.addEventListener("input", () => {
+      state.librarySearch = elements.librarySearchInput.value.trim().toLowerCase();
+      elements.librarySearchClear.hidden = !state.librarySearch;
+      renderLibrary();
+    });
+  }
+  if (elements.librarySearchClear) {
+    elements.librarySearchClear.addEventListener("click", () => {
+      elements.librarySearchInput.value = "";
+      state.librarySearch = "";
+      elements.librarySearchClear.hidden = true;
+      renderLibrary();
+      elements.librarySearchInput.focus();
+    });
   }
   if (elements.libraryExportBar) {
     elements.libraryExportBar.addEventListener("click", (event) => {
@@ -1374,16 +1375,20 @@ function renderCard() {
             </div>
 
             <div class="source-links">
-              <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
-              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
-              ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                Original
-              </a>` : ""}
-              ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                PDF
-              </a>` : ""}
+              <div class="source-stats-row">
+                <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
+                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
+              </div>
+              <div class="source-links-row">
+                ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Original
+                </a>` : ""}
+                ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  PDF
+                </a>` : ""}
+              </div>
             </div>
 
             <div class="flip-hint-back">
@@ -1775,6 +1780,9 @@ function bindCardGestures() {
     dragStartTime = Date.now();
     card.classList.add("is-dragging");
     card.setPointerCapture(e.pointerId);
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+    if (window.getSelection) window.getSelection().removeAllRanges();
   }
 
   function onMove(e) {
@@ -1809,6 +1817,8 @@ function bindCardGestures() {
     if (!dragging) return;
     dragging = false;
     card.classList.remove("is-dragging");
+    document.body.style.userSelect = "";
+    document.body.style.webkitUserSelect = "";
 
     const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
     const dt = Date.now() - dragStartTime;
@@ -2251,10 +2261,6 @@ function buildTopPickReply(papers, query) {
   };
 }
 
-function buildRoadmapReply(papers) {
-  return { type: "roadmap", data: window.__PAPERSWIPE_ROADMAP__ };
-}
-
 function appendBotRoadmap(data) {
   if (!data || !Array.isArray(data.stages) || !data.stages.length) {
     appendBotMessage("I couldn't generate a roadmap right now — please try again later.");
@@ -2557,6 +2563,16 @@ function renderLibrary() {
   if (state.libraryTags.length) {
     const selected = new Set(state.libraryTags);
     entries = entries.filter((entry) => deriveTags(entry.paper).some((tag) => selected.has(tag)));
+  }
+  if (state.librarySearch) {
+    const q = state.librarySearch;
+    entries = entries.filter((entry) => {
+      const p = entry.paper;
+      return (p.title || "").toLowerCase().includes(q) ||
+        (p.authors || []).some((a) => (a.name || "").toLowerCase().includes(q)) ||
+        (p.abstract || "").toLowerCase().includes(q) ||
+        (p.venue || "").toLowerCase().includes(q);
+    });
   }
   if (state.librarySort === "citations") {
     entries = [...entries].sort((a, b) => numberOrZero(b.paper.citation_count) - numberOrZero(a.paper.citation_count));
@@ -2920,7 +2936,9 @@ async function refreshSearches() {
 
 function switchView(view) {
   const validViews = ["discover", "library", "network", "todos"];
+  const prev = state.activeView;
   state.activeView = validViews.includes(view) ? view : "discover";
+  if (prev === state.activeView) return;
   closeAiBotPage();
   closeSettingsPage();
   const views = {
@@ -2929,13 +2947,29 @@ function switchView(view) {
     network: elements.networkView,
     todos: elements.todosView,
   };
+  const activePanel = views[state.activeView];
+  // Animate: hide all then show active
   Object.entries(views).forEach(([name, panel]) => {
-    if (!panel) return;
-    const active = name === state.activeView;
-    panel.hidden = !active;
-    panel.classList.toggle("is-active", active);
+    if (!panel || name === state.activeView) return;
+    panel.hidden = true;
+    panel.classList.remove("is-active");
   });
-  document.querySelectorAll(".bottom-nav [data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === state.activeView));
+  if (activePanel) {
+    activePanel.hidden = false;
+    // Force reflow for transition
+    void activePanel.offsetHeight;
+    activePanel.classList.add("is-active");
+  }
+  // Pulse animation on nav buttons
+  document.querySelectorAll(".bottom-nav [data-view]").forEach((button) => {
+    const isNowActive = button.dataset.view === state.activeView;
+    const wasActive = button.dataset.view === prev;
+    button.classList.toggle("is-active", isNowActive);
+    if (isNowActive && !wasActive) {
+      button.classList.add("nav-pulse");
+      setTimeout(() => button.classList.remove("nav-pulse"), 300);
+    }
+  });
   elements.searchPanel.hidden = true;
   if (state.activeView === "library") refreshLibrary();
   if (state.activeView === "network") renderTrendBoard();
@@ -3350,10 +3384,14 @@ function renderTrendOverlayCard() {
               </div>
             </div>
             <div class="source-links">
-              <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
-              <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
-              ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Original</a>` : ""}
-              ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>PDF</a>` : ""}
+              <div class="source-stats-row">
+                <span class="source-stat"><span class="source-stat-emoji">📖</span>${c.read_minutes} min</span>
+                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
+              </div>
+              <div class="source-links-row">
+                ${c.url ? `<a class="source-link" href="${escapeAttribute(c.url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Original</a>` : ""}
+                ${c.pdf_url ? `<a class="source-link" href="${escapeAttribute(c.pdf_url)}" target="_blank" rel="noopener" data-stop-click><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>PDF</a>` : ""}
+              </div>
             </div>
             <div class="flip-hint-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>Tap to flip back</div>
           </div>
@@ -3526,11 +3564,6 @@ function renderSettings() {
   refreshIcons();
 }
 
-const TODO_STORAGE_KEY = "paperswipe_todos"; // legacy — cleared on next boot
-
-function scopeLabel(scope) {
-  return scope === "day" ? "Today" : scope === "week" ? "This week" : "This month";
-}
 
 const WEEK_PLAN_DAY_TARGET_MIN = 120;
 const WEEK_PLAN_ORDER = ["priority", "save"];
@@ -3788,14 +3821,12 @@ function openSettingsPage() {
   if (!elements.settingsPage) return;
   renderSettings();
   elements.settingsPage.hidden = false;
-  document.body.classList.add("is-settings-open");
   refreshIcons();
 }
 
 function closeSettingsPage() {
   if (!elements.settingsPage) return;
   elements.settingsPage.hidden = true;
-  document.body.classList.remove("is-settings-open");
 }
 
 function removeSettingsTopic(topic) {
@@ -3967,16 +3998,20 @@ function openLibraryCard(id) {
                 <div class="best-for-row">${bestFor.map((t) => `<span class="best-chip">${escapeHTML(t)}</span>`).join("")}</div>
               </div>
               <div class="source-links">
-                <span class="source-stat"><span class="source-stat-emoji">📖</span>${mockReadMinutes(paper.read_minutes, paper.id)} min</span>
-                <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
-                ${safeURL(paper.url) ? `<a class="source-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener" data-stop-click>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                  Original
-                </a>` : ""}
-                ${safeURL(paper.pdf_url) ? `<a class="source-link" href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                  PDF
-                </a>` : ""}
+                <div class="source-stats-row">
+                  <span class="source-stat"><span class="source-stat-emoji">📖</span>${mockReadMinutes(paper.read_minutes, paper.id)} min</span>
+                  <span class="source-stat"><span class="source-stat-emoji">🌟</span>${escapeHTML(citationLabel(paper))}</span>
+                </div>
+                <div class="source-links-row">
+                  ${safeURL(paper.url) ? `<a class="source-link" href="${escapeAttribute(paper.url)}" target="_blank" rel="noopener" data-stop-click>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Original
+                  </a>` : ""}
+                  ${safeURL(paper.pdf_url) ? `<a class="source-link" href="${escapeAttribute(paper.pdf_url)}" target="_blank" rel="noopener" data-stop-click>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    PDF
+                  </a>` : ""}
+                </div>
               </div>
               <div class="flip-hint-back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
