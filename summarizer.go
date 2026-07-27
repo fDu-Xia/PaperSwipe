@@ -498,12 +498,12 @@ For each paper, generate a concise digest card based ONLY on the title and abstr
 CRITICAL — the "hook" field is the front-of-card one-liner and MUST be in Simplified Chinese:
 - 一句中文，口语化、通俗易懂，让非专业读者也一眼看懂这篇论文在讲什么、核心贡献是什么
 - 要抓眼球：突出最劲爆/最关键的一点（核心贡献或关键影响），像短视频标题或科普推文，不要学术腔
-- 字数：25～40 个汉字（含标点），至少20字，绝不超过 40 字；只写一句，不要分句堆砌
+- 字数：强制必须超过20字，低于40字。
 - 专有名词可保留英文（如 Transformer、RAG），但整句必须是中文
-- 不要每次都以"AI"开头，希望有 diversity，但是 focus 在当前论文主题上
-- 风格示例（仅示意语气与长度）：
-  "大模型第一次学会了"越聊越聪明"。让 AI 把每次犯过的错都变成经验，下次决策更准确。"
-  "AI 学会了"吃一堑长一智"——给 AI 装上分层记忆，让每一次对话都成为下一次的经验。"
+- 开头禁止使用"AI"两个字（句中可以出现，但不能是前两个字）；每句换一种开头方式（论文主题词、数字/数据、场景、反问、动作动词等），不要养成固定句式
+- 风格示例（仅示意语气与长度，注意下面三条开头方式互不相同，且都不是"AI"开头）：
+  "长视频生成最怕"越写越乱"——这篇论文让生成过程学会自己纠错。"
+  "给大模型装上分层记忆，让每次犯过的错都变成下次决策的经验。"
   "这篇论文，开启了 Diffusion 时代——不靠对抗训练，也能生成堪比 GAN 的逼真图像。"
 
 Other fields stay in English (each under 280 chars unless noted):

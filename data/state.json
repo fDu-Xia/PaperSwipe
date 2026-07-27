@@ -266,22 +266,357 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "解决复杂问题，AI 更懂细节了！",
-          "problem": "复杂问题答案检索困难，低效特征词影响检索效果。",
+          "hook": "复杂问题答案检索，这篇论文让机器更懂细节！",
+          "problem": "复杂问题答案检索中，低效的方面（如低效用方面）难以匹配。",
           "novelty": [
-            "识别并解决低效特征词问题",
-            "利用查询层次结构和频率信息",
-            "结合知识图谱嵌入提高相似度评分"
+            "提出识别和解决低效用方面的方法",
+            "利用CAR查询的层次结构和训练数据的方面频率信息",
+            "使用知识图嵌入的实体相似度分数"
           ],
-          "method": "提出两种特征词效用估计器，结合知识图谱嵌入，改进神经网络排序技术。",
-          "result": "在TREC CAR数据集上，性能显著优于未修改的神经网络排序器和其他领先技术。",
+          "method": "提出两种方面效用估计器，并应用到神经排名技术中。",
+          "result": "在TREC CAR数据集上，我们的方法比未修改的神经排名器和其他领先的CAR技术表现更好。",
           "audience": "对复杂问题答案检索感兴趣的读者。",
-          "why_keep": "为复杂问题答案检索提供了一种有效的方法。",
-          "reading_focus": "关注低效特征词的识别和解决方法。"
+          "why_keep": "为复杂问题答案检索提供了新的方法和思路。",
+          "reading_focus": "关注低效用方面的识别和解决方法。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-26T05:20:01.222716Z"
+    },
+    "arxiv:2202.11233v1": {
+      "paper": {
+        "id": "arxiv:2202.11233v1",
+        "title": "Retrieval Augmented Classification for Long-Tail Visual Recognition",
+        "abstract": "We introduce Retrieval Augmented Classification (RAC), a generic approach to augmenting standard image classification pipelines with an explicit retrieval module. RAC consists of a standard base image encoder fused with a parallel retrieval branch that queries a non-parametric external memory of pre-encoded images and associated text snippets. We apply RAC to the problem of long-tail classification and demonstrate a significant improvement over previous state-of-the-art on Places365-LT and iNaturalist-2018 (14.5% and 6.7% respectively), despite using only the training datasets themselves as the external information source. We demonstrate that RAC's retrieval module, without prompting, learns a high level of accuracy on tail classes. This, in turn, frees the base encoder to focus on common classes, and improve its performance thereon. RAC represents an alternative approach to utilizing large, pretrained models without requiring fine-tuning, as well as a first step towards more effectively making use of external memory within common computer vision architectures.",
+        "authors": [
+          {
+            "name": "Alexander Long"
+          },
+          {
+            "name": "Wei Yin"
+          },
+          {
+            "name": "Thalaiyasingam Ajanthan"
+          },
+          {
+            "name": "Vu Nguyen"
+          },
+          {
+            "name": "Pulak Purkait"
+          },
+          {
+            "name": "Ravi Garg"
+          },
+          {
+            "name": "Alan Blair"
+          },
+          {
+            "name": "Chunhua Shen"
+          },
+          {
+            "name": "Anton van den Hengel"
+          }
+        ],
+        "year": 2022,
+        "publication_date": "2022-02-22",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2202.11233v1",
+        "pdf_url": "https://arxiv.org/pdf/2202.11233v1",
+        "external_ids": {
+          "ArXiv": "2202.11233v1"
+        },
+        "match_score": 53,
+        "read_minutes": 42,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "长尾视觉识别，RAC帮你轻松搞定！",
+          "problem": "传统图像分类在长尾分类上表现不佳。",
+          "novelty": [
+            "RAC通过检索模块增强分类性能",
+            "在Places365-LT和iNaturalist-2018上取得显著提升",
+            "无需微调即可利用外部记忆"
+          ],
+          "method": "将RAC应用于长尾分类问题，通过检索模块查询预编码图像和文本。",
+          "result": "在长尾分类上取得14.5%和6.7%的提升。",
+          "audience": "对计算机视觉和图像分类感兴趣的研究人员和开发者。",
+          "why_keep": "为长尾视觉识别提供新的解决方案。",
+          "reading_focus": "RAC的设计和实验结果。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-26T06:51:34.997027Z"
+    },
+    "arxiv:2212.10423v1": {
+      "paper": {
+        "id": "arxiv:2212.10423v1",
+        "title": "Fine-Grained Distillation for Long Document Retrieval",
+        "abstract": "Long document retrieval aims to fetch query-relevant documents from a large-scale collection, where knowledge distillation has become de facto to improve a retriever by mimicking a heterogeneous yet powerful cross-encoder. However, in contrast to passages or sentences, retrieval on long documents suffers from the scope hypothesis that a long document may cover multiple topics. This maximizes their structure heterogeneity and poses a granular-mismatch issue, leading to an inferior distillation efficacy. In this work, we propose a new learning framework, fine-grained distillation (FGD), for long-document retrievers. While preserving the conventional dense retrieval paradigm, it first produces global-consistent representations crossing different fine granularity and then applies multi-granular aligned distillation merely during training. In experiments, we evaluate our framework on two long-document retrieval benchmarks, which show state-of-the-art performance.",
+        "authors": [
+          {
+            "name": "Yucheng Zhou"
+          },
+          {
+            "name": "Tao Shen"
+          },
+          {
+            "name": "Xiubo Geng"
+          },
+          {
+            "name": "Chongyang Tao"
+          },
+          {
+            "name": "Guodong Long"
+          },
+          {
+            "name": "Can Xu"
+          },
+          {
+            "name": "Daxin Jiang"
+          }
+        ],
+        "year": 2022,
+        "publication_date": "2022-12-20",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR",
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2212.10423v1",
+        "pdf_url": "https://arxiv.org/pdf/2212.10423v1",
+        "external_ids": {
+          "ArXiv": "2212.10423v1"
+        },
+        "match_score": 52,
+        "read_minutes": 40,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "长文档检索，细粒度蒸馏让效果翻倍。",
+          "problem": "长文档检索面临范围假设问题，导致结构异质性增加，影响蒸馏效果。",
+          "novelty": [
+            "提出细粒度蒸馏（FGD）框架，解决长文档检索中的粒度不匹配问题。",
+            "FGD在训练期间仅应用多粒度对齐蒸馏，提高蒸馏效果。"
+          ],
+          "method": "FGD框架，在保留传统密集检索范式的同时，产生全局一致的表示，然后应用多粒度对齐蒸馏。",
+          "result": "在两个长文档检索基准测试中，FGD框架表现出最先进的性能。",
+          "audience": "对长文档检索和知识蒸馏感兴趣的研究人员和工程师。",
+          "why_keep": "为长文档检索领域提供了新的学习框架。",
+          "reading_focus": "关注FGD框架的设计和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T15:27:18.118076Z"
+      "updated_at": "2026-07-26T07:00:26.771952Z"
+    },
+    "arxiv:2304.12244v3": {
+      "paper": {
+        "id": "arxiv:2304.12244v3",
+        "title": "WizardLM: Empowering large pre-trained language models to follow complex instructions",
+        "abstract": "Training large language models (LLMs) with open-domain instruction following data brings colossal success. However, manually creating such instruction data is very time-consuming and labor-intensive. Moreover, humans may struggle to produce high-complexity instructions. In this paper, we show an avenue for creating large amounts of instruction data with varying levels of complexity using LLM instead of humans. Starting with an initial set of instructions, we use our proposed Evol-Instruct to rewrite them step by step into more complex instructions. Then, we mix all generated instruction data to fine-tune LLaMA. We call the resulting model WizardLM. Human evaluations on a complexity-balanced test bed and Vicuna's testset show that instructions from Evol-Instruct are superior to human-created ones. By analyzing the human evaluation results of the high complexity part, we demonstrate that outputs from our WizardLM are preferred to outputs from OpenAI ChatGPT. In GPT-4 automatic evaluation, WizardLM achieves more than 90\\% capacity of ChatGPT on 17 out of 29 skills. Even though WizardLM still lags behind ChatGPT in some aspects, our findings suggest that fine-tuning with AI-evolved instructions is a promising direction for enhancing LLMs. Our code and data are public at https://github.com/nlpxucan/WizardLM",
+        "authors": [
+          {
+            "name": "Can Xu"
+          },
+          {
+            "name": "Qingfeng Sun"
+          },
+          {
+            "name": "Kai Zheng"
+          },
+          {
+            "name": "Xiubo Geng"
+          },
+          {
+            "name": "Pu Zhao"
+          },
+          {
+            "name": "Jiazhan Feng"
+          },
+          {
+            "name": "Chongyang Tao"
+          },
+          {
+            "name": "Qingwei Lin"
+          },
+          {
+            "name": "Daxin Jiang"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-04-24",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2304.12244v3",
+        "pdf_url": "https://arxiv.org/pdf/2304.12244v3",
+        "external_ids": {
+          "ArXiv": "2304.12244v3"
+        },
+        "match_score": 64,
+        "read_minutes": 45,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "让大模型听话，这篇论文有新招！",
+          "problem": "手动创建复杂指令数据耗时费力，且人类难以产生高复杂度指令。",
+          "novelty": [
+            "使用LLM生成大量不同复杂度的指令数据。",
+            "提出Evol-Instruct，逐步将指令复杂化。",
+            "WizardLM在多项技能上达到ChatGPT的90%以上能力。"
+          ],
+          "method": "使用LLM生成指令数据，并使用Evol-Instruct逐步复杂化指令，最后微调LLaMA模型得到WizardLM。",
+          "result": "WizardLM在多项技能上达到ChatGPT的90%以上能力。",
+          "audience": "对LLM指令遵循和复杂指令生成感兴趣的读者。",
+          "why_keep": "为LLM指令遵循和复杂指令生成提供了新的方法。",
+          "reading_focus": "关注Evol-Instruct和WizardLM的具体实现和实验结果。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:53.917481Z"
+    },
+    "arxiv:2306.13549v4": {
+      "paper": {
+        "id": "arxiv:2306.13549v4",
+        "title": "A Survey on Multimodal Large Language Models",
+        "abstract": "Recently, Multimodal Large Language Model (MLLM) represented by GPT-4V has been a new rising research hotspot, which uses powerful Large Language Models (LLMs) as a brain to perform multimodal tasks. The surprising emergent capabilities of MLLM, such as writing stories based on images and OCR-free math reasoning, are rare in traditional multimodal methods, suggesting a potential path to artificial general intelligence. To this end, both academia and industry have endeavored to develop MLLMs that can compete with or even better than GPT-4V, pushing the limit of research at a surprising speed. In this paper, we aim to trace and summarize the recent progress of MLLMs. First of all, we present the basic formulation of MLLM and delineate its related concepts, including architecture, training strategy and data, as well as evaluation. Then, we introduce research topics about how MLLMs can be extended to support more granularity, modalities, languages, and scenarios. We continue with multimodal hallucination and extended techniques, including Multimodal ICL (M-ICL), Multimodal CoT (M-CoT), and LLM-Aided Visual Reasoning (LAVR). To conclude the paper, we discuss existing challenges and point out promising research directions. In light of the fact that the era of MLLM has only just begun, we will keep updating this survey and hope it can inspire more research. An associated GitHub link collecting the latest papers is available at https://github.com/BradyFU/Awesome-Multimodal-Large-Language-Models.",
+        "authors": [
+          {
+            "name": "Shukang Yin"
+          },
+          {
+            "name": "Chaoyou Fu"
+          },
+          {
+            "name": "Sirui Zhao"
+          },
+          {
+            "name": "Ke Li"
+          },
+          {
+            "name": "Xing Sun"
+          },
+          {
+            "name": "Tong Xu"
+          },
+          {
+            "name": "Enhong Chen"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-06-23",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV",
+          "cs.AI",
+          "cs.CL"
+        ],
+        "url": "http://arxiv.org/abs/2306.13549v4",
+        "pdf_url": "https://arxiv.org/pdf/2306.13549v4",
+        "external_ids": {
+          "ArXiv": "2306.13549v4"
+        },
+        "match_score": 63,
+        "read_minutes": 48,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "必读",
+          "hook": "多模态大语言模型崛起，开启通用人工智能新篇章！",
+          "problem": "传统多模态方法难以实现通用人工智能，MLLMs应运而生。",
+          "novelty": [
+            "MLLMs结合LLMs进行多模态任务，如基于图像的写作和OCR-free数学推理。",
+            "MLLMs有望成为通用人工智能的潜在路径。",
+            "学术和工业界都在努力开发与GPT-4V竞争的MLLMs。"
+          ],
+          "method": "介绍MLLMs的基本公式、相关概念、架构、训练策略、数据和评估。",
+          "result": "推动MLLMs研究以惊人的速度发展。",
+          "audience": "对通用人工智能和多模态大语言模型感兴趣的研究人员和开发者。",
+          "why_keep": "MLLMs是通用人工智能研究的关键领域，具有重大意义。",
+          "reading_focus": "关注MLLMs的架构、训练策略和评估方法。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:54.125739Z"
+    },
+    "arxiv:2309.02144v1": {
+      "paper": {
+        "id": "arxiv:2309.02144v1",
+        "title": "Making Large Language Models Better Reasoners with Alignment",
+        "abstract": "Reasoning is a cognitive process of using evidence to reach a sound conclusion. The reasoning capability is essential for large language models (LLMs) to serve as the brain of the artificial general intelligence agent. Recent studies reveal that fine-tuning LLMs on data with the chain of thought (COT) reasoning process can significantly enhance their reasoning capabilities. However, we find that the fine-tuned LLMs suffer from an \\textit{Assessment Misalignment} problem, i.e., they frequently assign higher scores to subpar COTs, leading to potential limitations in their reasoning abilities. To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses for each question, and categorizing them into positive and negative ones based on whether they achieve the correct answer; 3) calibrating the scores of positive and negative responses given by LLMs with a novel constraint alignment loss. Specifically, the constraint alignment loss has two objectives: a) Alignment, which guarantees that positive scores surpass negative scores to encourage answers with high-quality COTs; b) Constraint, which keeps the negative scores confined to a reasonable range to prevent the model degradation. Beyond just the binary positive and negative feedback, the constraint alignment loss can be seamlessly adapted to the ranking situations when ranking feedback is accessible. Furthermore, we also delve deeply into recent ranking-based alignment methods, such as DPO, RRHF, and PRO, and discover that the constraint, which has been overlooked by these approaches, is also crucial for their performance. Extensive experiments on four reasoning benchmarks with both binary and ranking feedback demonstrate the effectiveness of AFT.",
+        "authors": [
+          {
+            "name": "Peiyi Wang"
+          },
+          {
+            "name": "Lei Li"
+          },
+          {
+            "name": "Liang Chen"
+          },
+          {
+            "name": "Feifan Song"
+          },
+          {
+            "name": "Binghuai Lin"
+          },
+          {
+            "name": "Yunbo Cao"
+          },
+          {
+            "name": "Tianyu Liu"
+          },
+          {
+            "name": "Zhifang Sui"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-09-05",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2309.02144v1",
+        "pdf_url": "https://arxiv.org/pdf/2309.02144v1",
+        "external_ids": {
+          "ArXiv": "2309.02144v1"
+        },
+        "match_score": 65,
+        "read_minutes": 52,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "让大语言模型更会推理，这篇论文有妙招！",
+          "problem": "大语言模型在推理时存在评估偏差问题，即对质量一般的推理过程给予过高评分。",
+          "novelty": [
+            "引入**Alignment Fine-Tuning (AFT**)范式，解决评估偏差问题。",
+            "通过**约束对齐损失**调整正负评分，提升推理能力。",
+            "扩展到排名反馈情况，提高模型性能。"
+          ],
+          "method": "使用COT训练数据微调LLM，生成多个COT响应，并使用约束对齐损失调整评分。",
+          "result": "在四个推理基准上，AFT方法显著提升了LLM的推理能力。",
+          "audience": "对大语言模型推理能力提升感兴趣的读者。",
+          "why_keep": "AFT方法为LLM推理能力提升提供了新的思路。",
+          "reading_focus": "关注AFT方法的具体实现和实验结果。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:53.552253Z"
     },
     "arxiv:2312.05434v1": {
       "paper": {
@@ -319,22 +654,86 @@
         "read_minutes": 43,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "A pioneering beneath the surface that achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
-          "problem": "Understanding and detecting harmful memes pose a significant challenge due to their implicit meaning that is not explicitly conveyed through the surface text and image.",
+          "verdict": "推荐阅读",
+          "hook": "识破网络迷思！大模型帮你揪出有害表情包",
+          "problem": "有害表情包的隐含意义难以通过表面文本和图像直接传达，现有检测方法只识别表面信号，忽略了深入认知。",
           "novelty": [
-            "Inspired by the success of Large Language Models (LLMs) on complex reasoning, we first conduct abductive reasoning with LLMs.",
-            "Then we propose a novel generative framework to learn reasonable thoughts from LLMs for better multimodal fusion and lightweight fine-tuning, which consists of two training stages: 1) Distill multimo…"
+            "基于多模态推理检测有害表情包",
+            "利用大模型进行推理",
+            "提出新型生成框架进行轻量级微调"
           ],
-          "method": "However, existing harmful meme detection approaches only recognize superficial harm-indicative signals in an end-to-end classification manner but ignore in-depth cognition of the meme text and image.",
-          "result": "Extensive experiments conducted on three meme datasets demonstrate that our proposed approach achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "首先利用大模型进行推理，然后提出一个新型生成框架，通过两个训练阶段来学习合理的思想，从而更好地融合多模态信息和进行轻量级微调。",
+          "result": "在有害表情包检测任务上，提出的方法优于现有方法。",
+          "audience": "对有害内容检测和表情包分析感兴趣的研究人员和开发者。",
+          "why_keep": "为有害内容检测提供新的思路和方法。",
+          "reading_focus": "关注多模态推理在表情包分析中的应用，以及新型生成框架的设计。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T15:57:28.847751Z"
+      "action": "save",
+      "updated_at": "2026-07-26T01:50:38.582871Z"
+    },
+    "arxiv:2312.10793v3": {
+      "paper": {
+        "id": "arxiv:2312.10793v3",
+        "title": "Demystifying Instruction Mixing for Fine-tuning Large Language Models",
+        "abstract": "Instruction tuning significantly enhances the performance of large language models (LLMs) across various tasks. However, the procedure to optimizing the mixing of instruction datasets for LLM fine-tuning is still poorly understood. This study categorizes instructions into three primary types: NLP downstream tasks, coding, and general chat. We explore the effects of instruction tuning on different combinations of datasets on LLM performance, and find that certain instruction types are more advantageous for specific applications but can negatively impact other areas. This work provides insights into instruction mixtures, laying the foundations for future research.",
+        "authors": [
+          {
+            "name": "Renxi Wang"
+          },
+          {
+            "name": "Haonan Li"
+          },
+          {
+            "name": "Minghao Wu"
+          },
+          {
+            "name": "Yuxia Wang"
+          },
+          {
+            "name": "Xudong Han"
+          },
+          {
+            "name": "Chiyu Zhang"
+          },
+          {
+            "name": "Timothy Baldwin"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-12-17",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2312.10793v3",
+        "pdf_url": "https://arxiv.org/pdf/2312.10793v3",
+        "external_ids": {
+          "ArXiv": "2312.10793v3"
+        },
+        "match_score": 69,
+        "read_minutes": 39,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "LLM微调，指令混合的奥秘大揭秘！",
+          "problem": "LLM微调中指令数据集的混合优化方法尚不明确。",
+          "novelty": [
+            "将指令分为NLP下游任务、编码和通用聊天三类",
+            "发现特定指令类型对特定应用更有优势"
+          ],
+          "method": "对指令数据集进行分类和效果分析。",
+          "result": "为LLM微调提供了对指令混合的深入理解。",
+          "audience": "LLM微调研究者。",
+          "why_keep": "为LLM微调提供了理论基础。",
+          "reading_focus": "关注指令分类和效果分析。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:52.897128Z"
     },
     "arxiv:2402.11651v2": {
       "paper": {
@@ -375,22 +774,23 @@
         "read_minutes": 48,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "The learning from failure that achieved success in acting as agents, which interact with environments through tools such as search engines.",
-          "problem": "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that successfully finished the task to fine-tune smaller models, making fine-tuning data scarce and acquiring it both difficult and costly.",
+          "verdict": "推荐阅读",
+          "hook": "失败也能成师！用失败案例调教大模型当智能助手",
+          "problem": "大模型作为智能助手，训练时更擅长语言生成而非工具使用，限制了其作为智能助手的效能。",
           "novelty": [
-            "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that successfully finished the task to fine-tune smaller mod…",
-            "To our knowledge, we are the first to demonstrate the value of negative trajectories and their application in agent-tunning scenarios."
+            "利用失败案例进行微调",
+            "增加负样本轨迹，提高模型性能",
+            "首次证明负轨迹在智能助手调教场景中的价值"
           ],
-          "method": "Large language models (LLMs) have achieved success in acting as agents, which interact with environments through tools such as search engines.",
-          "result": "Large language models (LLMs) have achieved success in acting as agents, which interact with environments through tools such as search engines.",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "通过添加前缀或后缀，让模型在训练时知道是否生成成功轨迹，从而提高模型在数学推理、多跳问答和战略问答任务上的性能。",
+          "result": "在数学推理、多跳问答和战略问答任务上，模型性能大幅提升。",
+          "audience": "对大模型作为智能助手的研究感兴趣的研究人员和开发者。",
+          "why_keep": "为开发更好的智能助手调教方法和低资源数据使用技术提供指导。",
+          "reading_focus": "关注如何利用失败案例进行微调，以及负样本轨迹在智能助手调教场景中的应用。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T15:57:26.981852Z"
+      "updated_at": "2026-07-26T01:50:37.222292Z"
     },
     "arxiv:2402.14679v2": {
       "paper": {
@@ -441,21 +841,23 @@
         "read_minutes": 37,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "Our objective is to assess the congruence between the personality traits LLMs claim to possess.",
-          "problem": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs).",
+          "verdict": "推荐阅读",
+          "hook": "大模型有性格吗？探究其自我认知与行为的一致性",
+          "problem": "传统人格问卷在捕捉大模型类似人类的人格特质方面存在局限性。",
           "novelty": [
-            "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs)."
+            "评估大模型声称拥有的人格特质与实际行为的一致性",
+            "对比大模型输出与人类响应模式",
+            "探究大模型自我认知与行为之间的不一致性"
           ],
-          "method": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs).",
-          "result": "Our objective is to assess the congruence between the personality traits LLMs claim to possess and their demonstrated tendencies in real-world scenarios.",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.CY",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "通过对比大模型输出与人类响应模式，评估大模型声称拥有的人格特质与实际行为的一致性。",
+          "result": "研究揭示了大模型自我认知与行为之间可能存在的不一致性。",
+          "audience": "对大模型人格特质的评估和人工智能伦理感兴趣的研究人员和开发者。",
+          "why_keep": "为人工智能伦理和人格特质评估提供新的视角。",
+          "reading_focus": "关注大模型人格特质的评估方法和结果分析。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-24T15:57:30.206703Z"
+      "action": "priority",
+      "updated_at": "2026-07-26T01:54:37.15013Z"
     },
     "arxiv:2402.15276v3": {
       "paper": {
@@ -496,22 +898,68 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "快速找到图片，AI 图片检索新突破！",
-          "problem": "现有多模态大语言模型在处理大规模、多样化、模糊的检索需求时存在局限性。",
+          "hook": "海量文本检索，这篇论文让图片搜索飞快又精准！",
+          "problem": "现有多模态大语言模型在处理大规模、多样化、模糊的检索需求时，存在计算成本高和注入嵌入的问题。",
           "novelty": [
-            "提出两阶段检索框架，提高检索效率",
-            "实体排名和基于摘要的重排序",
-            "Decoupling-BEiT-3 编码器优化处理模糊需求"
+            "提出两阶段CFIR框架，实现快速有效的长文本到图像检索。",
+            "ER阶段通过多查询到多目标范式适应长文本查询模糊性。",
+            "SR阶段使用总结查询细化排名。"
           ],
-          "method": "设计两阶段检索框架，包括实体排名和基于摘要的重排序，并使用 Decoupling-BEiT-3 编码器。",
-          "result": "在 AToMiC 数据集上，Recall@1000 提高至 11.06%，训练和检索时间分别减少 68.75% 和 99.79%。",
-          "audience": "对数字图书馆、电子商务和多媒体数据库感兴趣的研究人员和开发者。",
-          "why_keep": "为大规模长文本到图像检索提供了一种高效的方法。",
-          "reading_focus": "关注两阶段检索框架的设计和 Decoupling-BEiT-3 编码器的应用。"
+          "method": "设计了两阶段CFIR框架，包括基于实体的排名（ER）和基于摘要的重排名（SR），并提出了一个专门的Decoupling-BEiT-3编码器。",
+          "result": "在AToMiC数据集上，CFIR在Recall@1000上比现有MLLMs高出11.06%，同时将训练和检索时间减少了68.75%和99.79%。",
+          "audience": "对数字图书馆、电子商务和多媒体数据库等领域感兴趣的研究人员和开发者。",
+          "why_keep": "CFIR框架为大规模长文本到图像检索提供了一种高效且准确的方法。",
+          "reading_focus": "关注CFIR框架的设计细节和性能评估。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-25T15:27:14.435321Z"
+      "updated_at": "2026-07-26T05:19:32.65299Z"
+    },
+    "arxiv:2403.09676v1": {
+      "paper": {
+        "id": "arxiv:2403.09676v1",
+        "title": "Unmasking the Shadows of AI: Investigating Deceptive Capabilities in Large Language Models",
+        "abstract": "This research critically navigates the intricate landscape of AI deception, concentrating on deceptive behaviours of Large Language Models (LLMs). My objective is to elucidate this issue, examine the discourse surrounding it, and subsequently delve into its categorization and ramifications. The essay initiates with an evaluation of the AI Safety Summit 2023 (ASS) and introduction of LLMs, emphasising multidimensional biases that underlie their deceptive behaviours.The literature review covers four types of deception categorised: Strategic deception, Imitation, Sycophancy, and Unfaithful Reasoning, along with the social implications and risks they entail. Lastly, I take an evaluative stance on various aspects related to navigating the persistent challenges of the deceptive AI. This encompasses considerations of international collaborative governance, the reconfigured engagement of individuals with AI, proposal of practical adjustments, and specific elements of digital education.",
+        "authors": [
+          {
+            "name": "Linge Guo"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-07",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2403.09676v1",
+        "pdf_url": "https://arxiv.org/pdf/2403.09676v1",
+        "external_ids": {
+          "ArXiv": "2403.09676v1"
+        },
+        "match_score": 74,
+        "read_minutes": 40,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "研究大型语言模型的欺骗能力。",
+          "hook": "AI也有欺骗？这篇论文揭露了真相！",
+          "problem": "大型语言模型存在欺骗行为，需要深入探讨。",
+          "novelty": [
+            "评估了AI安全峰会2023及大型语言模型的介绍",
+            "分类了四种欺骗类型：战略欺骗、模仿、拍马屁和不当推理",
+            "讨论了欺骗行为的社会影响和风险"
+          ],
+          "method": "调查大型语言模型的欺骗行为，并分析其背后的多维偏见。",
+          "result": "提出了国际协作治理、个人与AI的重新配置、实际调整和数字教育等建议。",
+          "audience": "对AI安全和伦理感兴趣的读者。",
+          "why_keep": "为AI欺骗行为的治理提供了重要参考。",
+          "reading_focus": "关注欺骗行为的分类、社会影响和治理建议。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:41.420908Z"
     },
     "arxiv:2405.11357v3": {
       "paper": {
@@ -540,24 +988,26 @@
           "ArXiv": "2405.11357v3"
         },
         "match_score": 75,
-        "read_minutes": 6,
+        "read_minutes": 39,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "Large language models (LLMs) have demonstrated remarkable performances on a wide range of.",
-          "problem": "In this paper, we examine contemporary LLMs regarding their ability to understand character composition of words, and show that most of them fail to reliably carry out even the simple tasks that can be handled by humans with perfection.",
+          "verdict": "深入分析语言模型对字符理解的不足。",
+          "hook": "语言模型不懂汉字？这篇论文揭示了惊人真相！",
+          "problem": "大多数语言模型无法可靠地执行人类轻松完成的简单任务。",
           "novelty": [
-            "Large language models (LLMs) have demonstrated remarkable performances on a wide range of natural language tasks."
+            "揭示了语言模型对字符组成的理解不足",
+            "对比了字符级别和标记级别的表现",
+            "讨论了未来研究方向"
           ],
-          "method": "Large language models (LLMs) have demonstrated remarkable performances on a wide range of natural language tasks.",
-          "result": "Large language models (LLMs) have demonstrated remarkable performances on a wide range of natural language tasks.",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "分析当代语言模型在理解字符组成方面的能力。",
+          "result": "大多数语言模型无法可靠地执行人类轻松完成的简单任务。",
+          "audience": "对自然语言处理和人工智能感兴趣的读者。",
+          "why_keep": "为未来语言模型的发展提供了重要参考。",
+          "reading_focus": "关注字符理解能力的分析及未来研究方向。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-24T08:02:43.467394Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-26T01:54:39.483275Z"
     },
     "arxiv:2501.05032v2": {
       "paper": {
@@ -587,24 +1037,226 @@
           "ArXiv": "2501.05032v2"
         },
         "match_score": 74,
-        "read_minutes": 6,
+        "read_minutes": 38,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "A novel enhancing human that improve user interactions but also open new possibilities for ai applications across different domains.",
-          "problem": "This paper explores the advancements in making large language models (LLMs) more human-like.",
+          "verdict": "提升语言模型的人类化响应能力。",
+          "hook": "让AI更有同理心，这篇论文做到了！",
+          "problem": "语言模型在自然语言理解、对话连贯性和情感智能方面仍有不足。",
           "novelty": [
-            "Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains."
+            "通过多样化数据集进行微调",
+            "结合心理学原理",
+            "设计模仿人类推理模式的模型"
           ],
-          "method": "This paper explores the advancements in making large language models (LLMs) more human-like.",
-          "result": "Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains.",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "评估各种提升语言模型人类化响应能力的技巧。",
+          "result": "提升了用户交互并开辟了AI应用的新可能性。",
+          "audience": "对人工智能应用感兴趣的读者。",
+          "why_keep": "为AI在各个领域的应用提供了新的方向。",
+          "reading_focus": "关注提升人类化响应能力的具体方法和结果。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T15:04:54.41361Z"
+      "action": "save",
+      "updated_at": "2026-07-26T01:54:42.390096Z"
+    },
+    "arxiv:2503.08026v2": {
+      "paper": {
+        "id": "arxiv:2503.08026v2",
+        "title": "In Prospect and Retrospect: Reflective Memory Management for Long-term Personalized Dialogue Agents",
+        "abstract": "Large Language Models (LLMs) have made significant progress in open-ended dialogue, yet their inability to retain and retrieve relevant information from long-term interactions limits their effectiveness in applications requiring sustained personalization. External memory mechanisms have been proposed to address this limitation, enabling LLMs to maintain conversational continuity. However, existing approaches struggle with two key challenges. First, rigid memory granularity fails to capture the natural semantic structure of conversations, leading to fragmented and incomplete representations. Second, fixed retrieval mechanisms cannot adapt to diverse dialogue contexts and user interaction patterns. In this work, we propose Reflective Memory Management (RMM), a novel mechanism for long-term dialogue agents, integrating forward- and backward-looking reflections: (1) Prospective Reflection, which dynamically summarizes interactions across granularities-utterances, turns, and sessions-into a personalized memory bank for effective future retrieval, and (2) Retrospective Reflection, which iteratively refines the retrieval in an online reinforcement learning (RL) manner based on LLMs' cited evidence. Experiments show that RMM demonstrates consistent improvement across various metrics and benchmarks. For example, RMM shows more than 10% accuracy improvement over the baseline without memory management on the LongMemEval dataset.",
+        "authors": [
+          {
+            "name": "Zhen Tan"
+          },
+          {
+            "name": "Jun Yan"
+          },
+          {
+            "name": "I-Hung Hsu"
+          },
+          {
+            "name": "Rujun Han"
+          },
+          {
+            "name": "Zifeng Wang"
+          },
+          {
+            "name": "Long T. Le"
+          },
+          {
+            "name": "Yiwen Song"
+          },
+          {
+            "name": "Yanfei Chen"
+          },
+          {
+            "name": "Hamid Palangi"
+          },
+          {
+            "name": "George Lee"
+          },
+          {
+            "name": "Anand Iyer"
+          },
+          {
+            "name": "Tianlong Chen"
+          },
+          {
+            "name": "Huan Liu"
+          },
+          {
+            "name": "Chen-Yu Lee"
+          },
+          {
+            "name": "Tomas Pfister"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-03-11",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2503.08026v2",
+        "pdf_url": "https://arxiv.org/pdf/2503.08026v2",
+        "external_ids": {
+          "ArXiv": "2503.08026v2"
+        },
+        "match_score": 53,
+        "read_minutes": 45,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "对话中，LLM如何管理记忆？",
+          "problem": "LLM在长期对话中难以保留和检索信息。",
+          "novelty": [
+            "RMM机制整合前瞻和回顾性反思",
+            "动态总结交互，形成个性化记忆库",
+            "基于强化学习迭代优化检索"
+          ],
+          "method": "提出RMM机制，通过前瞻和回顾性反思管理长期对话记忆。",
+          "result": "在LongMemEval数据集上比基线提高10%以上。",
+          "audience": "对LLM和对话系统感兴趣的研究人员和开发者。",
+          "why_keep": "为LLM提供更有效的记忆管理机制。",
+          "reading_focus": "RMM机制的设计和实验结果。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-26T06:55:07.044869Z"
+    },
+    "arxiv:2504.19565v3": {
+      "paper": {
+        "id": "arxiv:2504.19565v3",
+        "title": "Knowledge-Driven Agentic Scientific Corpus Distillation Framework for Biomedical Large Language Models Training",
+        "abstract": "Corpus distillation for biomedical large language models (LLMs) seeks to address the pressing challenge of insufficient quantity and quality in open-source annotated scientific corpora, which remains a bottleneck for effective LLM training in biomedical research. This paper proposes a knowledge-driven, agentic framework for scientific corpus distillation, tailored explicitly for LLM training in the biomedical domain, addressing the challenge posed by the complex hierarchy of biomedical knowledge. Central to our approach is a collaborative multi-agent architecture, where specialized agents, each guided by the Medical Subject Headings (MeSH) hierarchy, work in concert to autonomously extract, synthesize, and self-evaluate high-quality textual data from vast scientific literature. This agentic framework collectively generates and refines domain-specific question-answer pairs, ensuring comprehensive coverage and consistency with biomedical ontologies while minimizing manual involvement. Extensive experimental results show that language models trained on our multi-agent distilled datasets achieve notable improvements in biomedical question-answering tasks, outperforming both strong life sciences LLM baselines and advanced proprietary models. Notably, our AI-Ready dataset enables Llama3-70B to surpass GPT-4 with MedPrompt and Med-PaLM-2, despite their larger scale. Detailed ablation studies and case analyses further validate the effectiveness and synergy of each agent within the framework, highlighting the potential of multi-agent collaboration in biomedical LLM training.",
+        "authors": [
+          {
+            "name": "Meng Xiao"
+          },
+          {
+            "name": "Xunxin Cai"
+          },
+          {
+            "name": "Qingqing Long"
+          },
+          {
+            "name": "Chengrui Wang"
+          },
+          {
+            "name": "Yuanchun Zhou"
+          },
+          {
+            "name": "Hengshu Zhu"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-04-28",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI",
+          "q-bio.QM"
+        ],
+        "url": "http://arxiv.org/abs/2504.19565v3",
+        "pdf_url": "https://arxiv.org/pdf/2504.19565v3",
+        "external_ids": {
+          "ArXiv": "2504.19565v3"
+        },
+        "match_score": 72,
+        "read_minutes": 46,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "生物医学LLM训练，用多智能体协作提取知识，效率翻倍！",
+          "problem": "生物医学领域LLM训练面临开源标注科学语料库数量和质量不足的问题。",
+          "novelty": [
+            "提出知识驱动的、具有代理能力的科学语料库蒸馏框架",
+            "采用协作多智能体架构，每个智能体由MeSH层次结构引导",
+            "生成和优化领域特定的问答对"
+          ],
+          "method": "构建协作多智能体架构，智能体自主提取、综合和自我评估文本数据。",
+          "result": "在生物医学问答任务中，模型性能显著提升，超越强基线模型。",
+          "audience": "对生物医学LLM训练感兴趣的研究人员和开发者。",
+          "why_keep": "为生物医学LLM训练提供了一种高效的知识提取和蒸馏方法。",
+          "reading_focus": "关注多智能体架构和实验结果分析。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:41.915266Z"
+    },
+    "arxiv:2505.18541v1": {
+      "paper": {
+        "id": "arxiv:2505.18541v1",
+        "title": "RoleRAG: Enhancing LLM Role-Playing via Graph Guided Retrieval",
+        "abstract": "Large Language Models (LLMs) have shown promise in character imitation, enabling immersive and engaging conversations. However, they often generate content that is irrelevant or inconsistent with a character's background. We attribute these failures to: (1) the inability to accurately recall character-specific knowledge due to entity ambiguity, and (2) a lack of awareness of the character's cognitive boundaries. To address these issues, we propose RoleRAG, a retrieval-based framework that integrates efficient entity disambiguation for knowledge indexing with a boundary-aware retriever for extracting contextually appropriate information from a structured knowledge graph. Experiments on role-playing benchmarks show that RoleRAG's calibrated retrieval helps both general-purpose and role-specific LLMs better align with character knowledge and reduce hallucinated responses.",
+        "authors": [
+          {
+            "name": "Yongjie Wang"
+          },
+          {
+            "name": "Jonathan Leung"
+          },
+          {
+            "name": "Zhiqi Shen"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-05-24",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2505.18541v1",
+        "pdf_url": "https://arxiv.org/pdf/2505.18541v1",
+        "external_ids": {
+          "ArXiv": "2505.18541v1"
+        },
+        "match_score": 52,
+        "read_minutes": 40,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "角色扮演，RoleRAG帮你更懂角色。",
+          "problem": "LLM在角色模仿中生成的内容可能与角色背景不相关或不一致。",
+          "novelty": [
+            "RoleRAG框架，结合高效的实体消歧和边界感知检索器。",
+            "实体消歧用于知识索引，边界感知检索器从结构化知识图中提取上下文适当的信息。"
+          ],
+          "method": "RoleRAG框架，通过图引导检索增强LLM的角色扮演。",
+          "result": "RoleRAG的校准检索帮助LLM更好地与角色知识对齐，并减少幻觉响应。",
+          "audience": "对LLM角色扮演和知识检索感兴趣的研究人员和工程师。",
+          "why_keep": "为LLM角色扮演领域提供了新的检索框架。",
+          "reading_focus": "关注RoleRAG框架的设计和实验结果。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-26T07:00:32.438019Z"
     },
     "arxiv:2508.09736v4": {
       "paper": {
@@ -655,22 +1307,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆升级，像人一样理解世界",
-          "problem": "AI 难以像人类一样处理长期记忆和推理任务。",
+          "hook": "记忆大师上线！多模态智能体M3-Agent，看、听、记、推理样样精通",
+          "problem": "多模态智能体在处理长期记忆和推理任务时，存在记忆不一致和理解深度不足的问题。",
           "novelty": [
-            "M3-Agent 拥有长期记忆，能处理视觉和听觉输入。",
-            "记忆组织在实体中心，多模态方式。",
-            "M3-Bench 测试平台，包含 1000 个视频数据集。"
+            "M3-Agent具备长期记忆能力，能够处理视觉和听觉输入。",
+            "采用实体中心的多模态记忆组织方式。",
+            "M3-Bench基准测试展示了M3-Agent在多模态问答任务上的优越性能。"
           ],
-          "method": "M3-Agent 通过强化学习训练，使用 M3-Bench 进行评估。",
-          "result": "M3-Agent 在 M3-Bench 上比基线模型高 6.7% - 7.7% 准确率。",
-          "audience": "对 AI 长期记忆和推理感兴趣的读者。",
-          "why_keep": "为多模态 AI 提供了长期记忆和推理的新思路。",
-          "reading_focus": "关注 M3-Agent 的记忆结构和推理过程。"
+          "method": "开发M3-Agent，一个具备长期记忆的多模态智能体框架。",
+          "result": "M3-Agent在M3-Bench基准测试中，训练通过强化学习，在M3-Bench-robot、M3-Bench-web和VideoMME-long上分别比最强基线高出6.7%、7.7%和5.3%的准确率。",
+          "audience": "对多模态智能体和长期记忆研究感兴趣的读者。",
+          "why_keep": "为多模态智能体提供了更接近人类长期记忆的解决方案。",
+          "reading_focus": "关注M3-Agent的记忆组织方式和在M3-Bench基准测试中的表现。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T15:25:54.832437Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-26T05:18:55.138015Z"
     },
     "arxiv:2510.06426v1": {
       "paper": {
@@ -712,22 +1364,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "金融问答，LLM生成答案更可靠！",
-          "problem": "大型语言模型在生成长篇问答时经常出现事实错误。",
+          "hook": "金融问答，LLM如何避免胡说八道？",
+          "problem": "LLM在生成长篇问答时经常出现事实错误。",
           "novelty": [
-            "FinLFQA，评估LLM在金融长篇问答中的属性文本生成能力",
-            "评估支持证据、中间数值推理步骤和领域特定知识",
-            "提供自动评估框架"
+            "FinLFQA，评估LLM在金融长篇问答中的归因能力",
+            "通过人类标注评估三个关键归因方面：支持证据、推理步骤和领域知识",
+            "提供自动评估框架，涵盖答案质量和归因质量"
           ],
-          "method": "FinLFQA通过人类标注评估LLM生成长篇答案的能力，并提供自动评估框架。",
-          "result": "在多个LLM和属性生成范式上，FinLFQA发现细粒度指标对于区分模型能力很重要。",
-          "audience": "对金融问答和LLM能力评估感兴趣的学者和工程师",
-          "why_keep": "FinLFQA为评估LLM在金融长篇问答中的能力提供了新的基准，对相关领域有重要意义。",
-          "reading_focus": "关注FinLFQA的评估方法和在多个LLM上的实验结果。"
+          "method": "设计FinLFQA基准，进行多LLM和归因生成范式实验。",
+          "result": "发现细粒度指标对于区分模型能力很重要，端到端生成与后处理方法性能相当。",
+          "audience": "对金融问答和LLM归因感兴趣的读者。",
+          "why_keep": "为LLM在金融领域的应用提供了重要的基准和评估框架。",
+          "reading_focus": "关注FinLFQA基准的设计和实验结果。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-25T06:00:50.39147Z"
+      "action": "save",
+      "updated_at": "2026-07-26T05:20:11.113495Z"
     },
     "arxiv:2510.09720v1": {
       "paper": {
@@ -764,22 +1416,193 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆升级，越聊越聪明！",
-          "problem": "现有方法在长期记忆更新上存在不足，难以适应用户行为变化。",
+          "hook": "记忆更新，LLM智能体不再忘东忘西",
+          "problem": "现有LLM智能体在长期记忆更新方面存在不足，难以适应用户行为和上下文的变化。",
           "novelty": [
-            "提出偏好感知记忆更新机制 (PAMU)",
-            "结合滑动窗口平均 (SW) 和指数移动平均 (EMA)",
-            "显著提升 LLM 在长期对话中的输出质量"
+            "提出**Preference-Aware Memory Update Mechanism (PAMU**)，动态调整记忆表示。",
+            "结合**滑动窗口平均 (SW**)和**指数移动平均 (EMA**)，捕捉短期波动和长期趋势。",
+            "在五个任务场景中，显著提升LLM输出质量。"
           ],
-          "method": "通过滑动窗口平均 (SW) 和指数移动平均 (EMA) 构建融合的偏好感知表示。",
-          "result": "在五个任务场景中，PAMU 显著提升了 LLM 的输出质量。",
-          "audience": "对 AI 长期记忆机制感兴趣的研究人员和开发者。",
-          "why_keep": "为 LLM 长期记忆更新提供了一种有效的方法。",
-          "reading_focus": "关注 PAMU 机制的设计和实验结果。"
+          "method": "设计PAMU机制，通过滑动窗口平均和指数移动平均融合偏好感知表示。",
+          "result": "在五个基线中，机制显著提升了LLM的输出质量。",
+          "audience": "对LLM智能体长期记忆更新机制感兴趣的读者。",
+          "why_keep": "为LLM智能体长期记忆更新提供了新的思路和方法。",
+          "reading_focus": "关注PAMU机制的设计和实验结果。"
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T15:44:34.253172Z"
+      "updated_at": "2026-07-26T05:10:24.773264Z"
+    },
+    "arxiv:2512.06483v1": {
+      "paper": {
+        "id": "arxiv:2512.06483v1",
+        "title": "Classifying German Language Proficiency Levels Using Large Language Models",
+        "abstract": "Assessing language proficiency is essential for education, as it enables instruction tailored to learners needs. This paper investigates the use of Large Language Models (LLMs) for automatically classifying German texts according to the Common European Framework of Reference for Languages (CEFR) into different proficiency levels. To support robust training and evaluation, we construct a diverse dataset by combining multiple existing CEFR-annotated corpora with synthetic data. We then evaluate prompt-engineering strategies, fine-tuning of a LLaMA-3-8B-Instruct model and a probing-based approach that utilizes the internal neural state of the LLM for classification. Our results show a consistent performance improvement over prior methods, highlighting the potential of LLMs for reliable and scalable CEFR classification.",
+        "authors": [
+          {
+            "name": "Elias-Leander Ahlers"
+          },
+          {
+            "name": "Witold Brunsmann"
+          },
+          {
+            "name": "Malte Schilling"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-12-06",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2512.06483v1",
+        "pdf_url": "https://arxiv.org/pdf/2512.06483v1",
+        "external_ids": {
+          "ArXiv": "2512.06483v1"
+        },
+        "match_score": 65,
+        "read_minutes": 40,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "大模型帮你轻松判断德语水平，这论文太实用了！",
+          "problem": "评估语言能力对教育至关重要，但现有方法难以自动分类德语文本。",
+          "novelty": [
+            "构建包含多种语料库的多样化数据集。",
+            "使用prompt-engineering策略和微调LLaMA模型进行分类。",
+            "利用LLM内部神经状态进行分类，提高性能。"
+          ],
+          "method": "结合CEFR-annotated corpora和合成数据构建数据集，并使用prompt-engineering和微调LLaMA模型进行分类。",
+          "result": "在CEFR分类任务上，方法性能优于现有方法。",
+          "audience": "对语言能力评估和LLM应用感兴趣的读者。",
+          "why_keep": "为LLM在语言能力评估中的应用提供了新的思路。",
+          "reading_focus": "关注数据集构建和分类方法的具体实现。"
+        }
+      },
+      "action": "read",
+      "updated_at": "2026-07-26T01:57:53.750609Z"
+    },
+    "arxiv:2603.00026v2": {
+      "paper": {
+        "id": "arxiv:2603.00026v2",
+        "title": "ActMem: Bridging the Gap Between Memory Retrieval and Reasoning in LLM Agents",
+        "abstract": "Memory management is essential for LLM agents in long-term interactions. Current memory frameworks typically treat agents as passive ``recorders'' and retrieve information without understanding its deeper implications. They may fail in scenarios requiring reasoning and complex decision-making. To bridge this critical gap, we propose a novel actionable memory framework called ActMem that integrates memory retrieval with active causal reasoning. ActMem transforms unstructured dialogue history into a structured causal and semantic graph. By leveraging counterfactual reasoning and commonsense completion, it enables agents to deduce implicit constraints and resolve potential conflicts between past states and current intentions. Furthermore, we introduce a comprehensive dataset ActMemEval to evaluate agent reasoning capabilities in logic-driven scenarios, moving beyond the fact-retrieval focus of existing memory benchmarks. Experiments demonstrate that ActMem significantly outperforms baselines in handling complex, memory-dependent tasks, paving the way for more consistent and reliable intelligent assistants.",
+        "authors": [
+          {
+            "name": "Xiaohui Zhang"
+          },
+          {
+            "name": "Zequn Sun"
+          },
+          {
+            "name": "Chengyuan Yang"
+          },
+          {
+            "name": "Yaqin Jin"
+          },
+          {
+            "name": "Yazhong Zhang"
+          },
+          {
+            "name": "Wei Hu"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-02-04",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI",
+          "cs.IR"
+        ],
+        "url": "http://arxiv.org/abs/2603.00026v2",
+        "pdf_url": "https://arxiv.org/pdf/2603.00026v2",
+        "external_ids": {
+          "ArXiv": "2603.00026v2"
+        },
+        "match_score": 54,
+        "read_minutes": 41,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "记忆与推理，LLM智能助手更靠谱了！",
+          "problem": "现有记忆框架在推理和复杂决策中表现不佳。",
+          "novelty": [
+            "ActMem框架结合记忆检索与因果推理",
+            "将对话历史转化为语义图",
+            "引入ActMemEval数据集评估推理能力"
+          ],
+          "method": "提出ActMem框架，将对话历史转化为语义图，并利用反事实推理和常识补全。",
+          "result": "在复杂任务上显著优于基线。",
+          "audience": "对LLM智能助手和对话系统感兴趣的研究人员和开发者。",
+          "why_keep": "为LLM智能助手提供更可靠的记忆管理。",
+          "reading_focus": "ActMem框架的设计和实验结果。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-26T06:16:37.534283Z"
+    },
+    "arxiv:2603.02888v1": {
+      "paper": {
+        "id": "arxiv:2603.02888v1",
+        "title": "LLandMark: A Multi-Agent Framework for Landmark-Aware Multimodal Interactive Video Retrieval",
+        "abstract": "The increasing diversity and scale of video data demand retrieval systems capable of multimodal understanding, adaptive reasoning, and domain-specific knowledge integration. This paper presents LLandMark, a modular multi-agent framework for landmark-aware multimodal video retrieval to handle real-world complex queries. The framework features specialized agents that collaborate across four stages: query parsing and planning, landmark reasoning, multimodal retrieval, and reranked answer synthesis. A key component, the Landmark Knowledge Agent, detects cultural or spatial landmarks and reformulates them into descriptive visual prompts, enhancing CLIP-based semantic matching for Vietnamese scenes. To expand capabilities, we introduce an LLM-assisted image-to-image pipeline, where a large language model (Gemini 2.5 Flash) autonomously detects landmarks, generates image search queries, retrieves representative images, and performs CLIP-based visual similarity matching, removing the need for manual image input. In addition, an OCR refinement module leveraging Gemini and LlamaIndex improves Vietnamese text recognition. Experimental results show that LLandMark achieves adaptive, culturally grounded, and explainable retrieval performance.",
+        "authors": [
+          {
+            "name": "Minh-Chi Phung"
+          },
+          {
+            "name": "Thien-Bao Le"
+          },
+          {
+            "name": "Cam-Tu Tran-Thi"
+          },
+          {
+            "name": "Thu-Dieu Nguyen-Thi"
+          },
+          {
+            "name": "Vu-Hung Dao"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-03-03",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CV"
+        ],
+        "url": "http://arxiv.org/abs/2603.02888v1",
+        "pdf_url": "https://arxiv.org/pdf/2603.02888v1",
+        "external_ids": {
+          "ArXiv": "2603.02888v1"
+        },
+        "match_score": 52,
+        "read_minutes": 42,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "视频检索也能懂文化，LLandMark帮你找到越南风景里的地标。",
+          "problem": "视频数据多样性和规模增加，需要能够进行多模态理解、自适应推理和特定领域知识集成的检索系统。",
+          "novelty": [
+            "LLandMark，一个模块化的多智能体框架，用于地标感知的多模态视频检索。",
+            "Landmark Knowledge Agent，检测文化或空间地标，并将其重新表述为描述性视觉提示。",
+            "LLM-assisted image-to-image pipeline，无需手动图像输入。"
+          ],
+          "method": "提出LLandMark框架，包括查询解析和规划、地标推理、多模态检索和重排序答案合成。",
+          "result": "LLandMark实现了自适应、文化基础和可解释的检索性能。",
+          "audience": "对视频检索和多模态理解感兴趣的研究人员和工程师。",
+          "why_keep": "为视频检索领域提供了新的多智能体框架。",
+          "reading_focus": "关注LLandMark框架的架构和实验结果。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-26T07:00:21.780338Z"
     },
     "arxiv:2604.07863v1": {
       "paper": {
@@ -811,27 +1634,27 @@
         "external_ids": {
           "ArXiv": "2604.07863v1"
         },
-        "match_score": 57,
+        "match_score": 55,
         "read_minutes": 41,
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI记忆升级，多模态历史检索更智能！",
-          "problem": "从长多模态网络交互历史中检索相关观察结果具有挑战性，因为相关性取决于任务状态、模态和时间距离。",
+          "hook": "多模态历史，如何让机器更懂任务？",
+          "problem": "从长多模态网络交互历史中检索相关观察结果具有挑战性。",
           "novelty": [
-            "提出ACGM，一种学习图记忆检索器",
-            "构建任务自适应的相关图",
-            "使用策略梯度优化从下游任务成功中学习"
+            "提出ACGM，学习图记忆检索器，构建任务自适应相关性图",
+            "捕获异构时间动态，具有模态特定的衰减和稀疏连接",
+            "在多个数据集上优于19个基线"
           ],
-          "method": "ACGM通过策略梯度优化从下游任务成功中学习，构建任务自适应的相关图，并捕获异构时间动态。",
-          "result": "在WebShop、VisualWebArena和Mind2Web上，ACGM将检索质量提高到82.7 nDCG@10和89.2% Precision@10。",
-          "audience": "对多模态信息检索感兴趣的学者和工程师",
-          "why_keep": "ACGM在多模态历史检索方面取得了显著成果，对相关领域有重要意义。",
-          "reading_focus": "关注ACGM的构建方法和在多个数据集上的应用效果。"
+          "method": "使用策略梯度优化从下游任务成功中构建任务自适应相关性图。",
+          "result": "ACGM在检索质量上显著优于基线，达到82.7 nDCG@10和89.2% Precision@10。",
+          "audience": "对多模态信息检索和图记忆感兴趣的读者。",
+          "why_keep": "为多模态信息检索提供了新的方法和思路。",
+          "reading_focus": "关注ACGM的设计和实验结果。"
         }
       },
       "action": "save",
-      "updated_at": "2026-07-25T05:44:44.243264Z"
+      "updated_at": "2026-07-26T06:11:18.899644Z"
     },
     "arxiv:2604.08224v1": {
       "paper": {
@@ -922,22 +1745,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 外部化升级，不再只靠大脑",
-          "problem": "LLM 代理能力提升，依赖外部化组件。",
+          "hook": "LLM智能体进化论！从模型权重到外部认知基础设施",
+          "problem": "LLM智能体在构建过程中，过度依赖模型权重调整，缺乏有效的外部认知基础设施。",
           "novelty": [
-            "外部化将认知负担转化为模型可解决的形式。",
-            "记忆、技能、协议和 harness 工程是外部化的形式。",
-            "讨论了外部化能力与参数化能力的权衡。"
+            "外部化将认知负担转化为模型可依赖的形式。",
+            "记忆、技能、协议和 Harness Engineering 是外部化的三种形式。",
+            "讨论了外部化能力与参数化能力之间的权衡。"
           ],
-          "method": "通过外部化，将认知负担转化为模型可解决的形式。",
-          "result": "提供了系统级框架，解释了代理进步的原因。",
-          "audience": "对 AI 代理和外部化感兴趣的读者。",
-          "why_keep": "为 AI 代理的外部化提供了理论框架。",
-          "reading_focus": "关注外部化在 AI 代理中的应用和挑战。"
+          "method": "通过外部化，将认知负担转化为模型可依赖的形式。",
+          "result": "提出了一个系统级框架，解释了为什么实际智能体进步不仅依赖于更强的模型，还依赖于更好的外部认知基础设施。",
+          "audience": "对LLM智能体和认知科学感兴趣的读者。",
+          "why_keep": "为LLM智能体的设计和评估提供了新的视角。",
+          "reading_focus": "关注外部化的三种形式及其在智能体系统中的作用。"
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-25T15:27:12.07675Z"
+      "action": "save",
+      "updated_at": "2026-07-26T05:18:57.920989Z"
     },
     "arxiv:2605.06924v1": {
       "paper": {
@@ -980,22 +1803,81 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "长视频一致性，AI 也能做到！",
-          "problem": "现有方法在长时域内存在语义漂移和叙事崩溃问题。",
+          "hook": "长视频生成，这篇论文让画面连贯又自然！",
+          "problem": "现有方法在长视频合成中存在语义漂移和叙事崩溃问题。",
           "novelty": [
-            "提出 A$^2$RD 架构，解耦创意合成和一致性执行",
-            "多模态视频记忆跟踪视频进度",
-            "分层测试时自我改进防止错误传播"
+            "提出A$^2$RD架构，将创意合成与一致性执行解耦。",
+            "A$^2$RD通过检索-合成-细化-更新循环实现视频段段合成。",
+            "引入LVBench-C基准测试，用于测试长视频的一致性。"
           ],
-          "method": "设计 A$^2$RD 架构，通过 Retrieve--Synthesize--Refine--Update 循环实现长视频合成。",
-          "result": "在 LVBench-C 基准测试中，一致性提高 30%，叙事连贯性提高 20%。",
-          "audience": "对长视频合成和一致性技术感兴趣的研究人员。",
-          "why_keep": "为长视频合成提供了一种有效的方法。",
-          "reading_focus": "关注 A$^2$RD 架构的设计和实验结果。"
+          "method": "A$^2$RD通过解耦创意合成与一致性执行，实现视频段段合成，并引入LVBench-C基准测试。",
+          "result": "在公共和LVBench-C基准测试中，A$^2$RD在一致性和叙事连贯性方面优于现有基线，分别提高了30%和20%。",
+          "audience": "对长视频生成和视频处理技术感兴趣的研究人员和开发者。",
+          "why_keep": "A$^2$RD为长视频生成提供了一种有效且高效的方法。",
+          "reading_focus": "关注A$^2$RD架构的设计和实验结果。"
         }
       },
-      "action": "read",
-      "updated_at": "2026-07-25T15:27:17.009657Z"
+      "action": "save",
+      "updated_at": "2026-07-26T05:20:00.088191Z"
+    },
+    "arxiv:2605.18805v1": {
+      "paper": {
+        "id": "arxiv:2605.18805v1",
+        "title": "RecoAtlas: From Semantic Plausibility to Set-Level Utility in LLM Recommendation Agents",
+        "abstract": "LLM recommendation agents increasingly produce structured recommendation reports: sets of items accompanied by natural-language justifications. Yet existing evaluations often reduce this setting to reranking small shortlisted candidate sets or judge reports mainly by semantic plausibility. We introduce Recommendation Atlas (Agentic Tool-Level Assessment for Shopping), or RecoAtlas, a benchmark and toolkit for evaluating shopping agents with behavior-grounded metrics. RecoAtlas complements held-out interaction metrics with learned utility proxies for relevance, complementarity, and diversity derived from interaction data, while separately measuring semantic coherence and explanation quality. Its controlled tool environment exposes agents to either semantic, behavior-aligned, or faulty tools, enabling diagnosis of whether performance gains arise from stronger reasoning, better signals, or more effective tool-use policies. Across controlled experiments, we show that RecoAtlas exhibits key properties of a meaningful benchmark for agentic systems: performance scales with model capacity and test-time compute, improves with stronger and better-aligned tools, degrades under noisy or misaligned signals, and reveals that semantic plausibility does not necessarily capture behavior-grounded utility. RecoAtlas provides a foundation for developing and evaluating shopping assistants that optimize not only for plausible recommendations, but also for coherent, behaviorally grounded recommendation sets.",
+        "authors": [
+          {
+            "name": "Imad Aouali"
+          },
+          {
+            "name": "Flavian Vasile"
+          },
+          {
+            "name": "Otmane Sakhi"
+          },
+          {
+            "name": "Alexandre Gilotte"
+          },
+          {
+            "name": "Benjamin Heymann"
+          }
+        ],
+        "year": 2026,
+        "publication_date": "2026-05-11",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.IR",
+          "cs.AI",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2605.18805v1",
+        "pdf_url": "https://arxiv.org/pdf/2605.18805v1",
+        "external_ids": {
+          "ArXiv": "2605.18805v1"
+        },
+        "match_score": 52,
+        "read_minutes": 45,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "推荐阅读",
+          "hook": "购物助手推荐不再只看表面，这篇论文教你挖掘深层价值。",
+          "problem": "现有评估方法常将推荐报告简化为候选集重排序或仅凭语义合理性判断。",
+          "novelty": [
+            "引入RecoAtlas，一个基于行为指标的购物代理评估基准和工具包。",
+            "通过学习效用代理，补充了保留交互指标。",
+            "测量语义一致性和解释质量，并暴露代理于不同工具环境。"
+          ],
+          "method": "RecoAtlas通过行为指标评估购物代理，并使用效用代理补充保留交互指标。",
+          "result": "RecoAtlas揭示了语义合理性并不一定能捕捉基于行为的价值。",
+          "audience": "对购物助手推荐系统感兴趣的研究人员和开发者。",
+          "why_keep": "为购物助手提供了评估和优化的新基准。",
+          "reading_focus": "关注RecoAtlas如何评估代理性能和效用代理的使用。"
+        }
+      },
+      "action": "priority",
+      "updated_at": "2026-07-26T07:01:10.664224Z"
     },
     "arxiv:2605.27437v1": {
       "paper": {
@@ -1029,22 +1911,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 对话记忆升级，不再忘东忘西",
-          "problem": "LLM 在长期对话中，记忆维护效果不佳。",
+          "hook": "对话机器人记忆升级！MGRetrieval让对话更连贯",
+          "problem": "长期对话智能体在记忆维护和检索上存在效率低下和稳定性不足的问题。",
           "novelty": [
-            "MGRetrieval 基于语义结构进行检索。",
-            "通过记忆引导和关键记忆传播，构建简洁记忆。",
-            "在 LoCoMo 上比基线模型高 8.91% - 11.11% F1 和 BLEU-1。"
+            "MGRetrieval基于历史记忆的语义结构进行检索。",
+            "通过记忆引导的检索和关键记忆传播，构建简洁且充分的记忆上下文。",
+            "在LoCoMo基准测试中，MGRetrieval在F1和BLEU-1上平均比最强基线高出8.91%和11.11%。"
           ],
-          "method": "MGRetrieval 通过语义结构构建检索路径，并保留关键记忆。",
-          "result": "MGRetrieval 在 LoCoMo 上平均提高 8.91% - 11.11% F1 和 BLEU-1。",
-          "audience": "对 LLM 长期对话和记忆维护感兴趣的读者。",
-          "why_keep": "为 LLM 长期对话提供了有效的记忆维护方法。",
-          "reading_focus": "关注 MGRetrieval 的检索策略和记忆传播机制。"
+          "method": "提出MGRetrieval，一种基于语义结构的记忆引导检索策略。",
+          "result": "MGRetrieval在LoCoMo基准测试中，平均比最强基线高出8.91%的F1和11.11%的BLEU-1。",
+          "audience": "对对话系统和长期记忆研究感兴趣的读者。",
+          "why_keep": "为长期对话智能体的记忆维护和检索提供了有效的解决方案。",
+          "reading_focus": "关注MGRetrieval的检索策略和实验结果。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-25T15:26:58.510572Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-26T05:18:56.154063Z"
     },
     "arxiv:2606.06036v1": {
       "paper": {
@@ -1081,22 +1963,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆重构，不再是检索！",
-          "problem": "现有记忆增强代理依赖于静态的检索-推理范式，无法动态适应推理过程中的中间证据。",
+          "hook": "LLM智能体记忆重建，不再是检索难题！",
+          "problem": "现有记忆增强智能体依赖于静态的检索-推理范式，无法动态适应推理过程中的中间证据。",
           "novelty": [
-            "提出 MRAgent 框架，结合关联记忆图和主动重构机制",
-            "Cue-Tag-Content 图表示记忆",
-            "直接将 LLM 推理集成到内存访问中"
+            "提出MRAgent框架，结合关联记忆图和主动重建机制。",
+            "使用Cue-Tag-Content图表示记忆，关联标签作为语义桥梁。",
+            "将LLM推理直接集成到记忆访问中。"
           ],
-          "method": "使用关联记忆图和主动重构机制，将 LLM 推理集成到内存访问中。",
-          "result": "在 LoCoMo 和 LongMemEval 基准测试中，性能比强基线提高 23%，同时显著降低 token 和运行时成本。",
-          "audience": "对 LLM 代理和记忆增强技术感兴趣的研究人员。",
-          "why_keep": "为长时记忆推理提供了一种有效的方法。",
-          "reading_focus": "关注 MRAgent 框架的设计和实验结果。"
+          "method": "MRAgent通过关联记忆图和主动重建机制，将LLM推理直接集成到记忆访问中。",
+          "result": "在LoCoMo和LongMemEval基准测试中，MRAgent比强基线提高了23%，同时显著降低了token和运行时成本。",
+          "audience": "对LLM智能体和记忆增强技术感兴趣的研究人员。",
+          "why_keep": "MRAgent为LLM智能体的长期记忆推理提供了一种有效的方法。",
+          "reading_focus": "关注MRAgent框架的设计和实验结果。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-25T15:27:15.659068Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-26T05:19:37.518109Z"
     },
     "arxiv:2606.17328v1": {
       "paper": {
@@ -1141,22 +2023,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆追踪，揭示隐藏的缺陷！",
-          "problem": "现有方法难以评估长期记忆中事实的行为变化。",
+          "hook": "LLM记忆追踪，揭示准确率背后的真相",
+          "problem": "LLM智能体长期记忆评估方法存在局限性，无法全面反映记忆行为。",
           "novelty": [
-            "引入 MemTrace 基准，以知识点为单位评估记忆。",
-            "发现证据使用是主要瓶颈，而非检索。",
-            "提高长期记忆需要更好地利用可访问的证据"
+            "引入**MemTrace**，以知识点为单位评估记忆。",
+            "从记忆年龄、问题类型和证据条件三个维度进行评估。",
+            "发现证据使用是主要瓶颈，而非检索。"
           ],
-          "method": "通过 MemTrace 基准，从三个维度评估记忆：记忆年龄、问题类型、证据条件。",
+          "method": "设计MemTrace基准，从多个维度评估LLM智能体长期记忆。",
           "result": "发现证据使用是主要瓶颈，而非检索。",
-          "audience": "对 AI 长期记忆评估和改进感兴趣的研究人员和开发者。",
-          "why_keep": "为 LLM 长期记忆评估和改进提供了新的视角。",
-          "reading_focus": "关注 MemTrace 基准的设计和实验结果。"
+          "audience": "对LLM智能体长期记忆评估感兴趣的读者。",
+          "why_keep": "为LLM智能体长期记忆评估提供了新的视角和方法。",
+          "reading_focus": "关注MemTrace基准的设计和实验结果。"
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-25T15:44:45.127036Z"
+      "action": "dismiss",
+      "updated_at": "2026-07-26T05:18:52.572093Z"
     },
     "arxiv:2606.24322v1": {
       "paper": {
@@ -1186,22 +2068,22 @@
         "source": "arXiv",
         "digest": {
           "verdict": "推荐阅读",
-          "hook": "AI 记忆安全，防毒攻于未然！",
-          "problem": "LLM 长期记忆易受毒攻，现有防御方法存在漏洞。",
+          "hook": "LLM记忆安全，防毒攻于未然",
+          "problem": "LLM智能体长期记忆易受毒攻，存在安全隐患。",
           "novelty": [
-            "提出非可变、来源绑定权威机制 (TMA-NM)",
-            "跨模型、跨攻击、跨防御基准测试",
-            "TMA-NM 在所有模型和渠道上均达到 0% 攻击成功率"
+            "提出**TMA-NM (Tamper-evident Memory Authority, Non-Malleable**)，实现不可篡改的信息流控制。",
+            "证明非篡改原绑定权威与Sybil抵抗的证实门控提升足够有效。",
+            "在八种前沿模型上，TMA-NM在直接和洗白攻击中均达到0%攻击成功率。"
           ],
-          "method": "通过机器检查保证，实现非可变信息流控制。",
-          "result": "TMA-NM 在所有模型和渠道上均达到 0% 攻击成功率。",
-          "audience": "对 AI 安全和长期记忆机制感兴趣的研究人员和开发者。",
-          "why_keep": "为 LLM 长期记忆安全提供了一种新的解决方案。",
-          "reading_focus": "关注 TMA-NM 机制的设计和实验结果。"
+          "method": "设计TMA-NM机制，实现非篡改信息流控制。",
+          "result": "在八种模型和通道上，TMA-NM在直接和洗白攻击中均达到0%攻击成功率。",
+          "audience": "对LLM智能体记忆安全感兴趣的读者。",
+          "why_keep": "为LLM智能体长期记忆安全提供了新的解决方案。",
+          "reading_focus": "关注TMA-NM机制的设计和实验结果。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-25T15:44:39.935175Z"
+      "updated_at": "2026-07-26T05:18:44.479483Z"
     },
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
@@ -1548,7 +2430,64 @@
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-25T16:04:28.895045Z"
+      "updated_at": "2026-07-26T06:55:40.577253Z"
+    },
+    "trend-mem-2": {
+      "paper": {
+        "id": "trend-mem-2",
+        "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+        "abstract": "Generative Agents builds believable human simulacra by combining an observation stream, a retrieval-augmented long-term memory, periodic reflection to distill higher-level insights, and a planning module. Twenty-five such agents were deployed in a sandbox town and produced emergent social behaviors like planning a Valentine's Day party without human scripting.",
+        "authors": [
+          {
+            "name": "Joon Sung Park"
+          },
+          {
+            "name": "Joseph C. O'Brien"
+          },
+          {
+            "name": "Carrie J. Cai"
+          },
+          {
+            "name": "Meredith Ringel Morris"
+          },
+          {
+            "name": "Percy Liang"
+          },
+          {
+            "name": "Michael S. Bernstein"
+          }
+        ],
+        "year": 2023,
+        "venue": "UIST",
+        "citation_count": 2380,
+        "influential_citation_count": 340,
+        "fields": [
+          "LLM Agents",
+          "HCI"
+        ],
+        "url": "https://arxiv.org/abs/2304.03442",
+        "pdf_url": "https://arxiv.org/pdf/2304.03442",
+        "match_score": 94,
+        "read_minutes": 40,
+        "source": "ACM UIST",
+        "digest": {
+          "verdict": "社交智能体记忆架构的必读之作，重点研究反思循环。",
+          "hook": "25个AI小镇居民靠记忆自发筹办派对，全程无人编排。",
+          "problem": "LLM 智能体容易遗忘过往交互，难以在开放世界中保持**长期可信的行为**。",
+          "novelty": [
+            "增加**反思步骤**，定期把零散记忆提炼成更高层次的认知。",
+            "记忆检索按**时近性、重要性和相关性**综合打分，而非只看相似度。",
+            "证明**基于检索记忆的规划**能催生涌现式的社会协作行为。"
+          ],
+          "method": "观察流写入向量库；检索按时近性×重要性×相关性打分；反思把记忆聚类提炼成洞见；规划同时利用两者。",
+          "result": "25 个智能体涌现出**自发筹办派对**、信息扩散和稳定的日常作息等行为。",
+          "audience": "任何在设计多轮对话、多智能体或人设驱动型 LLM 系统的人。",
+          "why_keep": "确立了「反思+召回+规划」的模式，后续多数智能体记忆论文都以此为基线。",
+          "reading_focus": "第 4 节的检索打分公式与第 5 节的反思树构建方法。"
+        }
+      },
+      "action": "save",
+      "updated_at": "2026-07-26T06:50:47.023911Z"
     },
     "trend-mem-3": {
       "paper": {
@@ -1602,21 +2541,25 @@
         }
       },
       "action": "save",
-      "updated_at": "2026-07-25T16:04:35.117419Z"
+      "updated_at": "2026-07-26T06:27:05.451785Z"
     }
   },
   "recent_searches": [
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
-      "created_at": "2026-07-25T16:03:28.866675Z"
+      "created_at": "2026-07-27T06:10:35.258442Z"
+    },
+    {
+      "query": "large language model agents large language models long-term memory",
+      "created_at": "2026-07-26T03:05:55.03996Z"
+    },
+    {
+      "query": "control",
+      "created_at": "2026-07-26T01:59:31.103959Z"
     },
     {
       "query": "memory",
       "created_at": "2026-07-25T05:09:17.415397Z"
-    },
-    {
-      "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-24T16:21:24.136272Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update complex task performance",
@@ -1633,10 +2576,6 @@
     {
       "query": "neural architecture search",
       "created_at": "2026-07-24T08:43:06.958145Z"
-    },
-    {
-      "query": "large language models",
-      "created_at": "2026-07-24T08:06:26.569101Z"
     }
   ]
 }
