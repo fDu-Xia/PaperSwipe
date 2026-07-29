@@ -96,17 +96,18 @@ window.MOCK_PAPERS = [
     "read_minutes": 12,
     "source": "Semantic Scholar",
     "digest": {
-      "verdict": "Worth a quick skim of methods and experiments",
-      "hook": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually.",
-      "problem": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
+      "verdict": "推荐阅读",
+      "hook": "长期对话记忆新架构，效果超越 OpenAI 26%！",
+      "problem": "固定上下文窗口难以在多轮长期对话中保持一致性。",
       "novelty": [
-        "We introduce Mem0, a scalable memory-centric architecture that addresses this issue by dynamically extracting, consolidating, and retrieving salient information from ongoing conversations."
+        "提出 **Mem0**，动态提取、整合并检索对话中的关键信息。",
+        "推出图记忆增强版本，用图结构捕捉对话要素间的复杂关系。"
       ],
-      "method": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
-      "result": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues.",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Computer Science",
-      "why_keep": "Matches the search direction well — already cited 485 times, serves as a mature reference",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "在 LOCOMO 基准上，与六类基线（记忆增强系统、不同粒度 RAG、全文本处理、开源方案、闭源模型、专用记忆平台）系统对比。",
+      "result": "在单跳、多跳、时序、开放域四类问题上全面领先；较 OpenAI 在 LLM-as-a-Judge 指标提升 26%，图记忆版本再高约 2%；p95 延迟降低 91%，token 成本节省超 90%。",
+      "audience": "关注 LLM 智能体长期记忆与工程落地的研究者，尤其计算机科学方向。",
+      "why_keep": "与检索方向高度匹配 — 已获 485 次引用，是成熟的对照基线。",
+      "reading_focus": "重点看方法框架、六类基线对比实验与延迟/成本数据。"
     }
   },
   {
@@ -1927,17 +1928,18 @@ window.MOCK_PAPERS = [
     "read_minutes": 11,
     "source": "Semantic Scholar",
     "digest": {
-      "verdict": "Worth a quick skim of methods and experiments",
-      "hook": "A novel cost and accuracy of long that existing evaluations are typically published by framework providers and focus on token usage and.",
-      "problem": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
+      "verdict": "值得速览方法与实验",
+      "hook": "分布式多智能体记忆方案实测：成本差 8 倍，精度差 25%！",
+      "problem": "现有评测多由框架方提供，只关注 token 用量和延迟，很少考虑系统级成本与云边部署场景。",
       "novelty": [
-        "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks."
+        "构建独立可复现测试床，评测云边模拟环境下的精度、延迟、CPU 时间、峰值内存、磁盘与网络开销。",
+        "对比 **mem0**、**Graphiti**、**cognee** 三类风投背书框架（向量/图/混合架构），以及 RAG 与全文本基线。"
       ],
-      "method": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
-      "result": "Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS.",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Computer Science",
-      "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "在 LoCoMo 基准上，分别在网络不受限与受限两种场景下对六类后端做系统性压测。",
+      "result": "mem0、RAG、全文本准确率达 77%–81%，Graphiti、cognee 仅 55%–56%（差距源于检索不完整而非推理失败）；RAG 总拥有成本比 mem0 低 8.4 倍，二者是帕累托前沿上仅有的非劣后端；压缩精度而非上下文长度才是决定 LTM 精度的关键。",
+      "audience": "关注 LLM 智能体记忆系统成本与工程部署的研究者/架构师，尤其计算机科学方向。",
+      "why_keep": "与检索方向高度匹配 — 提供可复现测试床与成本-精度权衡分析，方法扎实。",
+      "reading_focus": "重点看测试床设计、三类框架的成本-精度对比与帕累托分析。"
     }
   },
   {
@@ -1990,17 +1992,18 @@ window.MOCK_PAPERS = [
     "read_minutes": 6,
     "source": "OpenAlex",
     "digest": {
-      "verdict": "Worth a quick skim of methods and experiments",
-      "hook": "A novel memory matters that lastly, we propose several topics for future research to address these challenges and further.",
-      "problem": "We examine the memory management approaches used in these agents.",
+      "verdict": "值得速览方法与实验",
+      "hook": "综述向量数据库如何支撑 LLM 智能体的长期记忆。",
+      "problem": "现有 LLM 智能体的记忆管理方式缺乏系统梳理，记忆类型划分与生命周期管理仍是开放问题。",
       "novelty": [
-        "Lastly, we propose several topics for future research to address these challenges and further enhance the capabilities of LLM agents, including the use of metadata in procedural and semantic memory a…"
+        "系统综述 LLM 智能体的记忆管理方案，聚焦基于向量数据库的存储与检索实现。",
+        "提出未来研究方向：程序性/语义记忆中的元数据利用，以及向量数据库与外部知识源的融合。"
       ],
-      "method": "In this paper, we provide a review of the current efforts to develop LLM agents, which are autonomous agents that leverage large language models.",
-      "result": "Lastly, we propose several topics for future research to address these challenges and further enhance the capabilities of LLM agents, including the use of metadata in procedural and semantic memory and the integration of external knowledge sources with vector databases.",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Natural Language Processing Techniques / Artificial Intelligence",
-      "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "综述现有 LLM 智能体开发工作，梳理其记忆管理方案的共性设计。",
+      "result": "指出记忆类型划分不清、记忆全生命周期管理缺失等开放问题，并给出多个未来研究课题。",
+      "audience": "关注 LLM 智能体记忆机制的研究者，尤其自然语言处理/人工智能方向。",
+      "why_keep": "与检索方向高度匹配 — 提供开放获取 PDF，便于快速核实。",
+      "reading_focus": "重点看向量数据库记忆方案梳理与未来研究方向部分。"
     }
   },
   {
@@ -2037,19 +2040,19 @@ window.MOCK_PAPERS = [
     "read_minutes": 8,
     "source": "OpenAlex",
     "digest": {
-      "verdict": "Worth a quick skim of methods and experiments",
-      "hook": "Achieve this by integrating large language models (LLMs) and skillfully leveraging the powerful reasoning an.",
-      "problem": "This design has brought forth the advancement of social robots and aims to increase the quality of human–robot interaction.",
+      "verdict": "值得速览方法与实验",
+      "hook": "社交机器人 Nadine：LLM 驱动的情感与类人记忆系统。",
+      "problem": "现有 LLM 智能体大多缺乏类人长期记忆与细腻的情感能力，限制了人机交互体验。",
       "novelty": [
-        "This approach is novel compared to the current state‐of‐the‐art LLM‐based agents which do not implement human‐like long‐term memory or sophisticated emotional capabilities.",
-        "We built a social robot system that enables generating appropriate behaviors through multimodal input processing, bringing episodic memories accordingly to the recognized user, and simulating the emo…",
-        "In particular, we introduce an LLM‐agent frame for social robots, social robotics reasoning and acting, serving as a core component for the interaction module in our system."
+        "相较现有 LLM 智能体，首次为社交机器人实现类人长期记忆与情感能力的结合。",
+        "通过多模态输入处理生成合适行为，按用户身份调取情景记忆，并模拟机器人的情绪状态。",
+        "提出面向社交机器人的 LLM-agent 框架，作为交互模块的核心组件。"
       ],
-      "method": "Abstract In this work, we describe our approach to developing an intelligent and robust social robotic system for the Nadine social robot platform.",
-      "result": "We achieve this by integrating large language models (LLMs) and skillfully leveraging the powerful reasoning and instruction‐following capabilities of these types of models to achieve advanced human‐like affective and cognitive capabilities.",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Social Robot Interaction and HRI / Social Psychology",
-      "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "面向 Nadine 社交机器人平台，开发集成 LLM 推理与指令跟随能力的机器人系统。",
+      "result": "结合 LLM 强大的推理与指令跟随能力，实现了类人的情感与认知能力，提升人机交互质量。",
+      "audience": "关注 LLM 智能体应用的研究者，尤其社交机器人交互/社会心理学方向。",
+      "why_keep": "与检索方向高度匹配 — 可速览方法图示与实验后再决定精读。",
+      "reading_focus": "重点看情景记忆调取机制与情绪模拟设计。"
     }
   },
   {
@@ -2086,18 +2089,18 @@ window.MOCK_PAPERS = [
     "read_minutes": 10,
     "source": "OpenAlex",
     "digest": {
-      "verdict": "Worth a quick skim of methods and experiments",
-      "hook": "A novel intent-driven mobile gui testing with autonomous large that achieve them by interacting with the app.",
-      "problem": "GUI testing checks if a software system behaves as expected when users interact with its graphical interface, e.",
+      "verdict": "值得速览方法与实验",
+      "hook": "DroidAgent：让 LLM 智能体自主完成移动端 GUI 意图测试。",
+      "problem": "GUI 测试要判断软件在用户交互下是否符合预期，但高层测试目标的设定至今仍依赖人工。",
       "novelty": [
-        "We propose DroidAgent, an autonomous GUI testing agent for Android, for semantic, intent-driven automation of GUI testing.",
-        "For example, when testing a messaging app, DroidAgent created a second account and added a first account as a friend, testing a realistic use case, without human intervention."
+        "提出 **DroidAgent**，面向 Android 的自主 GUI 测试智能体，实现语义化、意图驱动的测试自动化。",
+        "测试消息类应用时，DroidAgent 能自主创建第二账号并添加好友，无需人工干预即完成真实使用场景测试。"
       ],
-      "method": "We propose DroidAgent, an autonomous GUI testing agent for Android, for semantic, intent-driven automation of GUI testing.",
-      "result": "Given an Android app, DroidAgent sets relevant task goals and subsequently tries to achieve them by interacting with the app.",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Software Testing and Debugging Techniques / Software",
-      "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "基于 LLM 并配备长短期记忆机制，让 DroidAgent 设定任务目标并通过与 App 交互逐步达成。",
+      "result": "在 Themis 基准的 15 款应用上评测，DroidAgent 平均活动覆盖率达 61%，高于现有最优方法的 51%；547 个自主任务中 317 个被人工判定为真实且贴合功能。",
+      "audience": "关注 LLM 智能体自动化测试的研究者/工程师，尤其软件测试方向。",
+      "why_keep": "与检索方向高度匹配 — 可速览方法图示与实验后再决定精读。",
+      "reading_focus": "重点看意图驱动的任务生成机制与活动覆盖率实验对比。"
     }
   },
   {
@@ -2149,18 +2152,18 @@ window.MOCK_PAPERS = [
     "read_minutes": 9,
     "source": "OpenAlex",
     "digest": {
-      "verdict": "Strong match — save and verify with priority",
-      "hook": "A novel survey on the memory mechanism of large language model that com/nuster1128/llm_agent_memory_survey .",
-      "problem": "Compared with original LLMs, LLM-based agents are featured in their self-evolving capability, which is the basis for solving real-world problems that need long-term and complex agent-environment interactions.",
+      "verdict": "高度匹配，优先收藏核实",
+      "hook": "首篇系统梳理 LLM 智能体记忆机制的综述，附开源仓库。",
+      "problem": "已有记忆机制方案分散在各篇论文中，缺乏从整体视角总结比较的系统综述，难以提炼可复用的设计范式。",
       "novelty": [
-        "To bridge this gap, in this article, we propose a comprehensive survey on the memory mechanism of LLM-based agents.",
-        "In specific, we first discuss “what is” and “why do we need” the memory in LLM-based agents."
+        "首次提出面向 LLM 智能体记忆机制的系统性综述，弥补该领域缺乏整体梳理的空白。",
+        "先讨论记忆的定义（是什么）与必要性（为什么需要），再系统回顾记忆模块的设计与评估方法。"
       ],
-      "method": "Large language model (LLM)-based agents have recently attracted much attention from the research and industry communities.",
-      "result": "com/nuster1128/LLM_Agent_Memory_Survey .",
-      "audience": "Researchers interested in large language model agents large language mode…, especially in Topic Modeling / Artificial Intelligence",
-      "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
-      "reading_focus": "Focus on the method framework, main experiments, and limitations."
+      "method": "系统回顾现有记忆机制研究，梳理其设计范式，并结合多个智能体应用场景分析记忆模块的作用。",
+      "result": "总结现有工作的局限性并指出重要未来方向；配套维护 GitHub 仓库 nuster1128/LLM_Agent_Memory_Survey 持续跟踪领域进展。",
+      "audience": "关注 LLM 智能体记忆机制体系化梳理的研究者，尤其人工智能方向。",
+      "why_keep": "与检索方向高度匹配 — 综述覆盖面广，适合作为该领域入门与查漏补缺的首选材料。",
+      "reading_focus": "重点看记忆机制的设计范式分类与未来研究方向章节。"
     }
   },
   {

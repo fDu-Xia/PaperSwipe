@@ -879,16 +879,27 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   box-shadow: 0 4px 12px rgba(25,29,40,.08);
 }
 
-/* Expanded top-papers list inside a trend row */
+/* Expanded top-papers list inside a trend row.
+   .trend-papers-collapse animates its grid-template-rows from 0fr to 1fr
+   so the list unfolds smoothly (accordion-style) instead of the previous
+   hidden-attribute toggle + full re-render, which felt like a page refresh. */
+.trend-papers-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms cubic-bezier(.2,.8,.2,1);
+}
+.trend-row.is-expanded .trend-papers-collapse { grid-template-rows: 1fr; }
 .trend-papers {
+  min-height: 0;
+  overflow: hidden;
   list-style: none;
   margin: 0;
   padding: 4px 12px 14px;
   display: flex; flex-direction: column;
   gap: 6px;
   border-top: 1px dashed var(--trend-border);
-  animation: trend-papers-in 260ms cubic-bezier(.2,.8,.2,1);
 }
+.trend-row.is-expanded .trend-papers { animation: trend-papers-in 260ms cubic-bezier(.2,.8,.2,1); }
 .trend-paper-row {
   display: grid;
   grid-template-columns: 22px 1fr 14px;
@@ -900,9 +911,11 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   border: 1px solid color-mix(in srgb, var(--trend-border) 60%, transparent);
   cursor: pointer;
   transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+.trend-row.is-expanded .trend-paper-row {
   opacity: 0;
   animation: trend-paper-in 320ms cubic-bezier(.2,.8,.2,1) forwards;
-  animation-delay: calc(40ms * var(--pi, 0));
+  animation-delay: calc(60ms + 40ms * var(--pi, 0));
 }
 .trend-paper-row:hover {
   transform: translateY(-1px);
@@ -1525,41 +1538,59 @@ html[data-theme="system"] .settings-page::after { display: none; }
 /* ── Mock demo disclaimer ribbon (only shown when app.js MOCK_MODE is on) ── */
 .mock-banner { position: fixed; z-index: 200; left: 0; right: 0; bottom: 0; padding: 5px 10px calc(5px + var(--safe-bottom)); background: rgba(17,19,26,.88); backdrop-filter: blur(6px); color: rgba(255,255,255,.92); font-size: 8.5px; line-height: 1.4; text-align: center; letter-spacing: .1px; pointer-events: none; }
 .mock-banner[hidden] { display: none; }
+/* On wide desktop viewports there's blank space beside the phone-frame
+   .app-shell — show the disclaimer there as a floating card instead of
+   a thin bottom bar. */
+@media (min-width: 760px) {
+  .mock-banner {
+    left: auto; bottom: auto;
+    top: 50%; right: 28px;
+    transform: translateY(-50%);
+    width: 190px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.65;
+    letter-spacing: 0;
+    box-shadow: 0 20px 50px rgba(10,12,18,.32);
+  }
+}
 
 /* ── Library long-press inline actions & schedule picker ── */
 .library-card { transition: transform .16s ease, opacity .16s ease, filter .16s ease; }
-.library-card.is-pressing { filter: brightness(.7) saturate(.9); transform: scale(.985); }
+.library-card.is-pressing { filter: brightness(.96) saturate(.97); transform: scale(.985); }
 .library-card-actions {
   position: absolute; inset: 0; z-index: 6;
   display: flex; align-items: center; justify-content: center;
   gap: 18px;
   border-radius: 9px;
   pointer-events: auto;
-  background: color-mix(in srgb, #0b0d14 40%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(6px) saturate(1.1);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
   animation: card-overlay-in 180ms cubic-bezier(.2,.8,.2,1) both;
 }
 .library-card-action {
   width: 40px; height: 40px;
-  border: 1px solid rgba(255,255,255,.32);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
   padding: 0;
   border-radius: 50%;
   display: grid; place-items: center;
-  background: rgba(255,255,255,.18);
+  background: var(--surface);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  color: #fff;
+  color: var(--ink);
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(10,12,18,.24);
+  box-shadow: 0 6px 16px rgba(10,12,18,.16);
   animation: card-action-pop 180ms cubic-bezier(.2,.8,.2,1) both;
   transition: transform 120ms ease, background 140ms ease;
 }
-.library-card-action:hover { background: rgba(255,255,255,.28); }
+.library-card-action:hover { background: color-mix(in srgb, var(--surface) 88%, var(--ink)); }
 .library-card-action:active { transform: scale(.9); }
 .library-card-action svg { width: 18px; height: 18px; }
-.library-card-action.is-danger { color: #fff; }
-.library-card-action.is-schedule { color: #fff; }
+.library-card-action.is-danger { color: var(--coral); }
+.library-card-action.is-schedule { color: var(--accent); }
 .library-card-action-emoji { display: none; }
 @keyframes card-overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes card-action-pop { from { opacity: 0; transform: scale(.55); } to { opacity: 1; transform: scale(1); } }
