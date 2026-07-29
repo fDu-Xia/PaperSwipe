@@ -739,7 +739,7 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
   grid-template-columns: 44px 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 14px 14px 14px 12px;
+  padding: 12px 14px 9px 12px;
 }
 .trend-row.is-expandable .trend-row-main { cursor: pointer; }
 .trend-row.is-expandable .trend-row-main::after {
@@ -880,26 +880,32 @@ html[data-theme="system"] .page-topbar { background: color-mix(in srgb, var(--su
 }
 
 /* Expanded top-papers list inside a trend row.
-   .trend-papers-collapse animates its grid-template-rows from 0fr to 1fr
-   so the list unfolds smoothly (accordion-style) instead of the previous
-   hidden-attribute toggle + full re-render, which felt like a page refresh. */
+   .trend-papers-collapse animates max-height (JS sets it to the measured
+   scrollHeight when expanding, back to 0 when collapsing — see
+   setTrendRowExpanded in app.js). A pure CSS grid-template-rows 0fr→1fr
+   trick was tried first but an auto-sized grid item doesn't reliably
+   collapse to 0 in this nested flex/grid context, leaking a sliver of
+   the dashed border below the collapsed card. Explicit max-height avoids
+   that entirely. */
 .trend-papers-collapse {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 320ms cubic-bezier(.2,.8,.2,1);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 320ms cubic-bezier(.2,.8,.2,1);
 }
-.trend-row.is-expanded .trend-papers-collapse { grid-template-rows: 1fr; }
 .trend-papers {
   min-height: 0;
-  overflow: hidden;
   list-style: none;
   margin: 0;
-  padding: 4px 12px 14px;
+  padding: 0;
   display: flex; flex-direction: column;
   gap: 6px;
-  border-top: 1px dashed var(--trend-border);
+  border-top: 1px dashed transparent;
 }
-.trend-row.is-expanded .trend-papers { animation: trend-papers-in 260ms cubic-bezier(.2,.8,.2,1); }
+.trend-row.is-expanded .trend-papers {
+  padding: 4px 12px 14px;
+  border-top-color: var(--trend-border);
+  animation: trend-papers-in 260ms cubic-bezier(.2,.8,.2,1);
+}
 .trend-paper-row {
   display: grid;
   grid-template-columns: 22px 1fr 14px;

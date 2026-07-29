@@ -4374,25 +4374,43 @@ function renderTrendBoard() {
       </li>`;
   }).join("");
   refreshIcons();
+  // Rows can render already flagged is-expanded (e.g. re-render while a
+  // topic is expanded); give their collapse wrapper its measured height
+  // right away instead of relying on the CSS default (0), which would
+  // otherwise show the row as "expanded" but visually collapsed.
+  if (expandedTrendId) {
+    setTrendRowExpanded(board.querySelector(`.trend-row[data-trend-expand="${escapeAttribute(expandedTrendId)}"]`), true);
+  }
+}
+
+/* Sets/removes the is-expanded state on a trend row and animates its
+   papers list by measuring the real content height (scrollHeight) rather
+   than a CSS-only trick — an auto-sized grid-template-rows 0fr/1fr didn't
+   reliably collapse to 0 in this nested flex/grid layout and left a
+   sliver of the dashed divider visible under collapsed cards. */
+function setTrendRowExpanded(row, expanded) {
+  if (!row) return;
+  row.classList.toggle("is-expanded", expanded);
+  const collapse = row.querySelector(".trend-papers-collapse");
+  if (!collapse) return;
+  collapse.style.maxHeight = expanded ? `${collapse.scrollHeight}px` : "0px";
 }
 
 function toggleTrendExpand(id) {
   if (!TRENDING_TOPIC_PAPERS[id]) return;
   const board = document.querySelector("#trend-board");
+  if (!board) return;
   const prevId = expandedTrendId;
   const nextId = prevId === id ? null : id;
   expandedTrendId = nextId;
-  if (!board) return;
-  // Toggle classes directly instead of re-rendering the whole board —
-  // keeps every row's DOM node in place so the CSS grid-rows transition
-  // on .trend-papers-collapse animates smoothly (accordion feel) rather
-  // than flashing/refreshing the entire list.
+  // Toggle classes/heights directly instead of re-rendering the whole
+  // board — keeps every row's DOM node in place so the max-height
+  // transition on .trend-papers-collapse animates smoothly (accordion
+  // feel) rather than flashing/refreshing the entire list.
   if (prevId && prevId !== nextId) {
-    const prevRow = board.querySelector(`.trend-row[data-trend-expand="${escapeAttribute(prevId)}"]`);
-    if (prevRow) prevRow.classList.remove("is-expanded");
+    setTrendRowExpanded(board.querySelector(`.trend-row[data-trend-expand="${escapeAttribute(prevId)}"]`), false);
   }
-  const row = board.querySelector(`.trend-row[data-trend-expand="${escapeAttribute(id)}"]`);
-  if (row) row.classList.toggle("is-expanded", Boolean(nextId));
+  setTrendRowExpanded(board.querySelector(`.trend-row[data-trend-expand="${escapeAttribute(id)}"]`), Boolean(nextId));
 }
 
 /* ── Trend paper overlay — reuses the home-card CSS but with its own,
