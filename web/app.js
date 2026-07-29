@@ -1,3 +1,8 @@
+/* API_BASE: 同源部署（浏览器/browser-sync）留空即可，走相对路径。
+   Capacitor 原生壳里没有 same-origin，必须指向后端公网地址：
+   在 capacitor.config.json 的 server / 或原生启动代码里注入 window.PAPERSWIPE_API_BASE。 */
+const API_BASE = (window.PAPERSWIPE_API_BASE || "").replace(/\/+$/, "");
+
 const DEFAULT_PROFILE = {
   identity: "graduate",
   researchIntent: "",
@@ -22,6 +27,7 @@ const state = {
   libraryTags: [],
   librarySort: "recent",
   appearance: "system",
+  language: "zh",
   aiModel: "",
   imageEnabled: false,
   imageModel: "",
@@ -171,10 +177,13 @@ function fallbackPapersForQuery(_query) {
 
 const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1";
 const APPEARANCE_STORAGE_KEY = "paperswipe-appearance-v1";
+const LANGUAGE_STORAGE_KEY = "paperswipe-language-v1";
+const DISPLAY_NAME_STORAGE_KEY = "paperswipe-display-name-v1";
 const elements = {};
 let toastTimer;
 let onboardingStep = 0;
 let onboardingProfile = { ...DEFAULT_PROFILE, topics: [...DEFAULT_PROFILE.topics] };
+let settingsSubpage = null;
 
 /* ── Card swipe state ── */
 let isFlipped = false;
@@ -182,6 +191,43 @@ let flipGuard = false;
 let dragging = false;
 let dragDX = 0, dragDY = 0, dragStartX = 0, dragStartY = 0, dragStartTime = 0;
 let weekPlanSwipe = null;
+let weekPlanDrag = null;
+let weekPlanDragJustEnded = false;
+
+/* ── Haptics: use the native Taptic Engine via Capacitor when running as an
+   app (simulator has no hardware, so it silently no-ops there — normal).
+   Falls back to navigator.vibrate for plain browser/PWA use. ── */
+function hapticImpact(style = "LIGHT") {
+  const haptics = window.Capacitor?.Plugins?.Haptics;
+  if (window.Capacitor?.isNativePlatform?.() && haptics) {
+    haptics.impact({ style }).catch(() => {});
+    return;
+  }
+  if (navigator.vibrate) navigator.vibrate(style === "HEAVY" ? 20 : style === "MEDIUM" ? 15 : 10);
+}
+
+/* ── App shell: kill web-page gestures (pinch-zoom / double-tap-zoom / bounce)
+   so the WKWebView feels like a native app, not a webpage. ── */
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+document.addEventListener("gesturechange", (e) => e.preventDefault());
+document.addEventListener("gestureend", (e) => e.preventDefault());
+let lastTouchEnd = 0;
+document.addEventListener(
+  "touchend",
+  (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault(); // block double-tap-to-zoom
+    lastTouchEnd = now;
+  },
+  { passive: false }
+);
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    if (e.touches.length > 1) e.preventDefault(); // block two-finger pinch/pan
+  },
+  { passive: false }
+);
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
@@ -189,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyAppearance(state.appearance);
   bindEvents();
   refreshIcons();
+  applyLanguage(loadLanguage());
 
   const savedProfile = loadOnboardingProfile();
   const forceOnboarding = new URLSearchParams(window.location.search).get("onboarding") === "1";
@@ -282,6 +329,18 @@ function cacheElements() {
     settingsTopicInput: document.querySelector("#settings-topic-input"),
     settingsComplexity: document.querySelector("#settings-complexity"),
     settingsComplexityLabel: document.querySelector("#settings-complexity-label"),
+    settingsProfileAvatar: document.querySelector("#settings-profile-avatar"),
+    settingsProfileName: document.querySelector("#settings-profile-name"),
+    settingsProfileRole: document.querySelector("#settings-profile-role"),
+    settingsDisplayNameInput: document.querySelector("#settings-display-name"),
+    settingsIntentInput: document.querySelector("#settings-intent-input"),
+    settingsIntentButton: document.querySelector("#settings-intent-button"),
+    settingsRowInterestsSum: document.querySelector("#settings-row-interests-sum"),
+    settingsRowFocusSum: document.querySelector("#settings-row-focus-sum"),
+    settingsRowExploreSum: document.querySelector("#settings-row-explore-sum"),
+    settingsRowAppearanceSum: document.querySelector("#settings-row-appearance-sum"),
+    settingsRowLanguageSum: document.querySelector("#settings-row-language-sum"),
+    settingsRowZoteroSum: document.querySelector("#settings-row-zotero-sum"),
   });
 }
 
@@ -386,7 +445,7 @@ function bindEvents() {
     }
     const exploreAdd = event.target.closest("[data-explore-add]");
     if (exploreAdd) {
-      promptExploreCustomTopic();
+      promptExploreCustomTopic(exploreAdd);
       return;
     }
     const imageButton = event.target.closest("[data-generate-image-id]");
@@ -424,6 +483,7 @@ function bindEvents() {
     }
     const weekPlanCard = event.target.closest("[data-week-plan-card]");
     if (weekPlanCard) {
+      if (weekPlanDragJustEnded) { weekPlanDragJustEnded = false; return; }
       const shell = weekPlanCard.closest(".wp-item-shell");
       if (shell && shell.classList.contains("is-revealed")) {
         // First click on a revealed shell just closes the action drawer.
@@ -624,22 +684,34 @@ function bindEvents() {
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     button.addEventListener("click", () => selectAppearance(button.dataset.appearance));
   });
-  document.querySelectorAll("[data-settings-style]").forEach((button) => {
-    button.addEventListener("click", () => {
-      onboardingProfile.discoveryStyle = button.dataset.settingsStyle;
-      persistProfile();
-      renderSettings();
-    });
+  document.querySelectorAll("[data-language]").forEach((button) => {
+    button.addEventListener("click", () => applyLanguage(button.dataset.language));
   });
   elements.settingsComplexity.addEventListener("input", () => {
     onboardingProfile.complexity = Number(elements.settingsComplexity.value);
     updateComplexityLabel(elements.settingsComplexityLabel, onboardingProfile.complexity);
     persistProfile();
+    renderSettings();
   });
   document.querySelector("#restart-onboarding").addEventListener("click", () => {
     window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     window.location.assign("/?onboarding=1");
   });
+
+  document.querySelectorAll("[data-settings-nav]").forEach((button) => {
+    button.addEventListener("click", () => openSettingsSubpage(button.dataset.settingsNav));
+  });
+  document.querySelectorAll("[data-settings-back]").forEach((button) => {
+    button.addEventListener("click", closeSettingsSubpage);
+  });
+  if (elements.settingsDisplayNameInput) {
+    elements.settingsDisplayNameInput.addEventListener("change", () => {
+      const name = elements.settingsDisplayNameInput.value.trim();
+      window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, name);
+      renderSettings();
+    });
+  }
+  if (elements.settingsIntentButton) elements.settingsIntentButton.addEventListener("click", redescribeResearchIntent);
 
   const zoteroApiKeyInput = document.querySelector("#zotero-api-key");
   const zoteroUserIdInput = document.querySelector("#zotero-user-id");
@@ -650,10 +722,10 @@ function bindEvents() {
   const saved = loadZoteroCredentials();
   if (zoteroApiKeyInput && saved.apiKey) zoteroApiKeyInput.value = saved.apiKey;
   if (zoteroUserIdInput && saved.userId) zoteroUserIdInput.value = saved.userId;
-  if (zoteroApiKeyInput) zoteroApiKeyInput.addEventListener("change", persistZoteroCredentials);
-  if (zoteroUserIdInput) zoteroUserIdInput.addEventListener("change", persistZoteroCredentials);
+  if (zoteroApiKeyInput) zoteroApiKeyInput.addEventListener("change", () => { persistZoteroCredentials(); renderSettings(); });
+  if (zoteroUserIdInput) zoteroUserIdInput.addEventListener("change", () => { persistZoteroCredentials(); renderSettings(); });
   if (zoteroTestBtn) zoteroTestBtn.addEventListener("click", testZoteroConnection);
-  if (zoteroClearBtn) zoteroClearBtn.addEventListener("click", clearZoteroCredentials);
+  if (zoteroClearBtn) zoteroClearBtn.addEventListener("click", () => { clearZoteroCredentials(); renderSettings(); });
 
   if (elements.settingsToggle) elements.settingsToggle.addEventListener("click", openSettingsPage);
   if (elements.settingsClose) elements.settingsClose.addEventListener("click", closeSettingsPage);
@@ -669,6 +741,64 @@ function bindEvents() {
     if (event.key === "ArrowRight") decide("save");
     if (event.key === " " || event.key === "Spacebar") { event.preventDefault(); isFlipped ? unflip() : flip(); }
   });
+}
+
+/* ── UI chrome i18n: bottom nav + Settings page only (in-app content such as
+   AI digests/tags stays as generated). Chinese text lives directly in the
+   HTML; toggling to English swaps via this dictionary and restores the
+   original Chinese from a cached data-attribute when switched back. ── */
+const I18N_EN = {
+  "nav.discover": "Explore", "nav.library": "Library", "nav.todos": "Schedule", "nav.network": "Trending",
+  "settings.title": "Settings",
+  "settings.group.research": "Research Preferences", "settings.group.system": "System Preferences", "settings.group.zotero": "Zotero",
+  "settings.row.interests": "Research Interests", "settings.row.focus": "Stay Focused", "settings.row.explore": "Explore More",
+  "settings.row.appearance": "Appearance", "settings.row.language": "Language", "settings.row.zotero": "Zotero Sync",
+  "settings.footnote": "Paper metadata from Semantic Scholar, arXiv and OpenAlex. Verify AI conclusions against the original source.",
+  "settings.identity.title": "Identity",
+  "settings.interests.title": "Research Interests",
+  "settings.interests.tagsTitle": "Discovered Interest Tags",
+  "settings.interests.tagsHint": "Changes refresh your paper discovery feed",
+  "settings.interests.update": "Update themes",
+  "settings.interests.redescribeTitle": "Redescribe your research interests",
+  "settings.interests.redescribeHint": "Describe your direction in a sentence, AI will re-extract tags",
+  "settings.interests.redescribeAction": "Re-analyze with AI",
+  "settings.interests.addPlaceholder": "Add a new research theme",
+  "settings.interests.redescribePlaceholder": "Tell us about your goals, interests and research plan…",
+  "settings.focus.title": "Stay Focused", "settings.focus.heading": "Stay Focused",
+  "settings.focus.hint": "Drag the slider to adjust the reading depth of recommendations",
+  "settings.focus.readingLevel": "Reading Level", "settings.focus.easy": "Beginner", "settings.focus.expert": "Expert",
+  "settings.explore.title": "Explore More",
+  "settings.explore.heading": "Pick topics you're curious about",
+  "settings.explore.restart": "Restart setup",
+  "settings.appearance.title": "Appearance", "settings.appearance.heading": "Display Theme",
+  "settings.appearance.hint": "Choose the display theme of the main interface",
+  "settings.appearance.light": "Light", "settings.appearance.system": "System", "settings.appearance.dark": "Dark",
+  "settings.language.title": "Language", "settings.language.heading": "Interface Language",
+  "settings.language.hint": "Switch the app's display language",
+  "settings.zotero.title": "Zotero", "settings.zotero.heading": "Zotero",
+  "settings.zotero.hint": "Once connected, send papers from Library to Zotero in one tap",
+  "settings.zotero.test": "Test connection", "settings.zotero.clear": "Clear",
+};
+
+function loadLanguage() {
+  const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  return saved === "en" ? "en" : "zh";
+}
+
+function applyLanguage(lang) {
+  state.language = lang === "en" ? "en" : "zh";
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.dataset.i18n;
+    if (node.dataset.i18nZh === undefined) node.dataset.i18nZh = node.textContent;
+    node.textContent = state.language === "en" ? (I18N_EN[key] || node.dataset.i18nZh) : node.dataset.i18nZh;
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    const key = node.dataset.i18nPlaceholder;
+    if (node.dataset.i18nZhPlaceholder === undefined) node.dataset.i18nZhPlaceholder = node.getAttribute("placeholder") || "";
+    node.setAttribute("placeholder", state.language === "en" ? (I18N_EN[key] || node.dataset.i18nZhPlaceholder) : node.dataset.i18nZhPlaceholder);
+  });
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, state.language);
+  if (elements.settingsPage) renderSettings();
 }
 
 function loadOnboardingProfile() {
@@ -796,6 +926,10 @@ function selectIdentity(identity) {
     button.classList.toggle("is-selected", selected);
     button.setAttribute("aria-checked", String(selected));
   });
+  if (state.started) {
+    persistProfile();
+    renderSettings();
+  }
 }
 
 function selectDiscoveryStyle(style) {
@@ -822,8 +956,8 @@ const EXPLORE_TOPIC_POOL = [
 const EXPLORE_MAX = 10;
 
 function renderExploreTopics() {
-  const cloud = document.querySelector("#explore-topics-cloud");
-  if (!cloud) return;
+  const clouds = document.querySelectorAll(".explore-topics-cloud");
+  if (!clouds.length) return;
   if (!Array.isArray(onboardingProfile.exploreTopics)) onboardingProfile.exploreTopics = [];
   const chosen = onboardingProfile.exploreTopics;
   const chosenSet = new Set(chosen);
@@ -840,9 +974,11 @@ function renderExploreTopics() {
   const addIndex = merged.length;
   const addDrift = (addIndex * 137) % 12 - 6;
   bubbles.push(`<button type="button" class="explore-bubble explore-bubble-add is-md${reachedCap ? " is-disabled" : ""}" data-explore-add${reachedCap ? " disabled" : ""} style="--bubble-index: ${addIndex}; --bubble-drift: ${addDrift}px;">＋ Add your own</button>`);
-  cloud.innerHTML = bubbles.join("");
-  const counter = document.querySelector("#explore-count");
-  if (counter) counter.textContent = String(chosen.length);
+  const html = bubbles.join("");
+  clouds.forEach((cloud) => { cloud.innerHTML = html; });
+  document.querySelectorAll("#explore-count, #settings-explore-count").forEach((counter) => {
+    counter.textContent = String(chosen.length);
+  });
 }
 
 function toggleExploreTopic(topic) {
@@ -858,15 +994,16 @@ function toggleExploreTopic(topic) {
     onboardingProfile.exploreTopics.splice(idx, 1);
   }
   renderExploreTopics();
+  if (state.started) persistProfile();
 }
 
-function promptExploreCustomTopic() {
+function promptExploreCustomTopic(triggerEl) {
   if (!Array.isArray(onboardingProfile.exploreTopics)) onboardingProfile.exploreTopics = [];
   if (onboardingProfile.exploreTopics.length >= EXPLORE_MAX) {
     showToast(`最多选择 ${EXPLORE_MAX} 个感兴趣领域`);
     return;
   }
-  const cloud = document.querySelector("#explore-topics-cloud");
+  const cloud = (triggerEl && triggerEl.closest(".explore-topics-cloud")) || document.querySelector(".explore-topics-cloud");
   if (!cloud || cloud.querySelector(".explore-bubble-input")) return;
   const addBtn = cloud.querySelector("[data-explore-add]");
   const input = document.createElement("input");
@@ -881,6 +1018,7 @@ function promptExploreCustomTopic() {
       onboardingProfile.exploreTopics.push(val);
     }
     renderExploreTopics();
+    if (state.started) persistProfile();
   };
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); commit(true); }
@@ -906,7 +1044,7 @@ async function prepareResearchIntent() {
   label.textContent = "Analyzing your topic…";
 
   try {
-    const response = await fetch("/api/topic-plan", {
+    const response = await fetch(`${API_BASE}/api/topic-plan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description }),
@@ -930,6 +1068,47 @@ async function prepareResearchIntent() {
     showToast(error.message);
   } finally {
     elements.analyzeTopicButton.disabled = false;
+    label.textContent = previousLabel;
+  }
+}
+
+async function redescribeResearchIntent() {
+  const description = elements.settingsIntentInput.value.trim();
+  if (Array.from(description).length < 6) {
+    showToast("请再具体一点，至少写 6 个字符");
+    elements.settingsIntentInput.focus();
+    return;
+  }
+  const label = elements.settingsIntentButton.querySelector("span");
+  const previousLabel = label.textContent;
+  elements.settingsIntentButton.disabled = true;
+  label.textContent = state.language === "en" ? "Analyzing…" : "解析中…";
+  try {
+    const response = await fetch(`${API_BASE}/api/topic-plan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "主题拆解失败");
+    const keywords = Array.isArray(payload.keywords)
+      ? payload.keywords.map((keyword) => String(keyword).trim()).filter(Boolean).slice(0, 8)
+      : [];
+    const searchQuery = String(payload.search_query || keywords.join(" ") || description).trim();
+    onboardingProfile.researchIntent = description;
+    onboardingProfile.searchQuery = searchQuery;
+    onboardingProfile.topics = keywords.length ? keywords : [searchQuery];
+    onboardingProfile.topicPlanAI = Boolean(payload.ai_enabled);
+    persistProfile();
+    elements.settingsIntentInput.value = "";
+    renderSettings();
+    switchView("discover");
+    performSearch(onboardingProfile.searchQuery || onboardingProfile.topics[0]);
+    showToast("研究兴趣已更新");
+  } catch (error) {
+    showToast(error.message);
+  } finally {
+    elements.settingsIntentButton.disabled = false;
     label.textContent = previousLabel;
   }
 }
@@ -990,7 +1169,7 @@ async function performSearch(rawQuery) {
   try {
     console.log(`[search] START q="${query}" @${new Date().toISOString()}`);
     const t0 = performance.now();
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`, {
+    const response = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}&limit=20`, {
       headers: { Accept: "text/event-stream" },
     });
     console.log(`[search] response received status=${response.status} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
@@ -1720,7 +1899,7 @@ async function generatePaperVisual(id) {
   if (currentPaper()?.id === id) renderCard();
   showToast("正在生成论文视觉图，通常需要 20–90 秒");
   try {
-    const response = await fetch("/api/paper-image", {
+    const response = await fetch(`${API_BASE}/api/paper-image`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paper_id: paper.id, title: paper.title, abstract: paper.abstract || "" }),
@@ -1939,7 +2118,7 @@ async function decide(action) {
   fly(action, 0);
 
   try {
-    const response = await fetch("/api/actions", {
+    const response = await fetch(`${API_BASE}/api/actions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paper, action }),
@@ -1958,7 +2137,7 @@ async function decide(action) {
 
 async function refreshHealth() {
   try {
-    const response = await fetch("/api/health");
+    const response = await fetch(`${API_BASE}/api/health`);
     const payload = await response.json();
     const imageStateChanged = state.imageEnabled !== Boolean(payload.image_enabled);
     state.aiModel = String(payload.ai_model || "");
@@ -2545,7 +2724,7 @@ function clearBotWelcome() {
 
 async function refreshLibrary() {
   try {
-    const response = await fetch("/api/library");
+    const response = await fetch(`${API_BASE}/api/library`);
     const payload = await response.json();
     state.library = payload.papers || [];
     const ids = new Set(state.library.map((entry) => entry.paper?.id).filter(Boolean));
@@ -2903,7 +3082,7 @@ async function removeFromLibrary(id) {
   const entry = state.library.find((item) => item.paper.id === id);
   if (!entry) return;
   try {
-    const response = await fetch("/api/actions", {
+    const response = await fetch(`${API_BASE}/api/actions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paper: entry.paper, action: "dismiss" }),
@@ -2918,7 +3097,7 @@ async function removeFromLibrary(id) {
 
 async function refreshStats() {
   try {
-    const response = await fetch("/api/stats");
+    const response = await fetch(`${API_BASE}/api/stats`);
     state.stats = await response.json();
     updateLibraryCounts();
   } catch (_) {
@@ -2928,7 +3107,7 @@ async function refreshStats() {
 
 async function refreshSearches() {
   try {
-    const response = await fetch("/api/searches");
+    const response = await fetch(`${API_BASE}/api/searches`);
     const payload = await response.json();
     const searches = payload.searches || [];
     const items = searches.length ? searches : onboardingProfile.topics.map((query) => ({ query }));
@@ -3436,7 +3615,7 @@ function trendOverlayFly(action, velocity) {
 
   /* Persist to Library for save/priority/read — same as home decide(). Dismiss just advances. */
   if (action !== "dismiss") {
-    fetch("/api/actions", {
+    fetch(`${API_BASE}/api/actions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paper, action }),
@@ -3549,23 +3728,96 @@ function setTrendScope(scope) {
   renderTrendBoard();
 }
 
+const IDENTITY_LABELS = {
+  graduate: { avatar: "🧑‍🎓", role: "Graduate / PhD" },
+  researcher: { avatar: "🧑‍🏫", role: "Professor / Researcher" },
+  enthusiast: { avatar: "🧑‍🚀", role: "Explorer" },
+};
+
 function renderSettings() {
-  const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
-  const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
-  elements.settingsTopicChips.innerHTML = onboardingProfile.topics.map((topic) => `<button type="button" data-settings-topic-remove="${escapeAttribute(topic)}"><span>${escapeHTML(topic)}</span><i data-lucide="x"></i></button>`).join("");
+  const identity = IDENTITY_LABELS[onboardingProfile.identity] || IDENTITY_LABELS.graduate;
+  const displayName = window.localStorage.getItem(DISPLAY_NAME_STORAGE_KEY) || "PaperSwipe 用户";
+
+  // Profile card
+  if (elements.settingsProfileAvatar) elements.settingsProfileAvatar.textContent = identity.avatar;
+  if (elements.settingsProfileName) elements.settingsProfileName.textContent = displayName;
+  if (elements.settingsProfileRole) elements.settingsProfileRole.textContent = identity.role;
+  if (elements.settingsDisplayNameInput && document.activeElement !== elements.settingsDisplayNameInput) {
+    elements.settingsDisplayNameInput.value = displayName === "PaperSwipe 用户" ? "" : displayName;
+  }
+  document.querySelectorAll("[data-identity]").forEach((button) => {
+    const selected = button.dataset.identity === onboardingProfile.identity;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+
+  // Research interests (bubble-style removable tags)
+  elements.settingsTopicChips.innerHTML = onboardingProfile.topics.map((topic, i) => {
+    const size = ["md", "lg", "sm", "md", "lg", "sm"][i % 6];
+    return `<button type="button" class="explore-bubble is-${size} is-active is-tag" data-settings-topic-remove="${escapeAttribute(topic)}" style="--bubble-index: ${i};"><span>${escapeHTML(topic)}</span><i data-lucide="x"></i></button>`;
+  }).join("");
+  if (elements.settingsRowInterestsSum) {
+    elements.settingsRowInterestsSum.textContent = onboardingProfile.topics.slice(0, 3).join(" · ") + (onboardingProfile.topics.length > 3 ? ` +${onboardingProfile.topics.length - 3}` : "");
+  }
+
+  // Stay focused (reading level)
+  elements.settingsComplexity.value = String(onboardingProfile.complexity);
+  updateComplexityLabel(elements.settingsComplexityLabel, onboardingProfile.complexity);
+  if (elements.settingsRowFocusSum) elements.settingsRowFocusSum.textContent = elements.settingsComplexityLabel.textContent;
+
+  // Explore more
+  renderExploreTopics();
+  const exploreCount = (onboardingProfile.exploreTopics || []).length;
+  if (elements.settingsRowExploreSum) {
+    elements.settingsRowExploreSum.textContent = exploreCount ? `${exploreCount} 个领域` : "未选择";
+  }
+
+  // Appearance
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     const selected = button.dataset.appearance === state.appearance;
     button.classList.toggle("is-active", selected);
     button.setAttribute("aria-checked", String(selected));
   });
-  document.querySelectorAll("[data-settings-style]").forEach((button) => {
-    const selected = button.dataset.settingsStyle === onboardingProfile.discoveryStyle;
+  if (elements.settingsRowAppearanceSum) {
+    elements.settingsRowAppearanceSum.textContent = state.appearance === "light" ? "浅色" : state.appearance === "dark" ? "深色" : "跟随系统";
+  }
+
+  // Language
+  document.querySelectorAll("[data-language]").forEach((button) => {
+    const selected = button.dataset.language === state.language;
     button.classList.toggle("is-active", selected);
     button.setAttribute("aria-checked", String(selected));
   });
-  elements.settingsComplexity.value = String(onboardingProfile.complexity);
-  updateComplexityLabel(elements.settingsComplexityLabel, onboardingProfile.complexity);
+  if (elements.settingsRowLanguageSum) elements.settingsRowLanguageSum.textContent = state.language === "en" ? "English" : "中文";
+
+  // Zotero
+  const zoteroSaved = loadZoteroCredentials();
+  if (elements.settingsRowZoteroSum) {
+    elements.settingsRowZoteroSum.textContent = zoteroSaved.apiKey && zoteroSaved.userId
+      ? (state.language === "en" ? "Connected" : "已绑定")
+      : (state.language === "en" ? "Not connected" : "未绑定");
+  }
+
   refreshIcons();
+}
+
+function openSettingsSubpage(name) {
+  if (!name) return;
+  document.querySelectorAll("[data-settings-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.settingsPanel !== name;
+  });
+  settingsSubpage = name;
+  renderSettings();
+  const scroll = document.querySelector(`[data-settings-panel="${name}"] .settings-scroll`);
+  if (scroll) scroll.scrollTop = 0;
+}
+
+function closeSettingsSubpage() {
+  document.querySelectorAll("[data-settings-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.settingsPanel !== "root";
+  });
+  settingsSubpage = null;
+  renderSettings();
 }
 
 
@@ -3586,6 +3838,10 @@ function buildWeekPlanTask(entry) {
     removed: state.weekPlanRemoved.has(p.id),
     order: WEEK_PLAN_ORDER.indexOf(entry.action) * 1000 + hashString(p.id || ""),
   };
+}
+
+function toDateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function weekStartDate(offset) {
@@ -3732,7 +3988,7 @@ function renderWeekPlan() {
     const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day.date.getDay()];
     const dateNum = day.date.getDate();
     return `
-      <article class="wp-day wp-day--${layout}${day.isToday ? " is-today" : ""}${day.isPast ? " is-past" : ""}" role="listitem" style="--wp-day-index:${idx}">
+      <article class="wp-day wp-day--${layout}${day.isToday ? " is-today" : ""}${day.isPast ? " is-past" : ""}" role="listitem" style="--wp-day-index:${idx}" data-week-plan-daykey="${toDateKey(day.date)}" data-week-plan-past="${day.isPast ? "1" : "0"}">
         <header class="wp-day-head">
           <div class="wp-day-date">
             <span class="wp-day-num">${dateNum}</span>
@@ -3780,8 +4036,79 @@ function openWeekPlanCard(id) {
   openLibraryCard(id);
 }
 
+const WP_LONG_PRESS_MS = 420;
+const WP_LONG_PRESS_TOLERANCE = 10;
+
 function bindWeekPlanSwipe() {
   if (!elements.weekPlanGrid) return;
+  elements.weekPlanGrid.addEventListener("selectstart", (event) => event.preventDefault());
+  elements.weekPlanGrid.addEventListener("contextmenu", (event) => event.preventDefault());
+  let longPressTimer = null;
+  const clearLongPress = () => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  };
+
+  const startDrag = (shell, itemEl, clientX, clientY, pointerId) => {
+    const id = itemEl.dataset.id;
+    if (!id) return;
+    window.getSelection()?.removeAllRanges();
+    hapticImpact("MEDIUM");
+    const rect = itemEl.getBoundingClientRect();
+    const ghost = itemEl.cloneNode(true);
+    ghost.classList.add("wp-drag-ghost");
+    ghost.style.width = `${rect.width}px`;
+    ghost.style.height = `${rect.height}px`;
+    ghost.style.left = `${rect.left}px`;
+    ghost.style.top = `${rect.top}px`;
+    document.body.appendChild(ghost);
+    itemEl.classList.add("is-dragging");
+    shell.classList.add("is-drag-source");
+    weekPlanDrag = {
+      id, itemEl, shell, ghost, pointerId,
+      offsetX: clientX - rect.left,
+      offsetY: clientY - rect.top,
+      originDayKey: shell.closest(".wp-day")?.dataset.weekPlanDaykey || null,
+      targetDay: null,
+    };
+  };
+
+  const updateDrag = (clientX, clientY) => {
+    if (!weekPlanDrag) return;
+    weekPlanDrag.ghost.style.left = `${clientX - weekPlanDrag.offsetX}px`;
+    weekPlanDrag.ghost.style.top = `${clientY - weekPlanDrag.offsetY}px`;
+    weekPlanDrag.ghost.style.display = "none";
+    const el = document.elementFromPoint(clientX, clientY);
+    weekPlanDrag.ghost.style.display = "";
+    const dayEl = el ? el.closest(".wp-day") : null;
+    if (weekPlanDrag.targetDay && weekPlanDrag.targetDay !== dayEl) {
+      weekPlanDrag.targetDay.classList.remove("is-drop-target");
+      weekPlanDrag.targetDay = null;
+    }
+    if (dayEl && dayEl.dataset.weekPlanPast !== "1") {
+      dayEl.classList.add("is-drop-target");
+      weekPlanDrag.targetDay = dayEl;
+    }
+  };
+
+  const endDrag = () => {
+    if (!weekPlanDrag) return;
+    const { id, itemEl, shell, ghost, targetDay, originDayKey, pointerId } = weekPlanDrag;
+    if (pointerId != null) { try { shell.releasePointerCapture(pointerId); } catch (_) {} }
+    ghost.remove();
+    itemEl.classList.remove("is-dragging");
+    shell.classList.remove("is-drag-source");
+    document.querySelectorAll(".wp-day.is-drop-target").forEach((d) => d.classList.remove("is-drop-target"));
+    weekPlanDrag = null;
+    weekPlanDragJustEnded = true;
+    setTimeout(() => { weekPlanDragJustEnded = false; }, 60);
+    if (targetDay) {
+      const targetKey = targetDay.dataset.weekPlanDaykey;
+      if (targetKey && targetKey !== originDayKey) {
+        reassignWeekPlanTask(id, targetKey);
+      }
+    }
+  };
+
   elements.weekPlanGrid.addEventListener("pointerdown", (event) => {
     const shell = event.target.closest("[data-week-plan-shell]");
     if (!shell || event.target.closest("[data-week-plan-action]")) return;
@@ -3793,27 +4120,53 @@ function bindWeekPlanSwipe() {
         other.style.setProperty("--wp-swipe", "0px");
       }
     });
-    weekPlanSwipe = { shell, startX: event.clientX, startY: event.clientY, dx: 0, active: false };
+    weekPlanSwipe = { shell, startX: event.clientX, startY: event.clientY, dx: 0, active: false, pointerId: event.pointerId };
+    try { shell.setPointerCapture(event.pointerId); } catch (_) {}
+    clearLongPress();
+    const itemEl = event.target.closest("[data-week-plan-card]");
+    if (itemEl && !shell.classList.contains("is-revealed")) {
+      const startX = event.clientX, startY = event.clientY;
+      const pointerId = event.pointerId;
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        if (weekPlanSwipe && !weekPlanSwipe.active) {
+          weekPlanSwipe = null; // long-press wins over swipe-to-reveal
+          startDrag(shell, itemEl, startX, startY, pointerId);
+        }
+      }, WP_LONG_PRESS_MS);
+    }
   });
   elements.weekPlanGrid.addEventListener("pointermove", (event) => {
+    if (weekPlanDrag) {
+      event.preventDefault();
+      updateDrag(event.clientX, event.clientY);
+      return;
+    }
     if (!weekPlanSwipe) return;
     const dx = event.clientX - weekPlanSwipe.startX;
     const dy = event.clientY - weekPlanSwipe.startY;
+    if (!weekPlanSwipe.active && (Math.abs(dx) > WP_LONG_PRESS_TOLERANCE || Math.abs(dy) > WP_LONG_PRESS_TOLERANCE)) {
+      clearLongPress(); // real movement before the hold fires — this is a swipe/scroll, not a long-press
+    }
     if (!weekPlanSwipe.active && Math.abs(dx) < 8) return;
     if (Math.abs(dy) > Math.abs(dx)) return;
+    if (!weekPlanSwipe.active) weekPlanSwipe.shell.classList.add("is-swiping");
     weekPlanSwipe.active = true;
     weekPlanSwipe.dx = Math.min(0, dx);
-    const reveal = Math.max(-132, weekPlanSwipe.dx);
+    const reveal = Math.max(-76, weekPlanSwipe.dx);
     weekPlanSwipe.shell.style.setProperty("--wp-swipe", `${reveal}px`);
-    weekPlanSwipe.shell.classList.toggle("is-revealed", reveal < -56);
-  });
+    weekPlanSwipe.shell.classList.toggle("is-revealed", reveal < -30);
+  }, { passive: false });
   const finish = () => {
+    clearLongPress();
+    if (weekPlanDrag) { endDrag(); return; }
     if (!weekPlanSwipe) return;
     const shell = weekPlanSwipe.shell;
-    const reveal = Math.max(-132, Math.min(0, weekPlanSwipe.dx || 0));
-    const open = reveal < -56;
-    shell.style.setProperty("--wp-swipe", open ? "-132px" : "0px");
+    const reveal = Math.max(-76, Math.min(0, weekPlanSwipe.dx || 0));
+    const open = reveal < -30;
+    shell.style.setProperty("--wp-swipe", open ? "-76px" : "0px");
     shell.classList.toggle("is-revealed", open);
+    shell.classList.remove("is-swiping");
     weekPlanSwipe = null;
   };
   elements.weekPlanGrid.addEventListener("pointerup", finish);
@@ -3823,6 +4176,7 @@ function bindWeekPlanSwipe() {
 
 function openSettingsPage() {
   if (!elements.settingsPage) return;
+  closeSettingsSubpage();
   renderSettings();
   elements.settingsPage.hidden = false;
   refreshIcons();
@@ -3831,6 +4185,7 @@ function openSettingsPage() {
 function closeSettingsPage() {
   if (!elements.settingsPage) return;
   elements.settingsPage.hidden = true;
+  settingsSubpage = null;
 }
 
 function removeSettingsTopic(topic) {
@@ -4060,7 +4415,7 @@ function bindLibraryLongPress() {
     let fired = false;
     const timer = setTimeout(() => {
       fired = true;
-      if (navigator.vibrate) navigator.vibrate(12);
+      hapticImpact("LIGHT");
       openLibraryInlineActions(card, id);
     }, HOLD_MS);
     const cancel = (moveEvent) => {
@@ -4213,6 +4568,16 @@ function renderScheduleGrid() {
 function setPaperPriority(priority) {
   state.scheduleDraftPriority = priority;
   renderScheduleGrid();
+}
+
+function reassignWeekPlanTask(id, dateKey) {
+  if (!id || !dateKey) return;
+  state.weekPlanAssign.set(id, dateKey);
+  renderWeekPlan();
+  hapticImpact("MEDIUM");
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const label = formatDayLabel(new Date(y, m - 1, d), toDateKey(new Date()) === dateKey);
+  showToast(`已移动到 ${label}`);
 }
 
 function assignPaperToDate(dateKey) {

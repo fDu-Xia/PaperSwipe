@@ -1,0 +1,9 @@
+{
+  "appId": "com.yourcompany.paperswipe",
+  "appName": "PaperSwipe",
+  "webDir": "web",
+  "server": {
+    "url": "http://30.31.48.75:8080",
+    "cleartext": true
+  }
+}

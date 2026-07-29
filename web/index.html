@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#202421">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -285,56 +285,222 @@
 
 
       <section id="settings-page" class="settings-page" aria-labelledby="settings-title" hidden>
-        <header class="page-topbar">
-          <button id="settings-close" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
-          <h1 id="settings-title">Settings</h1>
-          <span class="topbar-spacer"></span>
-        </header>
 
-        <div class="settings-scroll">
-          <section class="setting-section" aria-labelledby="research-theme-title">
-            <div class="setting-heading"><div><h2 id="research-theme-title">Research themes</h2><p>Changes refresh your paper discovery feed.</p></div><i data-lucide="brain-circuit"></i></div>
-            <div id="settings-topic-chips" class="settings-topic-chips"></div>
-            <label class="settings-input"><i data-lucide="search"></i><input id="settings-topic-input" type="text" placeholder="Add a new research theme" maxlength="120"></label>
-            <button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="refresh-cw"></i><span>Update themes</span></button>
-          </section>
+        <div class="settings-panel is-active" data-settings-panel="root">
+          <header class="page-topbar">
+            <button id="settings-close" class="topbar-button" type="button" aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 id="settings-title" data-i18n="settings.title">设置</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <button id="settings-profile-row" class="settings-profile-card" type="button" data-settings-nav="identity">
+              <span id="settings-profile-avatar" class="settings-profile-avatar">🧑‍🎓</span>
+              <div class="settings-profile-copy">
+                <strong id="settings-profile-name">PaperSwipe 用户</strong>
+                <small id="settings-profile-role">Graduate / PhD</small>
+              </div>
+              <i data-lucide="chevron-right"></i>
+            </button>
 
-          <section class="setting-section" aria-labelledby="appearance-title">
-            <div class="setting-heading"><div><h2 id="appearance-title">Appearance</h2><p>Choose the display theme of the main interface.</p></div><i data-lucide="palette"></i></div>
-            <div class="appearance-options" role="radiogroup" aria-label="显示主题">
-              <button type="button" data-appearance="light" role="radio"><i data-lucide="sun"></i><span>Light</span></button>
-              <button type="button" data-appearance="system" role="radio"><i data-lucide="monitor"></i><span>System</span></button>
-              <button type="button" data-appearance="dark" role="radio"><i data-lucide="moon"></i><span>Dark</span></button>
+            <div class="settings-group">
+              <p class="settings-group-title" data-i18n="settings.group.research">研究偏好</p>
+              <div class="settings-list">
+                <button class="settings-row" type="button" data-settings-nav="interests">
+                  <span class="settings-row-icon" style="--row-tint:#6657e8"><i data-lucide="brain-circuit"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.interests">研究兴趣</strong><small id="settings-row-interests-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+                <button class="settings-row" type="button" data-settings-nav="focus">
+                  <span class="settings-row-icon" style="--row-tint:#2f8f5b"><i data-lucide="compass"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.focus">专注推荐</strong><small id="settings-row-focus-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+                <button class="settings-row" type="button" data-settings-nav="explore">
+                  <span class="settings-row-icon" style="--row-tint:#e0546a"><i data-lucide="rocket"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.explore">拓展探索</strong><small id="settings-row-explore-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+              </div>
             </div>
-          </section>
 
-          <section class="setting-section" aria-labelledby="feed-settings-title">
-            <div class="setting-heading"><div><h2 id="feed-settings-title">Discovery style</h2><p>Control whether recommendations stay focused or diverge.</p></div><i data-lucide="compass"></i></div>
-            <div class="settings-segments" role="radiogroup" aria-label="发现风格">
-              <button type="button" data-settings-style="focus" role="radio">Focus</button>
-              <button type="button" data-settings-style="broaden" role="radio">Broaden</button>
+            <div class="settings-group">
+              <p class="settings-group-title" data-i18n="settings.group.system">系统偏好</p>
+              <div class="settings-list">
+                <button class="settings-row" type="button" data-settings-nav="appearance">
+                  <span class="settings-row-icon" style="--row-tint:#7a5cff"><i data-lucide="palette"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.appearance">外观</strong><small id="settings-row-appearance-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+                <button class="settings-row" type="button" data-settings-nav="language">
+                  <span class="settings-row-icon" style="--row-tint:#0aa5a0"><i data-lucide="languages"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.language">语言</strong><small id="settings-row-language-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+              </div>
             </div>
-            <div class="settings-range">
-              <label for="settings-complexity">Reading Level <strong id="settings-complexity-label">Balanced</strong></label>
-              <input id="settings-complexity" type="range" min="1" max="5" value="3">
-              <div><span>Accessible</span><span>Expert</span></div>
-            </div>
-          </section>
 
-          <section class="setting-section" aria-labelledby="zotero-title">
-            <div class="setting-heading"><div><h2 id="zotero-title">Zotero</h2><p>Once connected, send papers from Library to Zotero in one tap.</p></div><i data-lucide="link"></i></div>
-            <label class="settings-input"><i data-lucide="key-round"></i><input id="zotero-api-key" type="password" placeholder="API Key (zotero.org/settings/keys)" autocomplete="off"></label>
-            <label class="settings-input"><i data-lucide="user-round"></i><input id="zotero-user-id" type="text" placeholder="userID (numbers, see top of keys page)" autocomplete="off" inputmode="numeric"></label>
-            <div class="zotero-actions">
-              <button id="zotero-test-button" class="settings-primary" type="button"><i data-lucide="plug-zap"></i><span>Test connection</span></button>
-              <button id="zotero-clear-button" class="settings-secondary" type="button">Clear</button>
+            <div class="settings-group">
+              <p class="settings-group-title" data-i18n="settings.group.zotero">ZOTERO 设置</p>
+              <div class="settings-list">
+                <button class="settings-row" type="button" data-settings-nav="zotero">
+                  <span class="settings-row-icon" style="--row-tint:#cc3333"><i data-lucide="link"></i></span>
+                  <span class="settings-row-copy"><strong data-i18n="settings.row.zotero">Zotero 绑定</strong><small id="settings-row-zotero-sum"></small></span>
+                  <i data-lucide="chevron-right" class="settings-row-chevron"></i>
+                </button>
+              </div>
             </div>
-            <p id="zotero-status" class="zotero-status" hidden></p>
-          </section>
 
-          <button id="restart-onboarding" class="restart-onboarding" type="button"><i data-lucide="rotate-ccw"></i><span>Restart setup</span></button>
-          <p class="settings-footnote">Paper metadata from Semantic Scholar, arXiv and OpenAlex. Verify AI conclusions against the original source.</p>
+            <p class="settings-footnote" data-i18n="settings.footnote">论文元数据来自 Semantic Scholar、arXiv 与 OpenAlex，AI 结论请与原文核实。</p>
+          </div>
         </div>
+
+        <div class="settings-panel" data-settings-panel="identity" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.identity.title">身份</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section">
+              <label class="settings-input"><i data-lucide="pencil"></i><input id="settings-display-name" type="text" placeholder="你的昵称" maxlength="24"></label>
+            </section>
+            <section class="setting-section">
+              <div class="identity-picker" role="radiogroup" aria-label="Choose your role">
+                <button class="identity-card is-selected" type="button" role="radio" aria-checked="true" data-identity="graduate">
+                  <span class="identity-visual student" aria-hidden="true">🧑‍🎓</span>
+                  <div class="identity-copy"><strong>Graduate / PhD</strong><small>Writing my thesis</small></div>
+                  <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
+                </button>
+                <button class="identity-card" type="button" role="radio" aria-checked="false" data-identity="researcher">
+                  <span class="identity-visual professor" aria-hidden="true">🧑‍🏫</span>
+                  <div class="identity-copy"><strong>Professor / Researcher</strong><small>Exploring new territory</small></div>
+                  <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
+                </button>
+                <button class="identity-card" type="button" role="radio" aria-checked="false" data-identity="enthusiast">
+                  <span class="identity-visual enthusiast" aria-hidden="true">🧑‍🚀</span>
+                  <div class="identity-copy"><strong>Explorer</strong><small>Tracking the frontier</small></div>
+                  <span class="identity-tick" aria-hidden="true"><i data-lucide="check"></i></span>
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="interests" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.interests.title">研究兴趣</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section" aria-labelledby="research-theme-title">
+              <div class="setting-heading"><div><h2 id="research-theme-title" data-i18n="settings.interests.tagsTitle">发现兴趣标签</h2><p data-i18n="settings.interests.tagsHint">修改后将刷新你的论文推荐信息流</p></div><i data-lucide="brain-circuit"></i></div>
+              <div id="settings-topic-chips" class="settings-topic-chips explore-topics-cloud"></div>
+              <label class="settings-input"><i data-lucide="search"></i><input id="settings-topic-input" type="text" data-i18n-placeholder="settings.interests.addPlaceholder" placeholder="新增一个研究主题" maxlength="120"></label>
+              <button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="refresh-cw"></i><span data-i18n="settings.interests.update">更新研究主题</span></button>
+            </section>
+
+            <section class="setting-section">
+              <div class="setting-heading"><div><h2 data-i18n="settings.interests.redescribeTitle">重新描述研究兴趣</h2><p data-i18n="settings.interests.redescribeHint">用一段话描述你的研究方向，AI 会重新拆解为标签</p></div><i data-lucide="wand-sparkles"></i></div>
+              <label class="topic-composer" for="settings-intent-input">
+                <span class="topic-composer-icon"><i data-lucide="sparkles"></i></span>
+                <textarea id="settings-intent-input" rows="3" data-i18n-placeholder="settings.interests.redescribePlaceholder" placeholder="描述你的目标、兴趣或研究计划……" maxlength="360" autocomplete="off"></textarea>
+              </label>
+              <button id="settings-intent-button" class="settings-primary" type="button"><i data-lucide="sparkles"></i><span data-i18n="settings.interests.redescribeAction">AI 重新解析</span></button>
+            </section>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="focus" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.focus.title">专注推荐</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section" aria-labelledby="feed-settings-title">
+              <div class="setting-heading"><div><h2 id="feed-settings-title" data-i18n="settings.focus.heading">Stay Focused</h2><p data-i18n="settings.focus.hint">拖动滑块调整推荐论文的阅读深度</p></div><i data-lucide="compass"></i></div>
+              <div class="settings-range">
+                <label for="settings-complexity"><span data-i18n="settings.focus.readingLevel">阅读深度</span> <strong id="settings-complexity-label">Balanced</strong></label>
+                <input id="settings-complexity" type="range" min="1" max="5" value="3">
+                <div><span data-i18n="settings.focus.easy">入门</span><span data-i18n="settings.focus.expert">专家</span></div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="explore" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.explore.title">拓展探索</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section">
+              <div class="explore-topics-heading">
+                <span data-i18n="settings.explore.heading">选择你感兴趣的拓展领域</span><small><b id="settings-explore-count">0</b>/10</small>
+              </div>
+              <div id="settings-explore-cloud" class="explore-topics-cloud" role="group" aria-label="Curiosity topics"></div>
+            </section>
+            <button id="restart-onboarding" class="restart-onboarding" type="button"><i data-lucide="rotate-ccw"></i><span data-i18n="settings.explore.restart">重新初始化设置</span></button>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="appearance" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.appearance.title">外观</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section" aria-labelledby="appearance-title">
+              <div class="setting-heading"><div><h2 id="appearance-title" data-i18n="settings.appearance.heading">显示主题</h2><p data-i18n="settings.appearance.hint">选择主界面的显示主题</p></div><i data-lucide="palette"></i></div>
+              <div class="appearance-options" role="radiogroup" aria-label="显示主题">
+                <button type="button" data-appearance="light" role="radio"><i data-lucide="sun"></i><span data-i18n="settings.appearance.light">浅色</span></button>
+                <button type="button" data-appearance="system" role="radio"><i data-lucide="monitor"></i><span data-i18n="settings.appearance.system">跟随系统</span></button>
+                <button type="button" data-appearance="dark" role="radio"><i data-lucide="moon"></i><span data-i18n="settings.appearance.dark">深色</span></button>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="language" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.language.title">语言</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section">
+              <div class="setting-heading"><div><h2 data-i18n="settings.language.heading">界面语言</h2><p data-i18n="settings.language.hint">切换 App 的界面显示语言</p></div><i data-lucide="languages"></i></div>
+              <div class="appearance-options" role="radiogroup" aria-label="界面语言" style="grid-template-columns: repeat(2, 1fr);">
+                <button type="button" data-language="zh" role="radio"><i data-lucide="globe"></i><span>中文</span></button>
+                <button type="button" data-language="en" role="radio"><i data-lucide="type"></i><span>English</span></button>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-settings-panel="zotero" hidden>
+          <header class="page-topbar">
+            <button class="topbar-button" type="button" data-settings-back aria-label="返回" title="返回"><i data-lucide="arrow-left"></i></button>
+            <h1 data-i18n="settings.zotero.title">Zotero 绑定</h1>
+            <span class="topbar-spacer"></span>
+          </header>
+          <div class="settings-scroll">
+            <section class="setting-section" aria-labelledby="zotero-title">
+              <div class="setting-heading"><div><h2 id="zotero-title" data-i18n="settings.zotero.heading">Zotero</h2><p data-i18n="settings.zotero.hint">绑定后可一键把 Library 中的论文发送到 Zotero</p></div><i data-lucide="link"></i></div>
+              <label class="settings-input"><i data-lucide="key-round"></i><input id="zotero-api-key" type="password" placeholder="API Key (zotero.org/settings/keys)" autocomplete="off"></label>
+              <label class="settings-input"><i data-lucide="user-round"></i><input id="zotero-user-id" type="text" placeholder="userID (numbers, see top of keys page)" autocomplete="off" inputmode="numeric"></label>
+              <div class="zotero-actions">
+                <button id="zotero-test-button" class="settings-primary" type="button"><i data-lucide="plug-zap"></i><span data-i18n="settings.zotero.test">测试连接</span></button>
+                <button id="zotero-clear-button" class="settings-secondary" type="button" data-i18n="settings.zotero.clear">清除</button>
+              </div>
+              <p id="zotero-status" class="zotero-status" hidden></p>
+            </section>
+          </div>
+        </div>
+
       </section>
 
       <section id="todos-view" class="view todos-view" aria-labelledby="todos-title" hidden>
@@ -373,10 +539,10 @@
     </section>
 
     <nav class="bottom-nav" aria-label="主导航">
-      <button class="is-active" type="button" data-view="discover"><i data-lucide="compass"></i><span>Explore</span></button>
-      <button type="button" data-view="library"><i data-lucide="library"></i><span>Library</span><b id="bottom-library-count">0</b></button>
-      <button type="button" data-view="todos"><i data-lucide="calendar-days"></i><span>Schedule</span><b id="bottom-todos-count" hidden>0</b></button>
-      <button type="button" data-view="network"><i data-lucide="trending-up"></i><span>Trending</span></button>
+      <button class="is-active" type="button" data-view="discover"><i data-lucide="compass"></i><span data-i18n="nav.discover">发现</span></button>
+      <button type="button" data-view="library"><i data-lucide="library"></i><span data-i18n="nav.library">文库</span><b id="bottom-library-count">0</b></button>
+      <button type="button" data-view="todos"><i data-lucide="calendar-days"></i><span data-i18n="nav.todos">日程</span><b id="bottom-todos-count" hidden>0</b></button>
+      <button type="button" data-view="network"><i data-lucide="trending-up"></i><span data-i18n="nav.network">趋势</span></button>
     </nav>
 
     <div id="trend-overlay" class="trend-overlay" hidden aria-hidden="true">
