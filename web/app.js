@@ -3,6 +3,175 @@
    在 capacitor.config.json 的 server / 或原生启动代码里注入 window.PAPERSWIPE_API_BASE。 */
 const API_BASE = (window.PAPERSWIPE_API_BASE || "").replace(/\/+$/, "");
 
+/* ============================================================
+   MOCK MODE —— 无后端的纯静态部署（GitHub Pages 等）
+   自动探测：显式设置 window.PAPERSWIPE_MOCK=true，或部署在
+   *.github.io / *.githubusercontent.com 上时自动启用。
+   启用后拦截全部 /api/* 请求，全部走本地假数据 + localStorage，
+   不发起任何真实网络请求，也不需要任何 API Key。
+   ============================================================ */
+const MOCK_MODE = Boolean(
+  window.PAPERSWIPE_MOCK ?? /\.github\.io$/.test(location.hostname)
+);
+
+if (MOCK_MODE) installMockBackend();
+
+function installMockBackend() {
+  const LS_KEY = "paperswipe-mock-backend-v1";
+  const MOCK_PAPERS = Array.isArray(window.MOCK_PAPERS) ? window.MOCK_PAPERS : [];
+
+  function loadMockState() {
+    try {
+      const raw = window.localStorage.getItem(LS_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return { actions: {}, recentSearches: [] };
+  }
+  function saveMockState(mockState) {
+    try {
+      window.localStorage.setItem(LS_KEY, JSON.stringify(mockState));
+    } catch (_) {}
+  }
+  function computeStats(mockState) {
+    const stats = { saved: 0, priority: 0, read: 0, dismissed: 0 };
+    for (const entry of Object.values(mockState.actions)) {
+      if (entry.action === "save") stats.saved++;
+      else if (entry.action === "priority") stats.priority++;
+      else if (entry.action === "read") stats.read++;
+      else if (entry.action === "dismiss") stats.dismissed++;
+    }
+    return stats;
+  }
+  function jsonResponse(body, status = 200) {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  // Builds a fake text/event-stream Response so the existing consumeSSE()
+  // / performSearch() parsing code runs completely unmodified.
+  function sseResponse(events) {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        for (const [event, data] of events) {
+          await new Promise((resolve) => setTimeout(resolve, 260 + Math.random() * 260));
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+        }
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  }
+  function matchesQuery(paper, query) {
+    const tokens = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+    if (!tokens.length) return true;
+    const haystack = [
+      paper.title,
+      paper.abstract,
+      ...(paper.fields || []),
+      paper.digest?.hook,
+    ].join(" ").toLowerCase();
+    return tokens.some((t) => haystack.includes(t));
+  }
+
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async (input, init) => {
+    const url = typeof input === "string" ? input : input.url;
+    const path = url.replace(API_BASE, "").split("?")[0];
+    const method = (init && init.method) || "GET";
+
+    // Anything that isn't our own API (e.g. Zotero) still goes out for real.
+    if (!path.startsWith("/api/")) return realFetch(input, init);
+
+    if (path === "/api/health") {
+      return jsonResponse({
+        ok: true,
+        ai_enabled: true,
+        ai_model: "demo",
+        image_enabled: false,
+        image_model: "",
+        time: new Date().toISOString(),
+      });
+    }
+
+    if (path === "/api/topic-plan" && method === "POST") {
+      const body = JSON.parse((init && init.body) || "{}");
+      const description = String(body.description || "").trim();
+      const keywords = Array.from(
+        new Set(description.split(/[\s,，。.、]+/).filter((w) => w.length >= 2))
+      ).slice(0, 6);
+      return jsonResponse({
+        intent: description,
+        search_query: keywords.join(" ") || description,
+        keywords: keywords.length ? keywords : [description],
+        ai_enabled: false,
+      });
+    }
+
+    if (path === "/api/search" && method === "GET") {
+      const query = new URL(url, location.href).searchParams.get("q") || "";
+      const matched = MOCK_PAPERS.filter((p) => matchesQuery(p, query));
+      const pool = matched.length ? matched : MOCK_PAPERS;
+      const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 20);
+      const mockState = loadMockState();
+      mockState.recentSearches = [
+        { query, created_at: new Date().toISOString() },
+        ...mockState.recentSearches.filter((s) => s.query.toLowerCase() !== query.toLowerCase()),
+      ].slice(0, 8);
+      saveMockState(mockState);
+
+      const events = [
+        ["meta", {
+          query, source: "Demo dataset", total: shuffled.length, warning: "",
+          ai_enabled: true, image_enabled: false, generated_at: new Date().toISOString(),
+        }],
+      ];
+      for (let i = 0; i < shuffled.length; i += 3) {
+        events.push(["batch", { papers: shuffled.slice(i, i + 3) }]);
+      }
+      events.push(["done", { ai_applied: true }]);
+      return sseResponse(events);
+    }
+
+    if (path === "/api/actions" && method === "POST") {
+      const body = JSON.parse((init && init.body) || "{}");
+      const mockState = loadMockState();
+      if (!body.paper || !body.paper.id) return jsonResponse({ error: "paper id is required" }, 400);
+      mockState.actions[body.paper.id] = {
+        paper: body.paper, action: body.action, updated_at: new Date().toISOString(),
+      };
+      saveMockState(mockState);
+      return jsonResponse({ ok: true, stats: computeStats(mockState) });
+    }
+
+    if (path === "/api/library" && method === "GET") {
+      const mockState = loadMockState();
+      const papers = Object.values(mockState.actions)
+        .filter((e) => ["save", "priority", "read"].includes(e.action))
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      return jsonResponse({ papers });
+    }
+
+    if (path === "/api/stats" && method === "GET") {
+      return jsonResponse(computeStats(loadMockState()));
+    }
+
+    if (path === "/api/searches" && method === "GET") {
+      return jsonResponse({ searches: loadMockState().recentSearches });
+    }
+
+    if (path === "/api/paper-image") {
+      return jsonResponse({ error: "Demo 版未开放生图功能" }, 501);
+    }
+
+    return jsonResponse({ error: "not found in mock backend" }, 404);
+  };
+}
+
 const DEFAULT_PROFILE = {
   identity: "graduate",
   researchIntent: "",

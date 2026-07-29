@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="PaperSwipe - 把论文筛选变成轻松、快速、有证据的滑动决策。">
   <title>PaperSwipe</title>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="is-onboarding">
   <section id="onboarding" class="onboarding" aria-label="PaperSwipe setup">
@@ -592,8 +592,11 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/vendor/lucide.min.js"></script>
-  <script src="/mockdata/roadmap.js"></script>
-  <script src="/app.js"></script>
+  <script src="vendor/lucide.min.js"></script>
+  <script src="mockdata/roadmap.js"></script>
+  <!-- 全 mock 数据集：GitHub Pages(无后端)时由 app.js 顶部自动探测启用；
+       同源部署(有真实后端)时该文件仍会加载但不会被使用，无副作用。 -->
+  <script src="mockdata/papers.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
