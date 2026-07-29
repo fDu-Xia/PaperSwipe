@@ -5,16 +5,26 @@ const API_BASE = (window.PAPERSWIPE_API_BASE || "").replace(/\/+$/, "");
 
 /* ============================================================
    MOCK MODE —— 无后端的纯静态部署（GitHub Pages 等）
-   自动探测：显式设置 window.PAPERSWIPE_MOCK=true，或部署在
-   *.github.io / *.githubusercontent.com 上时自动启用。
+   自动探测：显式设置 window.PAPERSWIPE_MOCK=true，部署在
+   *.github.io 上，或本地访问时带 ?mock=1 时启用。
    启用后拦截全部 /api/* 请求，全部走本地假数据 + localStorage，
    不发起任何真实网络请求，也不需要任何 API Key。
+   本地测试用：任意静态服务器打开 web/，地址栏加 ?mock=1 即可，
+   不需要跑 go run . 也不需要 npm run dev（本项目没有这个脚本）。
    ============================================================ */
 const MOCK_MODE = Boolean(
-  window.PAPERSWIPE_MOCK ?? /\.github\.io$/.test(location.hostname)
+  window.PAPERSWIPE_MOCK ??
+    (/\.github\.io$/.test(location.hostname) ||
+      new URLSearchParams(location.search).get("mock") === "1")
 );
 
-if (MOCK_MODE) installMockBackend();
+if (MOCK_MODE) {
+  installMockBackend();
+  document.addEventListener("DOMContentLoaded", () => {
+    const banner = document.getElementById("mock-banner");
+    if (banner) banner.hidden = false;
+  });
+}
 
 function installMockBackend() {
   const LS_KEY = "paperswipe-mock-backend-v1";
