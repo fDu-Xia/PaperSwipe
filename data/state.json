@@ -283,6 +283,72 @@
       "action": "priority",
       "updated_at": "2026-07-25T15:27:18.118076Z"
     },
+    "arxiv:2309.02144v1": {
+      "paper": {
+        "id": "arxiv:2309.02144v1",
+        "title": "Making Large Language Models Better Reasoners with Alignment",
+        "abstract": "Reasoning is a cognitive process of using evidence to reach a sound conclusion. The reasoning capability is essential for large language models (LLMs) to serve as the brain of the artificial general intelligence agent. Recent studies reveal that fine-tuning LLMs on data with the chain of thought (COT) reasoning process can significantly enhance their reasoning capabilities. However, we find that the fine-tuned LLMs suffer from an \\textit{Assessment Misalignment} problem, i.e., they frequently assign higher scores to subpar COTs, leading to potential limitations in their reasoning abilities. To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses for each question, and categorizing them into positive and negative ones based on whether they achieve the correct answer; 3) calibrating the scores of positive and negative responses given by LLMs with a novel constraint alignment loss. Specifically, the constraint alignment loss has two objectives: a) Alignment, which guarantees that positive scores surpass negative scores to encourage answers with high-quality COTs; b) Constraint, which keeps the negative scores confined to a reasonable range to prevent the model degradation. Beyond just the binary positive and negative feedback, the constraint alignment loss can be seamlessly adapted to the ranking situations when ranking feedback is accessible. Furthermore, we also delve deeply into recent ranking-based alignment methods, such as DPO, RRHF, and PRO, and discover that the constraint, which has been overlooked by these approaches, is also crucial for their performance. Extensive experiments on four reasoning benchmarks with both binary and ranking feedback demonstrate the effectiveness of AFT.",
+        "authors": [
+          {
+            "name": "Peiyi Wang"
+          },
+          {
+            "name": "Lei Li"
+          },
+          {
+            "name": "Liang Chen"
+          },
+          {
+            "name": "Feifan Song"
+          },
+          {
+            "name": "Binghuai Lin"
+          },
+          {
+            "name": "Yunbo Cao"
+          },
+          {
+            "name": "Tianyu Liu"
+          },
+          {
+            "name": "Zhifang Sui"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-09-05",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI",
+          "cs.LG"
+        ],
+        "url": "http://arxiv.org/abs/2309.02144v1",
+        "pdf_url": "https://arxiv.org/pdf/2309.02144v1",
+        "external_ids": {
+          "ArXiv": "2309.02144v1"
+        },
+        "match_score": 66,
+        "read_minutes": 52,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "让智能体更会办事：Making Large Language Model",
+          "problem": "However, we find that the fine-tuned LLMs suffer from an \\textit{Assessment Misalignment} problem, i.",
+          "novelty": [
+            "To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses fo…"
+          ],
+          "method": "The reasoning capability is essential for large language models (LLMs) to serve as the brain of the artificial general intelligence agent.",
+          "result": "To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses for each question, and categorizing them into positive and negative ones based on…",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-09-26T10:11:24.0826351Z"
+    },
     "arxiv:2312.05434v1": {
       "paper": {
         "id": "arxiv:2312.05434v1",
@@ -320,7 +386,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "A pioneering beneath the surface that achieves superior performance than state-of-the-art methods on the harmful meme detection task.",
+          "hook": "一文读懂：Beneath the Surface 想解决什么。",
           "problem": "Understanding and detecting harmful memes pose a significant challenge due to their implicit meaning that is not explicitly conveyed through the surface text and image.",
           "novelty": [
             "Inspired by the success of Large Language Models (LLMs) on complex reasoning, we first conduct abductive reasoning with LLMs.",
@@ -334,7 +400,69 @@
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-24T15:57:28.847751Z"
+      "updated_at": "2026-09-26T09:26:47.3254882Z"
+    },
+    "arxiv:2312.10793v3": {
+      "paper": {
+        "id": "arxiv:2312.10793v3",
+        "title": "Demystifying Instruction Mixing for Fine-tuning Large Language Models",
+        "abstract": "Instruction tuning significantly enhances the performance of large language models (LLMs) across various tasks. However, the procedure to optimizing the mixing of instruction datasets for LLM fine-tuning is still poorly understood. This study categorizes instructions into three primary types: NLP downstream tasks, coding, and general chat. We explore the effects of instruction tuning on different combinations of datasets on LLM performance, and find that certain instruction types are more advantageous for specific applications but can negatively impact other areas. This work provides insights into instruction mixtures, laying the foundations for future research.",
+        "authors": [
+          {
+            "name": "Renxi Wang"
+          },
+          {
+            "name": "Haonan Li"
+          },
+          {
+            "name": "Minghao Wu"
+          },
+          {
+            "name": "Yuxia Wang"
+          },
+          {
+            "name": "Xudong Han"
+          },
+          {
+            "name": "Chiyu Zhang"
+          },
+          {
+            "name": "Timothy Baldwin"
+          }
+        ],
+        "year": 2023,
+        "publication_date": "2023-12-17",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2312.10793v3",
+        "pdf_url": "https://arxiv.org/pdf/2312.10793v3",
+        "external_ids": {
+          "ArXiv": "2312.10793v3"
+        },
+        "match_score": 69,
+        "read_minutes": 39,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "一文读懂：Demystifying Instruction Mix 想解",
+          "problem": "Instruction tuning significantly enhances the performance of large language models (LLMs) across various tasks.",
+          "novelty": [
+            "Instruction tuning significantly enhances the performance of large language models (LLMs) across various tasks."
+          ],
+          "method": "Instruction tuning significantly enhances the performance of large language models (LLMs) across various tasks.",
+          "result": "This work provides insights into instruction mixtures, laying the foundations for future research.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-09-26T10:11:20.1861127Z"
     },
     "arxiv:2402.11651v2": {
       "paper": {
@@ -376,7 +504,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "The learning from failure that achieved success in acting as agents, which interact with environments through tools such as search engines.",
+          "hook": "让智能体更会办事：Learning From Failure。",
           "problem": "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that successfully finished the task to fine-tune smaller models, making fine-tuning data scarce and acquiring it both difficult and costly.",
           "novelty": [
             "To resolve this problem, previous work has first collected interaction trajectories between LLMs and environments, using only trajectories that successfully finished the task to fine-tune smaller mod…",
@@ -389,8 +517,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "priority",
-      "updated_at": "2026-07-24T15:57:26.981852Z"
+      "action": "dismiss",
+      "updated_at": "2026-09-26T09:26:45.0801116Z"
     },
     "arxiv:2402.14679v2": {
       "paper": {
@@ -442,7 +570,7 @@
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "Our objective is to assess the congruence between the personality traits LLMs claim to possess.",
+          "hook": "一文读懂：Is Self-knowledge and Action 想解",
           "problem": "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs).",
           "novelty": [
             "In this study, we delve into the validity of conventional personality questionnaires in capturing the human-like personality traits of Large Language Models (LLMs)."
@@ -454,8 +582,8 @@
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "save",
-      "updated_at": "2026-07-24T15:57:30.206703Z"
+      "action": "dismiss",
+      "updated_at": "2026-09-26T09:26:59.4602267Z"
     },
     "arxiv:2402.15276v3": {
       "paper": {
@@ -513,6 +641,50 @@
       "action": "dismiss",
       "updated_at": "2026-07-25T15:27:14.435321Z"
     },
+    "arxiv:2403.09676v1": {
+      "paper": {
+        "id": "arxiv:2403.09676v1",
+        "title": "Unmasking the Shadows of AI: Investigating Deceptive Capabilities in Large Language Models",
+        "abstract": "This research critically navigates the intricate landscape of AI deception, concentrating on deceptive behaviours of Large Language Models (LLMs). My objective is to elucidate this issue, examine the discourse surrounding it, and subsequently delve into its categorization and ramifications. The essay initiates with an evaluation of the AI Safety Summit 2023 (ASS) and introduction of LLMs, emphasising multidimensional biases that underlie their deceptive behaviours.The literature review covers four types of deception categorised: Strategic deception, Imitation, Sycophancy, and Unfaithful Reasoning, along with the social implications and risks they entail. Lastly, I take an evaluative stance on various aspects related to navigating the persistent challenges of the deceptive AI. This encompasses considerations of international collaborative governance, the reconfigured engagement of individuals with AI, proposal of practical adjustments, and specific elements of digital education.",
+        "authors": [
+          {
+            "name": "Linge Guo"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-02-07",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2403.09676v1",
+        "pdf_url": "https://arxiv.org/pdf/2403.09676v1",
+        "external_ids": {
+          "ArXiv": "2403.09676v1"
+        },
+        "match_score": 74,
+        "read_minutes": 40,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "一文读懂：Unmasking the Shadows of AI 想解决",
+          "problem": "Lastly, I take an evaluative stance on various aspects related to navigating the persistent challenges of the deceptive AI.",
+          "novelty": [
+            "This research critically navigates the intricate landscape of AI deception, concentrating on deceptive behaviours of Large Language Models (LLMs)."
+          ],
+          "method": "This research critically navigates the intricate landscape of AI deception, concentrating on deceptive behaviours of Large Language Models (LLMs).",
+          "result": "The essay initiates with an evaluation of the AI Safety Summit 2023 (ASS) and introduction of LLMs, emphasising multidimensional biases that underlie their deceptive behaviours.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-09-26T10:11:15.4978974Z"
+    },
     "arxiv:2405.11357v3": {
       "paper": {
         "id": "arxiv:2405.11357v3",
@@ -540,11 +712,11 @@
           "ArXiv": "2405.11357v3"
         },
         "match_score": 75,
-        "read_minutes": 6,
+        "read_minutes": 39,
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "Large language models (LLMs) have demonstrated remarkable performances on a wide range of.",
+          "hook": "一文读懂：Large Language Models Lack U 想解",
           "problem": "In this paper, we examine contemporary LLMs regarding their ability to understand character composition of words, and show that most of them fail to reliably carry out even the simple tasks that can be handled by humans with perfection.",
           "novelty": [
             "Large language models (LLMs) have demonstrated remarkable performances on a wide range of natural language tasks."
@@ -557,7 +729,66 @@
         }
       },
       "action": "priority",
-      "updated_at": "2026-07-24T08:02:43.467394Z"
+      "updated_at": "2026-09-26T09:27:01.2807523Z"
+    },
+    "arxiv:2407.01505v1": {
+      "paper": {
+        "id": "arxiv:2407.01505v1",
+        "title": "Self-Cognition in Large Language Models: An Exploratory Study",
+        "abstract": "While Large Language Models (LLMs) have achieved remarkable success across various applications, they also raise concerns regarding self-cognition. In this paper, we perform a pioneering study to explore self-cognition in LLMs. Specifically, we first construct a pool of self-cognition instruction prompts to evaluate where an LLM exhibits self-cognition and four well-designed principles to quantify LLMs' self-cognition. Our study reveals that 4 of the 48 models on Chatbot Arena--specifically Command R, Claude3-Opus, Llama-3-70b-Instruct, and Reka-core--demonstrate some level of detectable self-cognition. We observe a positive correlation between model size, training data quality, and self-cognition level. Additionally, we also explore the utility and trustworthiness of LLM in the self-cognition state, revealing that the self-cognition state enhances some specific tasks such as creative writing and exaggeration. We believe that our work can serve as an inspiration for further research to study the self-cognition in LLMs.",
+        "authors": [
+          {
+            "name": "Dongping Chen"
+          },
+          {
+            "name": "Jiawen Shi"
+          },
+          {
+            "name": "Yao Wan"
+          },
+          {
+            "name": "Pan Zhou"
+          },
+          {
+            "name": "Neil Zhenqiang Gong"
+          },
+          {
+            "name": "Lichao Sun"
+          }
+        ],
+        "year": 2024,
+        "publication_date": "2024-07-01",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "url": "http://arxiv.org/abs/2407.01505v1",
+        "pdf_url": "https://arxiv.org/pdf/2407.01505v1",
+        "external_ids": {
+          "ArXiv": "2407.01505v1"
+        },
+        "match_score": 68,
+        "read_minutes": 41,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Peripheral match — confirm relevance before investing time",
+          "hook": "一文读懂：Self-Cognition in Large Lang 想解",
+          "problem": "While Large Language Models (LLMs) have achieved remarkable success across various applications, they also raise concerns regarding self-cognition.",
+          "novelty": [
+            "Specifically, we first construct a pool of self-cognition instruction prompts to evaluate where an LLM exhibits self-cognition and four well-designed principles to quantify LLMs' self-cognition."
+          ],
+          "method": "While Large Language Models (LLMs) have achieved remarkable success across various applications, they also raise concerns regarding self-cognition.",
+          "result": "While Large Language Models (LLMs) have achieved remarkable success across various applications, they also raise concerns regarding self-cognition.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-09-26T10:11:21.1020444Z"
     },
     "arxiv:2501.05032v2": {
       "paper": {
@@ -587,11 +818,11 @@
           "ArXiv": "2501.05032v2"
         },
         "match_score": 74,
-        "read_minutes": 6,
+        "read_minutes": 38,
         "source": "arXiv",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "A novel enhancing human that improve user interactions but also open new possibilities for ai applications across different domains.",
+          "hook": "一文读懂：Enhancing Human 想解决什么。",
           "problem": "This paper explores the advancements in making large language models (LLMs) more human-like.",
           "novelty": [
             "Our findings demonstrate that these enhancements not only improve user interactions but also open new possibilities for AI applications across different domains."
@@ -604,7 +835,67 @@
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-07-24T15:04:54.41361Z"
+      "updated_at": "2026-09-26T10:11:14.9690322Z"
+    },
+    "arxiv:2504.19565v3": {
+      "paper": {
+        "id": "arxiv:2504.19565v3",
+        "title": "Knowledge-Driven Agentic Scientific Corpus Distillation Framework for Biomedical Large Language Models Training",
+        "abstract": "Corpus distillation for biomedical large language models (LLMs) seeks to address the pressing challenge of insufficient quantity and quality in open-source annotated scientific corpora, which remains a bottleneck for effective LLM training in biomedical research. This paper proposes a knowledge-driven, agentic framework for scientific corpus distillation, tailored explicitly for LLM training in the biomedical domain, addressing the challenge posed by the complex hierarchy of biomedical knowledge. Central to our approach is a collaborative multi-agent architecture, where specialized agents, each guided by the Medical Subject Headings (MeSH) hierarchy, work in concert to autonomously extract, synthesize, and self-evaluate high-quality textual data from vast scientific literature. This agentic framework collectively generates and refines domain-specific question-answer pairs, ensuring comprehensive coverage and consistency with biomedical ontologies while minimizing manual involvement. Extensive experimental results show that language models trained on our multi-agent distilled datasets achieve notable improvements in biomedical question-answering tasks, outperforming both strong life sciences LLM baselines and advanced proprietary models. Notably, our AI-Ready dataset enables Llama3-70B to surpass GPT-4 with MedPrompt and Med-PaLM-2, despite their larger scale. Detailed ablation studies and case analyses further validate the effectiveness and synergy of each agent within the framework, highlighting the potential of multi-agent collaboration in biomedical LLM training.",
+        "authors": [
+          {
+            "name": "Meng Xiao"
+          },
+          {
+            "name": "Xunxin Cai"
+          },
+          {
+            "name": "Qingqing Long"
+          },
+          {
+            "name": "Chengrui Wang"
+          },
+          {
+            "name": "Yuanchun Zhou"
+          },
+          {
+            "name": "Hengshu Zhu"
+          }
+        ],
+        "year": 2025,
+        "publication_date": "2025-04-28",
+        "venue": "arXiv",
+        "citation_count": 0,
+        "influential_citation_count": 0,
+        "fields": [
+          "cs.CL",
+          "cs.AI",
+          "q-bio.QM"
+        ],
+        "url": "http://arxiv.org/abs/2504.19565v3",
+        "pdf_url": "https://arxiv.org/pdf/2504.19565v3",
+        "external_ids": {
+          "ArXiv": "2504.19565v3"
+        },
+        "match_score": 72,
+        "read_minutes": 46,
+        "source": "arXiv",
+        "digest": {
+          "verdict": "Worth a quick skim of methods and experiments",
+          "hook": "让智能体更会办事：Knowledge。",
+          "problem": "Corpus distillation for biomedical large language models (LLMs) seeks to address the pressing challenge of insufficient quantity and quality in open-source annotated scientific corpora, which remains a bottleneck for effective LLM training in biomedical research.",
+          "novelty": [
+            "Notably, our AI-Ready dataset enables Llama3-70B to surpass GPT-4 with MedPrompt and Med-PaLM-2, despite their larger scale."
+          ],
+          "method": "Corpus distillation for biomedical large language models (LLMs) seeks to address the pressing challenge of insufficient quantity and quality in open-source annotated scientific corpora, which remains a bottleneck for effective LLM training in biomedical research.",
+          "result": "Extensive experimental results show that language models trained on our multi-agent distilled datasets achieve notable improvements in biomedical question-answering tasks, outperforming both strong life sciences LLM baselines and advanced proprietary models.",
+          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
+          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+        }
+      },
+      "action": "dismiss",
+      "updated_at": "2026-09-26T10:11:18.9920472Z"
     },
     "arxiv:2508.09736v4": {
       "paper": {
@@ -1609,7 +1900,11 @@
   "recent_searches": [
     {
       "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-09-25T11:26:29.6825162Z"
+      "created_at": "2026-09-26T09:26:39.0658824Z"
+    },
+    {
+      "query": "medical image segmentation few-shot learning data efficiency",
+      "created_at": "2026-09-26T08:52:47.1428391Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
@@ -1634,10 +1929,6 @@
     {
       "query": "neural architecture search",
       "created_at": "2026-07-24T08:43:06.958145Z"
-    },
-    {
-      "query": "large language models",
-      "created_at": "2026-07-24T08:06:26.569101Z"
     }
   ]
 }

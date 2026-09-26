@@ -28,6 +28,27 @@ func betaFixture(t *testing.T) (*Beta, http.Handler) {
 	return b, b.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "app") }))
 }
 
+func TestBetaPublicLogoOnly(t *testing.T) {
+	_, h := betaFixture(t)
+	for _, method := range []string{"GET", "HEAD"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(method, "/assets/paperswipe-logo.png", nil))
+		if w.Code != 200 || w.Header().Get("Content-Type") != "image/png" {
+			t.Fatal("logo unavailable")
+		}
+		if method == "HEAD" && w.Body.Len() != 0 {
+			t.Fatal("HEAD has a body")
+		}
+	}
+	for _, path := range []string{"/assets/private.png", "/app.js", "/api/library"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", path, nil))
+		if w.Code == 200 {
+			t.Fatalf("unexpected public access: %s", path)
+		}
+	}
+}
+
 func TestBetaConcurrentQuotaAndBusyGate(t *testing.T) {
 	b, h := betaFixture(t)
 	s := b.users[tokenHash("alice-secret")].store

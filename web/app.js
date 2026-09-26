@@ -450,6 +450,7 @@ function bindEvents() {
       if (index === -1) state.libraryTags.push(tag);
       else state.libraryTags.splice(index, 1);
       renderLibrary();
+      animateLibraryChange();
       return;
     }
     const libraryCard = event.target.closest("[data-library-card]");
@@ -620,6 +621,7 @@ function bindEvents() {
         item.setAttribute("aria-selected", String(active));
       });
       renderLibrary();
+      animateLibraryChange();
     });
   });
 
@@ -1016,6 +1018,7 @@ async function performSearch(rawQuery) {
         if (!incoming.length) return;
         const wasEmpty = state.papers.length === 0;
         state.papers.push(...incoming);
+        renderUpcomingCards();
         receivedAny = true;
         elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates${state.streaming ? " (loading…)" : ""}`;
         // Promote the deck if we were showing loading or skeleton.
@@ -1086,6 +1089,7 @@ async function consumeSSE(stream, dispatch) {
 }
 
 function renderLoadingCard() {
+  renderUpcomingCards();
   elements.card.className = "card theme-violet is-loading";
   elements.card.style.transform = "";
   elements.card.style.opacity = "";
@@ -1187,6 +1191,7 @@ function renderErrorCard(message) {
 
 function renderCard() {
   const paper = currentPaper();
+  renderUpcomingCards();
   /* Reset card state */
   elements.card.style.transition = "";
   elements.card.style.opacity = "";
@@ -1399,33 +1404,9 @@ function renderCard() {
   updateProgress();
   setActionEnabled(true);
 
-  /* Entrance animation — slide up + fade in */
-  elements.card.style.transition = 'none';
-  elements.card.style.transform = 'translateY(38px) scale(0.93)';
-  elements.card.style.opacity = '0';
-  elements.stack1.style.transition = elements.stack2.style.transition = 'none';
-  elements.stack1.style.transform = 'translateY(6px) scale(.96)';
-  elements.stack1.style.opacity = '.45';
-  elements.stack2.style.transform = 'translateY(14px) scale(.91)';
-  elements.stack2.style.opacity = '.25';
+  // The next paper has already risen into place under the departing card.
+  updateDeckProgress(0, false);
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      elements.card.style.transition = 'transform 440ms cubic-bezier(.25,.8,.25,1.2), opacity 360ms ease, box-shadow 440ms ease';
-      elements.card.style.transform = '';
-      elements.card.style.opacity = '';
-      elements.card.style.boxShadow = '';
-      elements.stack1.style.transition = elements.stack2.style.transition = 'transform 440ms cubic-bezier(.25,.8,.25,1.2), opacity 440ms ease';
-      elements.stack1.style.transform = 'translateY(10px) scale(.94)';
-      elements.stack1.style.opacity = '.35';
-      elements.stack2.style.transform = 'translateY(20px) scale(.89)';
-      elements.stack2.style.opacity = '.18';
-      elements.card.addEventListener('transitionend', function h() {
-        elements.card.style.transition = '';
-        elements.card.removeEventListener('transitionend', h);
-      });
-    });
-  });
 }
 
 /* Refresh cached element refs after innerHTML replacement */
@@ -1799,10 +1780,7 @@ function bindCardGestures() {
       0 ${28 + lift * 24}px ${56 + lift * 32}px rgba(0,0,0,${shadowAlpha * .8})`;
 
     const strength = Math.min(1, Math.max(Math.abs(dragDX), Math.abs(dragDY)) / 110);
-    elements.stack1.style.transform = `translateY(${10 - strength * 10}px) scale(${.94 + strength * .06})`;
-    elements.stack1.style.opacity = .35 - strength * .25;
-    elements.stack2.style.transform = `translateY(${20 - strength * 20}px) scale(${.89 + strength * .1})`;
-    elements.stack2.style.opacity = .18 - strength * .14;
+    updateDeckProgress(strength, false);
 
     updateStamps(dragDX, dragDY, strength);
   }
@@ -1843,7 +1821,13 @@ function bindCardGestures() {
   card.addEventListener("pointerdown", onDown);
   card.addEventListener("pointermove", onMove);
   card.addEventListener("pointerup", onUp);
-  card.addEventListener("pointercancel", onUp);
+  card.addEventListener("pointercancel", () => {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove("is-dragging");
+    document.body.style.userSelect = document.body.style.webkitUserSelect = "";
+    springBack();
+  });
 
   /* Tap anywhere on back to flip back */
   card.addEventListener("click", (e) => {
@@ -1865,12 +1849,31 @@ function springBack() {
   updateStamps(0, 0, 0);
 }
 
+function renderUpcomingCards() {
+  [elements.stack1, elements.stack2].forEach((layer, index) => {
+    const paper = state.papers[state.index + index + 1];
+    layer.hidden = !paper;
+    layer.setAttribute('aria-hidden', 'true');
+    layer.className = 'stack-layer stack-' + (index + 1) + ' upcoming-card ' + (paper ? paperTheme(paper) : '');
+    if (!paper) { layer.replaceChildren(); return; }
+    const venue = [paper.venue || paper.source, paper.year].filter(Boolean).join(' · ');
+    layer.innerHTML = `<div class="card-hero"><div class="card-top-wrap"><div class="card-topline"><span class="card-badge">${escapeHTML(venue)}</span></div><div class="card-fields">${deriveTags(paper).map(escapeHTML).join(' · ')}</div></div><div class="card-body"><p class="card-subtitle">${escapeHTML(pickSubtitle(paper))}</p><h2 class="card-title">${escapeHTML(paper.title)}</h2></div><div class="card-byline"><span class="avatar">${escapeHTML(getInitials(paper.authors?.[0]?.name || 'PS'))}</span><div class="byline-text"><strong>${escapeHTML(formatAuthors(paper.authors))}</strong>${escapeHTML(venue)}</div></div></div>`;
+  });
+}
+function updateDeckProgress(progress, animate) {
+  [elements.stack1, elements.stack2].forEach((layer, index) => {
+    const depth = index + 1;
+    layer.style.transition = animate && !reducedMotion() ? 'transform 320ms cubic-bezier(.22,1,.36,1)' : 'none';
+    layer.style.transform = `translateY(${(depth - progress) * 24}px) scale(${1 - (depth - progress) * .035})`;
+    layer.style.opacity = '1';
+    layer.querySelectorAll('.card-hero > *').forEach(content => {
+      content.style.transition = animate && !reducedMotion() ? 'opacity 280ms ease' : 'none';
+      content.style.opacity = index === 0 ? String(progress) : '0';
+    });
+  });
+}
 function resetStacks() {
-  elements.stack1.style.transition = elements.stack2.style.transition = "transform 420ms cubic-bezier(.25,.8,.25,1.2), opacity 420ms ease";
-  elements.stack1.style.transform = "translateY(10px) scale(.94)";
-  elements.stack1.style.opacity = ".35";
-  elements.stack2.style.transform = "translateY(20px) scale(.89)";
-  elements.stack2.style.opacity = ".18";
+  updateDeckProgress(0, true);
 }
 
 /* ── Flip ── */
@@ -1894,6 +1897,7 @@ function unflip() {
 
 function fly(action, velocity) {
   unflip();
+  updateDeckProgress(1, true);
   elements.card.style.transition = "transform 340ms cubic-bezier(.4,0,1,1), opacity 300ms ease";
   const boost = Math.min(1.6, 1 + (velocity || 0) * 0.7);
   let tx = 0, ty = 0, rx = 0, ry = 0;
@@ -1910,11 +1914,6 @@ function fly(action, velocity) {
 
   setTimeout(() => {
     state.index += 1;
-    elements.stack1.style.transition = elements.stack2.style.transition = "none";
-    elements.stack1.style.transform = "translateY(10px) scale(.94)";
-    elements.stack1.style.opacity = ".35";
-    elements.stack2.style.transform = "translateY(20px) scale(.89)";
-    elements.stack2.style.opacity = ".18";
     renderCard();
     if (elements.hint && !elements.hint.classList.contains("is-gone")) {
       elements.hint.style.transition = "opacity 300ms ease";
@@ -2008,7 +2007,7 @@ function renderBotGreeting() {
   const hero = document.createElement("div");
   hero.className = "ai-bot-hero";
   hero.innerHTML = `
-    <span class="ai-bot-hero-avatar"><i data-lucide="sparkles"></i></span>
+    <img class="product-logo ai-bot-hero-avatar" src="/assets/paperswipe-logo.png" alt="PaperSwipe">
     <p class="ai-bot-hero-title">Hi, I'm your paper assistant</p>
     <p class="ai-bot-hero-sub">${count
       ? `You have <b>${count}</b> papers in your Library${intent ? ` around "${escapeHTML(shorten(intent, 24))}"` : ""}. Tell me your goal and I'll help you plan.`
@@ -3818,16 +3817,29 @@ function bindWeekPlanSwipe() {
   elements.weekPlanGrid.addEventListener("pointerleave", finish);
 }
 
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+let settingsMotion;
+function animateLibraryChange() {
+  if (reducedMotion()) return;
+  elements.libraryList.getAnimations().forEach(a => a.cancel());
+  elements.libraryList.animate([{opacity:.35,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:240,easing:'cubic-bezier(.22,1,.36,1)'});
+}
 function openSettingsPage() {
   if (!elements.settingsPage) return;
   renderSettings();
   elements.settingsPage.hidden = false;
+  settingsMotion?.cancel();
+  if (!reducedMotion()) settingsMotion = elements.settingsPage.animate([{opacity:0,transform:'translateX(-24px) scale(.98)'},{opacity:1,transform:'translateX(0) scale(1)'}],{duration:320,easing:'cubic-bezier(.22,1,.36,1)'});
   refreshIcons();
 }
 
 function closeSettingsPage() {
-  if (!elements.settingsPage) return;
-  elements.settingsPage.hidden = true;
+  const page = elements.settingsPage;
+  if (!page || page.hidden) return;
+  settingsMotion?.cancel();
+  if (reducedMotion()) { page.hidden = true; return; }
+  settingsMotion = page.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:'translateX(-20px)'}],{duration:200,easing:'ease-in'});
+  settingsMotion.onfinish = () => { page.hidden = true; elements.settingsToggle?.focus({preventScroll:true}); };
 }
 
 function removeSettingsTopic(topic) {
@@ -3870,10 +3882,12 @@ function selectAppearance(appearance) {
 }
 
 function applyAppearance(appearance) {
-  document.documentElement.dataset.theme = appearance;
+  const dark = appearance === 'dark' || (appearance === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.content = appearance === "dark" ? "#101118" : "#f4f5f7";
+  if (themeMeta) themeMeta.content = dark ? "#000000" : "#f4f5f7";
 }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.appearance === 'system') applyAppearance('system'); });
 
 function updateComplexityLabel(node, complexity) {
   const labels = ["Easy", "Accessible", "Balanced", "Advanced", "Expert"];

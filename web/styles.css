@@ -1,4 +1,5 @@
 :root {
+  --motion-ease: cubic-bezier(.22,1,.36,1);
   color-scheme: light;
   --app-bg: #f4f5f7;
   --surface: #ffffff;
@@ -2337,4 +2338,46 @@ html[data-theme="system"] .hl-item p strong, html[data-theme="system"] .detail-b
 .stamp.save    { top: 50%; left: 22px;  color: #2a9d6e; border-color: #2a9d6e; transform: translateY(-50%) rotate(10deg); }
 .stamp.priority{ top: 50px; left: 50%;   color: #d4980b; border-color: #d4980b; transform: translateX(-50%) rotate(-3deg); }
 .stamp.read    { bottom: 70px; left: 50%;color: #6e7280; border-color: #6e7280; transform: translateX(-50%) rotate(2deg); }
+
+/* Mobile motion and supplied brand asset. */
+.product-logo { display:block; object-fit:contain; width:30px; height:30px; border-radius:8px; }
+.onboarding-logo { width:54px; height:54px; border-radius:14px; }
+img.ai-bot-avatar, img.ai-bot-hero-avatar { background:none; border-radius:22%; box-shadow:none; }
+img.ai-bot-hero-avatar { width:64px; height:64px; }
+.library-tabs button, .library-tag, #settings-toggle { transition:transform 220ms var(--motion-ease),background-color 220ms ease,color 220ms ease,box-shadow 220ms ease; }
+.library-tabs button:active, .library-tag:active, #settings-toggle:active { transform:scale(.94); }
+.library-tabs button:focus-visible, .library-tag:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.library-tag.is-active { animation:filter-select 260ms var(--motion-ease); }
+@keyframes filter-select { from { transform:scale(.93); } to { transform:scale(1); } }
+.stage > .upcoming-card { overflow:hidden; opacity:1; background:var(--surface); transform-origin:center bottom; box-shadow:0 7px 18px #0003; }
+#deck-area { padding-bottom:56px; }
+.stage > .upcoming-card.stack-1 { z-index:2; }
+.stage > .upcoming-card.stack-2 { z-index:1; }
+.stage > .card { z-index:3; }
+.upcoming-card .card-hero > * { opacity:0; }
+html[data-theme="dark"] { --app-bg:#000; }
+html[data-theme="dark"] { background:#000; }
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .onboarding-frame { box-shadow:none; border:0; outline:0; }
+html[data-theme="dark"] .app-topbar,
+html[data-theme="dark"] .discover-view .app-topbar,
+html[data-theme="dark"] .page-topbar,
+html[data-theme="dark"] .bottom-nav { background:#000; border-color:transparent; }
+html[data-theme="dark"] body,
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .view,
+html[data-theme="dark"] .settings-page,
+html[data-theme="dark"] .onboarding,
+html[data-theme="dark"] .onboarding-frame,
+html[data-theme="dark"] .onboarding-step,
+html[data-theme="dark"] .ai-bot-page { background:#000; }
+html[data-theme="dark"] .view::before,
+html[data-theme="dark"] .view::after,
+html[data-theme="dark"] .settings-page::before,
+html[data-theme="dark"] .settings-page::after,
+html[data-theme="dark"] .onboarding-step::before,
+html[data-theme="dark"] .onboarding-step::after { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
+}
 

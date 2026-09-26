@@ -143,6 +143,19 @@ func (b *Beta) Handler(static http.Handler) http.Handler {
 			w.Write(data)
 			return
 		}
+		// Only this public brand asset is accessible without an invitation.
+		if r.URL.Path == "/assets/paperswipe-logo.png" && (r.Method == "GET" || r.Method == "HEAD") {
+			data, err := webFiles.ReadFile("web/assets/paperswipe-logo.png")
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "image/png")
+			if r.Method == "GET" {
+				w.Write(data)
+			}
+			return
+		}
 		if !authenticated {
 			if strings.HasPrefix(r.URL.Path, "/api/") {
 				writeError(w, 401, "请重新登录内测账户")

@@ -8,7 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="PaperSwipe - 把论文筛选变成轻松、快速、有证据的滑动决策。">
   <title>PaperSwipe</title>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/paperswipe-logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/paperswipe-logo.png">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="is-onboarding">
@@ -20,7 +21,7 @@
 
       <section class="onboarding-step identity-step is-active" data-onboarding-step="0">
         <header class="onboarding-heading">
-          <p class="onboarding-kicker">PAPERSWIPE</p>
+          <p class="onboarding-kicker"><img class="product-logo onboarding-logo" src="/assets/paperswipe-logo.png" alt="PaperSwipe"></p>
           <h1>Welcome to<br><span class="wordmark-hero" aria-label="PaperSwipe"><span class="wordmark-letter accent">P</span><span class="wordmark-letter accent">a</span><span class="wordmark-letter accent">p</span><span class="wordmark-letter accent">e</span><span class="wordmark-letter accent">r</span><span class="wordmark-letter accent">S</span><span class="wordmark-letter accent">w</span><span class="wordmark-letter accent">i</span><span class="wordmark-letter accent">p</span><span class="wordmark-letter accent">e</span><span class="wordmark-punct accent">!</span></span><button class="confetti-popper" type="button" data-confetti-trigger aria-label="Celebrate">🎉</button></h1>
           <p>Tell us who you are, and we'll tune paper recommendations to your work.</p>
         </header>
@@ -147,7 +148,7 @@
         <header class="app-topbar">
           <button id="settings-toggle" class="topbar-button" type="button" aria-label="打开设置" title="设置"><i data-lucide="settings"></i></button>
           <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
-            <span><i data-lucide="layers-3"></i></span><strong>PaperSwipe</strong>
+            <img class="product-logo" src="/assets/paperswipe-logo.png" alt=""><strong>PaperSwipe</strong>
           </button>
           <span class="topbar-spacer"></span>
         </header>
@@ -359,7 +360,7 @@
       <header class="ai-bot-page-header">
         <button id="ai-bot-close" class="topbar-button" type="button" aria-label="Back" title="Back"><i data-lucide="arrow-left"></i></button>
         <div class="ai-bot-page-id">
-          <span class="ai-bot-avatar"><i data-lucide="sparkles"></i></span>
+          <img class="product-logo ai-bot-avatar" src="/assets/paperswipe-logo.png" alt="">
           <strong id="ai-bot-title">PaperSwipe AI</strong>
         </div>
         <button id="ai-bot-reset" class="topbar-button" type="button" aria-label="Clear conversation" title="Clear conversation"><i data-lucide="rotate-ccw"></i></button>
