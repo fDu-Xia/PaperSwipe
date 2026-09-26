@@ -15,12 +15,21 @@ import (
 var webFiles embed.FS
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "invite" {
+		token := randomToken()
+		fmt.Printf("Private invite token (give only to this tester): %s\nBETA_INVITES entry (replace tester01 with a unique id): tester01:%s\n", token, tokenHash(token))
+		return
+	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	if err := loadLocalEnv(".env.local"); err != nil {
 		logger.Warn("load local environment", "error", err)
 	}
 	dataDir := envOr("DATA_DIR", "data")
-	store, err := NewStore(filepath.Join(dataDir, "state.json"))
+	var store *Store
+	var err error
+	if os.Getenv("BETA_MODE") != "1" {
+		store, err = NewStore(filepath.Join(dataDir, "state.json"))
+	}
 	if err != nil {
 		logger.Error("open state store", "error", err)
 		os.Exit(1)
@@ -47,10 +56,21 @@ func main() {
 		}
 	}
 	static := spaFileServer(staticFS, devMode)
+	var handler http.Handler = api.Routes(static)
+	if os.Getenv("BETA_MODE") == "1" {
+		beta, err := newBeta(api, dataDir, os.Getenv("PUBLIC_ORIGIN"), os.Getenv("BETA_INVITES"))
+		if err != nil {
+			logger.Error("invalid beta configuration", "error", err)
+			os.Exit(1)
+		}
+		handler = beta.Handler(static)
+	}
 	server := &http.Server{
 		Addr:              envOr("ADDR", ":8080"),
-		Handler:           api.Routes(static),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		MaxHeaderBytes:    16 << 10,
 		IdleTimeout:       60 * time.Second,
 	}
 

@@ -73,6 +73,7 @@ function hashString(str) {
 
 // Deterministic: same paper id always resolves to the same (or no) badge.
 function pickFriendRec(paperId) {
+  return null; // Only verified awards may be displayed.
   if (!paperId) return null;
   const h = hashString(paperId);
   // ~40% of cards get a badge
@@ -169,8 +170,8 @@ function fallbackPapersForQuery(_query) {
   return FALLBACK_PAPERS.map(withFallbackDigest);
 }
 
-const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1";
-const APPEARANCE_STORAGE_KEY = "paperswipe-appearance-v1";
+const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1" + (window.PAPERSWIPE_USER || "");
+const APPEARANCE_STORAGE_KEY = "paperswipe-appearance-v1" + (window.PAPERSWIPE_USER || "");
 const elements = {};
 let toastTimer;
 let onboardingStep = 0;
@@ -183,7 +184,7 @@ let dragging = false;
 let dragDX = 0, dragDY = 0, dragStartX = 0, dragStartY = 0, dragStartTime = 0;
 let weekPlanSwipe = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+function initializeApp() {
   cacheElements();
   state.appearance = loadAppearance();
   applyAppearance(state.appearance);
@@ -200,7 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const autoPopper = document.querySelector("[data-confetti-trigger]");
     if (autoPopper) setTimeout(() => fireConfetti(autoPopper), 550);
   }
-});
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initializeApp);
+else queueMicrotask(initializeApp);
 
 function cacheElements() {
   Object.assign(elements, {
@@ -995,8 +998,8 @@ async function performSearch(rawQuery) {
     });
     console.log(`[search] response received status=${response.status} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
     if (!response.ok) {
-      const errBody = await response.text().catch(() => "");
-      throw new Error(errBody || `检索失败 (HTTP ${response.status})`);
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(errBody.error || `检索失败 (HTTP ${response.status})`);
     }
     if (!response.body) throw new Error("此浏览器不支持流式响应");
 
@@ -1024,13 +1027,8 @@ async function performSearch(rawQuery) {
         elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
         console.log(`[search] done total=${state.papers.length} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
         refreshSearches();
-        // If the stream ended with zero papers (upstream 429 / outage),
-        // silently swap in a few reference papers so the deck still works.
         if (state.papers.length === 0) {
-          state.papers = fallbackPapersForQuery(query);
-          elements.searchNote.textContent = "";
-          elements.resultSource.textContent = `${state.source || "arXiv"} · ${state.papers.length} candidates`;
-          renderCard();
+          renderErrorCard(elements.searchNote.textContent || "没有找到论文，请换关键词或稍后重试。");
         }
       }
     });
@@ -1045,13 +1043,6 @@ async function performSearch(rawQuery) {
   } finally {
     state.loading = false;
     state.streaming = false;
-    // Safety net: if we finished with no papers (e.g. stream broke before `done`),
-    // silently populate the deck with fallback papers so the UI stays usable.
-    if (state.papers.length === 0) {
-      state.papers = fallbackPapersForQuery(query);
-      elements.searchNote.textContent = "";
-      renderCard();
-    }
     if (state.papers.length && elements.resultSource) {
       elements.resultSource.textContent = `${state.source || "arXiv"} · ${state.papers.length} candidates`;
     }
@@ -1178,6 +1169,7 @@ function renderErrorCard(message) {
       <div class="card-face card-front" id="cardFront">
         <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;text-align:center;padding:30px;">
           No papers found<br><small style="font-weight:400;opacity:.7;margin-top:8px;line-height:1.5;">${escapeHTML(message)}</small>
+          <button id="retry-search" type="button" style="padding:12px 24px;margin-top:20px;border-radius:12px;cursor:pointer;">重新检索</button>
         </div>
       </div>
       <div class="card-face card-back" id="cardBack">
@@ -1188,6 +1180,7 @@ function renderErrorCard(message) {
   elements.cardFront = document.querySelector("#cardFront");
   elements.cardBack = document.querySelector("#cardBack");
   elements.cardHero = document.querySelector("#cardHero");
+  document.querySelector("#retry-search")?.addEventListener("click", (event) => { event.stopPropagation(); performSearch(state.query); });
   setActionEnabled(false);
   updateProgress();
 }
@@ -1934,9 +1927,7 @@ function fly(action, velocity) {
 async function decide(action) {
   const paper = currentPaper();
   if (!paper || state.loading) return;
-  state.session[action] += 1;
-  unflip();
-  fly(action, 0);
+  state.loading = true;
 
   try {
     const response = await fetch("/api/actions", {
@@ -1948,10 +1939,16 @@ async function decide(action) {
       const body = await response.text().catch(() => "");
       throw new Error(`HTTP ${response.status} ${body.slice(0, 120)}`);
     }
-    await Promise.all([refreshLibrary(), refreshStats()]);
+    state.session[action] += 1;
+    unflip();
+    fly(action, 0);
+    await Promise.all([refreshLibrary(), refreshStats(), new Promise(resolve => setTimeout(resolve, 340))]);
   } catch (err) {
     console.error("[decide] persist failed", { action, paperId: paper.id, err });
+    springBack();
     showToast(`未同步到 Library：${err.message || err}`);
+  } finally {
+    state.loading = false;
   }
 }
 
@@ -2702,8 +2699,8 @@ function paperToBibTeX(paper) {
   if (type === "inproceedings") push("booktitle", paper.venue);
   else push("journal", paper.venue);
   push("url", paper.url);
-  push("doi", paper.doi);
-  if (paper.digest?.tldr) push("abstract", paper.digest.tldr);
+  push("doi", paper.external_ids?.DOI || paper.doi);
+  push("abstract", paper.abstract || paper.digest?.hook);
   const noteParts = [];
   if (paper.match_score != null) noteParts.push(`match=${paper.match_score}`);
   if (paper.read_minutes) noteParts.push(`read=${paper.read_minutes}min`);
@@ -2740,7 +2737,7 @@ function exportSelectedBibTeX() {
   showToast(`已导出 ${papers.length} 篇到 .bib 文件`);
 }
 
-const ZOTERO_STORAGE_KEY = "paperswipe_zotero_v1";
+const ZOTERO_STORAGE_KEY = "paperswipe_zotero_v1" + (window.PAPERSWIPE_USER || "");
 const ZOTERO_API_BASE = "https://api.zotero.org";
 
 function loadZoteroCredentials() {
@@ -2828,7 +2825,7 @@ function paperToZoteroItem(paper) {
   else if (itemType === "conferencePaper") item.proceedingsTitle = venue;
   else if (itemType === "thesis") item.university = venue;
   else if (itemType === "preprint") item.repository = venue;
-  if (paper.doi) item.DOI = paper.doi;
+  if (paper.external_ids?.DOI || paper.doi) item.DOI = paper.external_ids?.DOI || paper.doi;
   return item;
 }
 
@@ -4317,13 +4314,12 @@ function numberOrZero(value) {
 // Mock fallbacks for missing real data.
 function mockCitationCount(value) {
   const n = numberOrZero(value);
-  return n > 0 ? n : Math.floor(Math.random() * 26); // use real if present, else 0-25
+  return Math.max(0, n);
 }
 // Stable mock: same paper id always yields the same minute count so the
 // number doesn't jump across re-renders. Range 30–120 min.
-function mockReadMinutes(_ignored, paperId) {
-  if (!paperId) return 30 + Math.floor(Math.random() * 91);
-  return 30 + (hashString(String(paperId)) % 91);
+function mockReadMinutes(value, paperId) {
+  return numberOrZero(value) > 0 ? numberOrZero(value) : 40;
 }
 
 // Formats the citation number for display. Always show a number; if no real

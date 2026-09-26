@@ -130,6 +130,8 @@ type SearchRecord struct {
 }
 
 type AppState struct {
+	QuotaDay       string                 `json:"quota_day,omitempty"`
+	QuotaCount     int                    `json:"quota_count,omitempty"`
 	Version        int                    `json:"version"`
 	Actions        map[string]ActionEntry `json:"actions"`
 	RecentSearches []SearchRecord         `json:"recent_searches"`

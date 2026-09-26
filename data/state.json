@@ -1206,8 +1206,8 @@
     "d38d84dda9b6dc944db84b067e6f931b1fe87707": {
       "paper": {
         "id": "d38d84dda9b6dc944db84b067e6f931b1fe87707",
-        "title": "Cost and accuracy of long-term memory in Distributed Multi-Agent Systems based on Large Language Models",
-        "abstract": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks. Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS. These gaps are addressed with an independent reproducible testbed that evaluates accuracy, latency, CPU time, peak RAM, disk I/O and network usage in a simulated cloud-edge environment. Three venture capital-funded frameworks spanning vector, graph, and hybrid architectures, namely mem0, Graphiti, and cognee, are compared alongside retrieval-augmented generation (RAG) and full-context baselines on the LoCoMo benchmark under unconstrained and constrained network scenarios. Two clusters emerge: mem0, RAG, and full-context reach 77% to 81% accuracy, while Graphiti and cognee reach only 55% to 56%, a gap driven by retrieval incompleteness rather than reasoning failure. The RAG baseline matches the upper cluster at 8.4 times lower total cost of ownership (TCO) than mem0, and both are the only non-dominated backends on the Pareto frontier. Latency and bandwidth constraints as well as jitter leave retrieval quality unchanged for every backend, while vector-based LTM incurs a modest latency penalty of 4% to 5% under edge-cloud constraints. Compression precision rather than context volume determines LTM accuracy, as full-context forwarding underperforms mem0 despite supplying the entire conversation for each question.",
+        "title": "Cost and Accuracy of Long-Term Memory in Distributed Multi-Agent Systems Based on Large Language Models",
+        "abstract": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging internet of agents (IoA), where distributed multi-agent systems (DMASs) span cloud and edge networks. Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS. These gaps are addressed with an independent reproducible testbed that evaluates accuracy, latency, CPU time, peak RAM, disk I/O and network usage in a simulated cloud-edge environment. Three venture capital-funded frameworks spanning vector, graph, and hybrid architectures, namely mem0, Graphiti, and cognee, are compared alongside retrieval-augmented generation (RAG) and full-context baselines on the LoCoMo benchmark under unconstrained and constrained network scenarios. Two clusters emerge: mem0, RAG, and full-context reach 77% to 81% accuracy, while Graphiti and cognee reach only 55% to 56%, a gap driven by retrieval incompleteness rather than reasoning failure. The RAG baseline matches the upper cluster at 8.4 times lower total cost of ownership (TCO) than mem0, and both are the only non-dominated backends on the Pareto frontier. Latency and bandwidth constraints as well as jitter leave retrieval quality unchanged for every backend, while vector-based LTM incurs a modest latency penalty of 4% to 5% under edge-cloud constraints. Compression precision rather than context volume determines LTM accuracy, as full-context forwarding underperforms mem0 despite supplying the entire conversation for each question. Open-source research: the testbed, results, and notebooks for analysis and evaluation are available at: https://github.com/wolffbe/dmas-memory",
         "authors": [
           {
             "name": "Benedict Wolff"
@@ -1218,38 +1218,39 @@
         ],
         "year": 2026,
         "publication_date": "2026-01-12",
-        "venue": "arXiv.org",
+        "venue": "Annual International Computer Software and Applications Conference",
         "citation_count": 1,
         "influential_citation_count": 0,
         "fields": [
           "Computer Science"
         ],
         "url": "https://www.semanticscholar.org/paper/d38d84dda9b6dc944db84b067e6f931b1fe87707",
+        "pdf_url": "https://arxiv.org/pdf/2601.07978",
         "external_ids": {
           "ArXiv": "2601.07978",
           "CorpusId": "2.84704394e+08",
           "DBLP": "journals/corr/abs-2601-07978",
-          "DOI": "10.48550/arXiv.2601.07978"
+          "DOI": "10.1109/COMPSAC69091.2026.00015"
         },
         "match_score": 86,
-        "read_minutes": 11,
+        "read_minutes": 50,
         "source": "Semantic Scholar",
         "digest": {
           "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "A novel cost and accuracy of long that existing evaluations are typically published by framework providers and focus on token usage and.",
-          "problem": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
+          "hook": "给 AI 装上更好的记忆机制：Cost and Accuracy of",
+          "problem": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging internet of agents (IoA), where distributed multi-agent systems (DMASs) span cloud and edge networks.",
           "novelty": [
-            "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks."
+            "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging internet of agents (IoA), where distributed multi-agent systems (DMASs) span cloud and edge networks."
           ],
-          "method": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging Internet of Agents (IoA), where distributed multi-agent systems (DMAS) span cloud and edge networks.",
+          "method": "Long-term memory (LTM) is fundamental to large language model (LLM)-based agents in the emerging internet of agents (IoA), where distributed multi-agent systems (DMASs) span cloud and edge networks.",
           "result": "Existing evaluations are typically published by framework providers and focus on token usage and latency, rarely accounting for system-level cost or deployment in DMAS.",
           "audience": "Researchers interested in large language model agents large language mode…, especially in Computer Science",
-          "why_keep": "Matches the search direction well — skim the method figures and experiments before deciding to deep-read",
+          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
           "reading_focus": "Focus on the method framework, main experiments, and limitations."
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-07-24T15:05:00.055234Z"
+      "action": "read",
+      "updated_at": "2026-09-25T11:27:13.3693876Z"
     },
     "openalex:W4391116828": {
       "paper": {
@@ -1607,16 +1608,16 @@
   },
   "recent_searches": [
     {
+      "query": "large language model agents large language models long-term memory",
+      "created_at": "2026-09-25T11:26:29.6825162Z"
+    },
+    {
       "query": "LLM agents long-term memory formation retrieval update performance complex tasks",
       "created_at": "2026-07-25T16:03:28.866675Z"
     },
     {
       "query": "memory",
       "created_at": "2026-07-25T05:09:17.415397Z"
-    },
-    {
-      "query": "large language model agents large language models long-term memory",
-      "created_at": "2026-07-24T16:21:24.136272Z"
     },
     {
       "query": "LLM agents long-term memory formation retrieval update complex task performance",

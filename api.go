@@ -27,6 +27,7 @@ func NewAPI(searcher *PaperSearcher, summarizer *Summarizer, images *ImageGenera
 func (a *API) Routes(static http.Handler) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", a.health)
+	mux.HandleFunc("GET /api/me", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"user": "local"}) })
 	mux.HandleFunc("POST /api/topic-plan", a.topicPlan)
 	mux.HandleFunc("POST /api/paper-image", a.paperImage)
 	mux.HandleFunc("GET /api/search", a.search)
@@ -127,14 +128,14 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 28*time.Second)
 	logFlow("========== 新检索开始 ==========")
 	logFlow("【总览】检索词=%q | limit=%d | AI 摘要=%v | 模型=%s", query, limit, a.summarizer.Enabled(), a.summarizer.Model())
-	a.logger.Info("search start", "query", query, "limit", limit)
+	a.logger.Info("search start", "limit", limit)
 	searchStart := time.Now()
 	papers, source, err := a.searcher.Search(searchCtx, query, limit)
 	cancelSearch()
-	a.logger.Info("search fetched", "query", query, "duration", time.Since(searchStart).Round(time.Millisecond), "papers", len(papers), "source", source, "err", err)
+	a.logger.Info("search fetched", "duration", time.Since(searchStart).Round(time.Millisecond), "papers", len(papers), "source", source, "failed", err != nil)
 	warning := ""
 	if err != nil {
-		a.logger.Warn("paper search failed", "query", query, "error", err)
+		a.logger.Warn("paper sources unavailable")
 		logFlow("【总览】检索失败：%v", err)
 		warning = "开放论文源暂时不可用，请稍后重试。"
 		papers = nil
@@ -185,11 +186,11 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 300*time.Second)
 	defer cancelSummary()
 	summaryStart := time.Now()
-	a.logger.Info("summary start", "query", query, "papers", len(papers))
+	a.logger.Info("summary start", "papers", len(papers))
 	aiApplied := a.summarizer.SummarizeStream(summaryCtx, query, papers, func(batch []Paper) {
 		writeEvent("batch", map[string]any{"papers": batch})
 	})
-	a.logger.Info("summary done", "query", query, "duration", time.Since(summaryStart).Round(time.Millisecond), "ai_applied", aiApplied)
+	a.logger.Info("summary done", "duration", time.Since(summaryStart).Round(time.Millisecond), "ai_applied", aiApplied)
 	logFlow("【总览】全流程完成 | AI 摘要 applied=%v | 摘要耗时 %s", aiApplied, time.Since(summaryStart).Round(time.Millisecond))
 	logFlow("========== 检索结束 ==========")
 

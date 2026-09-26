@@ -24,6 +24,9 @@ const (
 var llmCallSeq atomic.Uint64
 
 func logFlow(format string, args ...any) {
+	if os.Getenv("DEBUG_FLOW") != "1" || os.Getenv("BETA_MODE") == "1" {
+		return
+	}
 	fmt.Fprintf(os.Stderr, "[流程] "+format+"\n", args...)
 }
 
@@ -37,13 +40,13 @@ func cardRangeLabel(start, end int) string {
 }
 
 type Summarizer struct {
-	client           *http.Client
-	apiKey           string
-	baseURL          string
-	model            string
-	thinking         string
-	reasoningEffort  string
-	maxTokens        int
+	client          *http.Client
+	apiKey          string
+	baseURL         string
+	model           string
+	thinking        string
+	reasoningEffort string
+	maxTokens       int
 }
 
 func NewSummarizer(client *http.Client) *Summarizer {
@@ -758,20 +761,25 @@ func buildHook(novelty, method, result string, paper Paper) string {
 	// ── Helper: strip academic boilerplate and clean up ──
 	distill := func(s string) string {
 		s = strings.TrimSpace(s)
-		if s == "" { return "" }
+		if s == "" {
+			return ""
+		}
 		prefixes := []string{
-			"We propose ","We present ","We introduce ","We investigate ",
-			"We demonstrate ","We show ","We study ","We explore ",
-			"We address ","We develop ","We describe ","We examine ",
-			"In this paper, ","In this work, ","This paper ","This work ",
+			"We propose ", "We present ", "We introduce ", "We investigate ",
+			"We demonstrate ", "We show ", "We study ", "We explore ",
+			"We address ", "We develop ", "We describe ", "We examine ",
+			"In this paper, ", "In this work, ", "This paper ", "This work ",
 		}
 		lower := strings.ToLower(s)
 		for _, p := range prefixes {
 			if strings.HasPrefix(lower, strings.ToLower(p)) {
-				s = s[len(p):]; break
+				s = s[len(p):]
+				break
 			}
 		}
-		if len(s) > 0 { s = strings.ToUpper(s[:1]) + s[1:] }
+		if len(s) > 0 {
+			s = strings.ToUpper(s[:1]) + s[1:]
+		}
 		return strings.TrimSpace(s)
 	}
 
@@ -788,7 +796,7 @@ func buildHook(novelty, method, result string, paper Paper) string {
 		}
 
 		// Strategy 2: Remove common leading phrases
-		for _, p := range []string{"On the ","Towards ","Toward ","A ","The "} {
+		for _, p := range []string{"On the ", "Towards ", "Toward ", "A ", "The "} {
 			if strings.HasPrefix(strings.ToLower(t), strings.ToLower(p)) {
 				t = strings.TrimSpace(t[len(p):])
 				break
@@ -830,9 +838,15 @@ func buildHook(novelty, method, result string, paper Paper) string {
 	// ── Helper: extract a punchy benefit/impact phrase ──
 	extractBenefit := func() string {
 		raw := result
-		if raw == "" { raw = method }
-		if raw == "" { raw = novelty }
-		if raw == "" { return "" }
+		if raw == "" {
+			raw = method
+		}
+		if raw == "" {
+			raw = novelty
+		}
+		if raw == "" {
+			return ""
+		}
 		raw = distill(raw)
 
 		// Pattern 1: Achievement with numbers — "improves GSM8K accuracy from 18% to 58%"
@@ -846,9 +860,13 @@ func buildHook(novelty, method, result string, paper Paper) string {
 			if m := re.FindStringSubmatch(raw); m != nil {
 				b := strings.TrimSpace(m[1])
 				b = strings.TrimRight(b, ",; ")
-				if !strings.HasSuffix(b, ".") { b += "." }
+				if !strings.HasSuffix(b, ".") {
+					b += "."
+				}
 				b = strings.ToUpper(b[:1]) + b[1:]
-				if len(b) <= 120 { return b }
+				if len(b) <= 120 {
+					return b
+				}
 				// Truncate at word boundary
 				if idx := strings.LastIndex(b[:117], " "); idx > 20 {
 					return b[:idx] + "."
@@ -865,19 +883,33 @@ func buildHook(novelty, method, result string, paper Paper) string {
 				raw = raw[:97] + "."
 			}
 		}
-		if len(raw) > 15 { return raw }
+		if len(raw) > 15 {
+			return raw
+		}
 		return ""
 	}
 
 	// ── Helper: pick the best adjective based on context ──
 	pickAdjective := func() string {
 		lower := strings.ToLower(novelty + " " + method)
-		if strings.Contains(lower, "simple") || strings.Contains(lower, "straightforward") { return "simple" }
-		if strings.Contains(lower, "first") || strings.Contains(lower, "pioneering") { return "pioneering" }
-		if strings.Contains(lower, "efficient") || strings.Contains(lower, "scalable") { return "efficient" }
-		if strings.Contains(lower, "novel") || strings.Contains(lower, "new paradigm") || strings.Contains(lower, "new framework") { return "novel" }
-		if strings.Contains(lower, "powerful") || strings.Contains(lower, "robust") { return "powerful" }
-		if strings.Contains(lower, "unified") || strings.Contains(lower, "universal") { return "unified" }
+		if strings.Contains(lower, "simple") || strings.Contains(lower, "straightforward") {
+			return "simple"
+		}
+		if strings.Contains(lower, "first") || strings.Contains(lower, "pioneering") {
+			return "pioneering"
+		}
+		if strings.Contains(lower, "efficient") || strings.Contains(lower, "scalable") {
+			return "efficient"
+		}
+		if strings.Contains(lower, "novel") || strings.Contains(lower, "new paradigm") || strings.Contains(lower, "new framework") {
+			return "novel"
+		}
+		if strings.Contains(lower, "powerful") || strings.Contains(lower, "robust") {
+			return "powerful"
+		}
+		if strings.Contains(lower, "unified") || strings.Contains(lower, "universal") {
+			return "unified"
+		}
 		return "novel"
 	}
 
@@ -902,7 +934,9 @@ func buildHook(novelty, method, result string, paper Paper) string {
 				hook = hook[:firstAfterThat+5] + strings.ToLower(rest[:1]) + rest[1:]
 			}
 		}
-		if len(hook) <= 140 { return hook }
+		if len(hook) <= 140 {
+			return hook
+		}
 	}
 
 	// ── Template B: "The [concept] that [benefit]." (when concept is a known entity) ──
@@ -915,17 +949,23 @@ func buildHook(novelty, method, result string, paper Paper) string {
 				hook = hook[:firstAfterThat+5] + strings.ToLower(rest[:1]) + rest[1:]
 			}
 		}
-		if len(hook) <= 140 { return hook }
+		if len(hook) <= 140 {
+			return hook
+		}
 	}
 
 	// ── Template C: Just the benefit/impact statement ──
-	if benefit != "" && len(benefit) > 25 { return benefit }
+	if benefit != "" && len(benefit) > 25 {
+		return benefit
+	}
 
 	// ── Template D: "[Concept] — a [adj] [description]." ──
 	noveltyClean := distill(novelty)
 	if concept != "" && noveltyClean != "" && len(noveltyClean) < 120 {
 		hook := concept + " — a " + adj + " " + strings.ToLower(noveltyClean[:1]) + noveltyClean[1:]
-		if len(hook) <= 140 { return hook }
+		if len(hook) <= 140 {
+			return hook
+		}
 	}
 
 	// ── Template E: "A [adj] [concept] that changes how we think about [field]." ──
@@ -935,13 +975,21 @@ func buildHook(novelty, method, result string, paper Paper) string {
 			field = paper.Fields[1]
 		}
 		hook := fmt.Sprintf("A %s %s that changes how we think about %s.", adj, strings.ToLower(concept), strings.ToLower(field))
-		if len(hook) <= 140 { return hook }
+		if len(hook) <= 140 {
+			return hook
+		}
 	}
 
 	// ── Fallback chain ──
-	if len(noveltyClean) > 20 { return noveltyClean }
-	if m := distill(method); len(m) > 20 { return m }
-	if len(benefit) > 15 { return benefit }
+	if len(noveltyClean) > 20 {
+		return noveltyClean
+	}
+	if m := distill(method); len(m) > 20 {
+		return m
+	}
+	if len(benefit) > 15 {
+		return benefit
+	}
 
 	// ── Last resort: synthesize from title ──
 	if len(paper.Title) > 15 {
@@ -959,7 +1007,9 @@ func buildHook(novelty, method, result string, paper Paper) string {
 				return t[:idx] + "…"
 			}
 		}
-		if len(t) <= 130 { return t }
+		if len(t) <= 130 {
+			return t
+		}
 	}
 
 	return "A noteworthy paper worth your attention."

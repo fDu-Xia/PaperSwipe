@@ -64,8 +64,20 @@ func (s *Store) RecordAction(paper Paper, action string) error {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	previous, existed := s.state.Actions[paper.ID]
+	if !existed && len(s.state.Actions) >= 2000 {
+		return errors.New("内测文献记录已达 2000 条上限，请联系团队")
+	}
 	s.state.Actions[paper.ID] = ActionEntry{Paper: paper, Action: action, UpdatedAt: time.Now().UTC()}
-	return s.saveLocked()
+	if err := s.saveLocked(); err != nil {
+		if existed {
+			s.state.Actions[paper.ID] = previous
+		} else {
+			delete(s.state.Actions, paper.ID)
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *Store) RecordSearch(query string) error {

@@ -1,0 +1,44 @@
+services:
+  app:
+    build: .
+    image: paperswipe-beta:${RELEASE_TAG:-local}
+    restart: unless-stopped
+    env_file: .env.beta
+    environment:
+      BETA_MODE: "1"
+      ADDR: ":8080"
+      DATA_DIR: /app/data
+      IMAGE_MODEL: ""
+      DEBUG_FLOW: "0"
+    volumes:
+      - app_data:/app/data
+    mem_limit: 512m
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    env_file: .env.beta
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+volumes:
+  app_data:
+  caddy_data:
+  caddy_config:

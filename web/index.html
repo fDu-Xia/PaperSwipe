@@ -246,10 +246,10 @@
           <header class="trend-hero">
             <div class="trend-kicker">
               <span class="trend-live-dot" aria-hidden="true"></span>
-              <span>LIVE · Updated 2 min ago</span>
+              <span>DEMO · 预置示例数据</span>
             </div>
             <h1 id="network-title" class="trend-title">Global Trending</h1>
-            <p class="trend-sub">The research topics moving the field this week</p>
+            <p class="trend-sub">交互内测：榜单、数量、增幅及示例论文为预置内容，不代表实时热点或已核验研究结论。</p>
             <div class="trend-stat-row">
               <div class="trend-stat">
                 <span class="trend-stat-num" id="trend-total-papers">128.4k</span>
@@ -278,7 +278,7 @@
           <ol class="trend-board" id="trend-board"></ol>
 
           <footer class="trend-foot">
-            <span>Signals: paper submissions, citations, saves &amp; social mentions</span>
+            <span>示例榜单，未接入实时投稿、引用、收藏或社交信号。</span>
           </footer>
         </div>
       </section>
@@ -340,6 +340,7 @@
       <section id="todos-view" class="view todos-view" aria-labelledby="todos-title" hidden>
         <h1 id="todos-title" class="sr-only">Reading Week</h1>
         <div class="todos-scroll">
+          <p class="prototype-notice">日程内测：当前安排与完成标记尚未完整持久化，刷新或退出后可能重置，不跨设备同步。重要安排请另行记录。</p>
           <section class="week-plan-section" aria-labelledby="week-plan-title">
             <div class="week-plan-head">
               <div>
@@ -364,6 +365,7 @@
         <button id="ai-bot-reset" class="topbar-button" type="button" aria-label="Clear conversation" title="Clear conversation"><i data-lucide="rotate-ccw"></i></button>
       </header>
       <div id="ai-bot-messages" class="ai-bot-messages" aria-live="polite"></div>
+      <p class="prototype-notice">阅读助手内测：当前使用本地规则生成建议，学习路线含预置示例，并非实时大模型对话。会话不持久保存，论文结论请核对原文。</p>
       <form id="ai-bot-form" class="ai-bot-form">
         <div class="ai-bot-form-inner">
           <textarea id="ai-bot-input" rows="1" placeholder="Tell me your goal, or ask what to read today…" aria-label="Ask the AI assistant" maxlength="600"></textarea>
@@ -428,6 +430,6 @@
 
   <script src="/vendor/lucide.min.js"></script>
   <script src="/mockdata/roadmap.js"></script>
-  <script src="/app.js"></script>
+  <script src="/bootstrap.js"></script>
 </body>
 </html>
