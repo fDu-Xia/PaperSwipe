@@ -50,6 +50,7 @@ func newBeta(base *API, dir, origin, invites string) (*Beta, error) {
 			return nil, e
 		}
 		a := *base
+		a.cache = newSearchCache()
 		a.store = s
 		a.images = &ImageGenerator{}
 		b.users[hash] = &a
@@ -184,7 +185,11 @@ func (b *Beta) Handler(static http.Handler) http.Handler {
 			writeError(w, 403, "内测暂未开放生图")
 			return
 		}
-		costly := r.URL.Path == "/api/search" || r.URL.Path == "/api/topic-plan"
+		costly := r.URL.Path == "/api/search" || r.URL.Path == "/api/topic-plan" || r.URL.Path == "/api/summary-retry"
+		// Authenticated cache hits need neither a provider slot nor daily generation quota.
+		if a.tryCachedSearch(w, r) {
+			return
+		}
 		if costly {
 			select {
 			case b.slots <- struct{}{}:

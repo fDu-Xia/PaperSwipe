@@ -10,6 +10,17 @@
 <link rel="apple-touch-icon" href="/assets/paperswipe-logo.png">
 <style>.brand .product-logo{width:32px;height:32px;border-radius:8px}.paper-mark:before{display:none}.paper-mark .product-logo{width:78px;height:78px;border-radius:18px}</style>
 <main>
+<style>
+.input-wrap{transition:border-color 180ms ease,box-shadow 180ms ease}
+#submit,#reveal,summary{transition:transform 180ms cubic-bezier(.22,1,.36,1),background-color 180ms ease,box-shadow 180ms ease}
+#submit:not(:disabled):active{transform:scale(.96);box-shadow:0 2px 8px #6657e826}
+#reveal:active{transform:scale(.9);background:#ebe8ff}
+summary:active{transform:translateX(3px)}
+#error:not(:empty){animation:login-feedback 220ms ease-out}
+details[open] p{animation:login-feedback 220ms ease-out}
+@keyframes login-feedback{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
 <header class="brand"><img class="product-logo" src="/assets/paperswipe-logo.png" alt=""><span>PaperSwipe</span><span class="beta">邀请制内测</span></header>
 <section class="intro" aria-labelledby="welcome"><div class="paper-mark" aria-hidden="true"><img class="product-logo" src="/assets/paperswipe-logo.png" alt=""></div><h1 id="welcome">找到值得读的论文。</h1><p>从一篇好论文开始。<br>输入专属邀请码，开启你的阅读探索。</p></section>
 <form id="login"><label for="token">邀请码</label><div class="input-wrap"><input id="token" name="token" type="password" required autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="粘贴团队发给你的邀请码" aria-describedby="token-hint error"><button id="reveal" type="button" aria-label="显示邀请码" aria-pressed="false">显示</button></div><p class="hint" id="token-hint">每个邀请码对应独立文献库，请勿转发。</p><button id="submit" type="submit">进入 PaperSwipe</button><p id="error" role="alert"></p></form>

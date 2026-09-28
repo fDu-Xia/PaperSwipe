@@ -60,23 +60,27 @@ type Digest struct {
 }
 
 type Paper struct {
-	ID                       string            `json:"id"`
-	Title                    string            `json:"title"`
-	Abstract                 string            `json:"abstract,omitempty"`
-	Authors                  []Author          `json:"authors"`
-	Year                     int               `json:"year,omitempty"`
-	PublicationDate          string            `json:"publication_date,omitempty"`
-	Venue                    string            `json:"venue,omitempty"`
-	CitationCount            int               `json:"citation_count"`
-	InfluentialCitationCount int               `json:"influential_citation_count"`
-	Fields                   []string          `json:"fields"`
-	URL                      string            `json:"url,omitempty"`
-	PDFURL                   string            `json:"pdf_url,omitempty"`
-	ExternalIDs              map[string]string `json:"external_ids,omitempty"`
-	MatchScore               int               `json:"match_score"`
-	ReadMinutes              int               `json:"read_minutes"`
-	Source                   string            `json:"source"`
-	Digest                   Digest            `json:"digest"`
+	SummaryStatus            string             `json:"summary_status,omitempty"`
+	SummaryMessage           string             `json:"summary_message,omitempty"`
+	SummaryModel             string             `json:"summary_model,omitempty"`
+	SummaryPreferences       *ReaderPreferences `json:"summary_preferences,omitempty"`
+	ID                       string             `json:"id"`
+	Title                    string             `json:"title"`
+	Abstract                 string             `json:"abstract,omitempty"`
+	Authors                  []Author           `json:"authors"`
+	Year                     int                `json:"year,omitempty"`
+	PublicationDate          string             `json:"publication_date,omitempty"`
+	Venue                    string             `json:"venue,omitempty"`
+	CitationCount            int                `json:"citation_count"`
+	InfluentialCitationCount int                `json:"influential_citation_count"`
+	Fields                   []string           `json:"fields"`
+	URL                      string             `json:"url,omitempty"`
+	PDFURL                   string             `json:"pdf_url,omitempty"`
+	ExternalIDs              map[string]string  `json:"external_ids,omitempty"`
+	MatchScore               int                `json:"match_score"`
+	ReadMinutes              int                `json:"read_minutes"`
+	Source                   string             `json:"source"`
+	Digest                   Digest             `json:"digest"`
 }
 
 type SearchResponse struct {

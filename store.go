@@ -56,6 +56,11 @@ func (s *Store) load() error {
 }
 
 func (s *Store) RecordAction(paper Paper, action string) error {
+	// A transient generation state must not remain stuck after reload/disconnect.
+	if paper.SummaryStatus == "pending" {
+		paper.SummaryStatus = "failed"
+		paper.SummaryMessage = "收藏时摘要尚未完成，可单独重试"
+	}
 	if !validActions[action] {
 		return errors.New("invalid action")
 	}

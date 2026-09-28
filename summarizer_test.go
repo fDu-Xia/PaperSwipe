@@ -105,7 +105,7 @@ func TestSummarizeStreamOrder(t *testing.T) {
 		time.Sleep(delay)
 		items := make([]llmDigest, 0, len(batch))
 		for _, paper := range batch {
-			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Verdict: "AI summary"}})
+			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Verdict: "AI summary", Hook: "A specific research finding"}})
 		}
 		content, _ := json.Marshal(llmDigestResponse{Papers: items})
 		_ = json.NewEncoder(w).Encode(map[string]any{

@@ -15,6 +15,7 @@ const state = {
   query: "AI agent memory",
   source: "",
   loading: false,
+  actionBusy: false,
   started: false,
   activeView: "discover",
   library: [],
@@ -439,7 +440,7 @@ function bindEvents() {
     }
     const detailButton = event.target.closest("[data-detail-id]");
     if (detailButton) {
-      elements.libraryCardDialog.close();
+      dismissDialog(elements.libraryCardDialog);
       openDetails(detailButton.dataset.detailId);
       return;
     }
@@ -498,13 +499,13 @@ function bindEvents() {
     }
     const removeButton = event.target.closest("[data-remove-id]");
     if (removeButton) {
-      elements.libraryCardDialog.close();
+      dismissDialog(elements.libraryCardDialog);
       removeFromLibrary(removeButton.dataset.removeId);
       return;
     }
     const closeButton = event.target.closest("[data-close-dialog]");
     if (closeButton) {
-      document.querySelector(`#${closeButton.dataset.closeDialog}`)?.close();
+      dismissDialog(document.querySelector(`#${closeButton.dataset.closeDialog}`));
       return;
     }
     const topicRemove = event.target.closest("[data-settings-topic-remove]");
@@ -514,7 +515,7 @@ function bindEvents() {
     }
   });
 
-  document.querySelector("#dialog-close").addEventListener("click", () => elements.dialog.close());
+  document.querySelector("#dialog-close").addEventListener("click", () => dismissDialog(elements.dialog));
 
   const aiBotButton = document.querySelector("#ai-bot-button");
   if (aiBotButton) {
@@ -608,8 +609,9 @@ function bindEvents() {
   }
   document.querySelectorAll("dialog").forEach((dialog) => {
     dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
+      if (event.target === dialog) dismissDialog(dialog);
     });
+    dialog.addEventListener("cancel", (event) => { event.preventDefault(); dismissDialog(dialog); });
   });
 
   document.querySelectorAll("[data-filter]").forEach((button) => {
@@ -635,6 +637,15 @@ function bindEvents() {
       persistProfile();
       renderSettings();
     });
+  });
+  bindReaderPicker();
+  document.querySelector('#refresh-search').addEventListener('click',()=>{
+    if(state.loading){showToast('正在完成本次搜索，请稍候');return;}
+    void performSearch(state.query,{refresh:true});
+  });
+  document.querySelector('#apply-reader-settings').addEventListener('click',()=>{
+    if(state.streaming){showToast('请等待当前搜索完成后应用设置');return;}
+    closeSettingsPage();switchView('discover');void performSearch(state.query);
   });
   elements.settingsComplexity.addEventListener("input", () => {
     onboardingProfile.complexity = Number(elements.settingsComplexity.value);
@@ -666,7 +677,7 @@ function bindEvents() {
   bindWeekPlanSwipe();
 
   document.addEventListener("keydown", (event) => {
-    if (!state.started || state.activeView !== "discover" || state.loading || dragging || anyDialogOpen() || event.target.matches("input, textarea")) return;
+    if (!state.started || state.activeView !== "discover" || state.actionBusy || dragging || anyDialogOpen() || event.target.matches("input, textarea")) return;
     if (!currentPaper()) return;
     if (event.key === "ArrowLeft") decide("dismiss");
     if (event.key === "ArrowUp") decide("priority");
@@ -972,14 +983,24 @@ function startApp(profile) {
   performSearch(state.query);
 }
 
-async function performSearch(rawQuery) {
+let activeSearchController;
+let searchRevision = 0;
+async function performSearch(rawQuery, {refresh=false} = {}) {
   const query = String(rawQuery || "").trim();
   if (query.length < 2) {
     showToast("请输入至少 2 个字符");
     elements.searchInput.focus();
     return;
   }
+  if (state.actionBusy) { showToast('请等待当前收藏操作完成'); return; }
+  if (state.streaming && state.query === query) { showToast('这个主题仍在搜索，无需重复提交'); return; }
+  activeSearchController?.abort();
+  const revision = ++searchRevision;
+  const controller = new AbortController();
+  activeSearchController = controller;
+  const searchTimeout = setTimeout(() => controller.abort(), 125000);
   state.loading = true;
+  document.querySelector('#refresh-search').disabled=true;
   state.query = query;
   state.index = 0;
   state.papers = [];
@@ -992,11 +1013,19 @@ async function performSearch(rawQuery) {
   renderLoadingCard();
 
   let receivedAny = false;
+  let completed = false;
+  let cachedResult=false;
+  let generatedAt='';
+  let expectedPapers=0;
+  const finalPapers = new Map();
   try {
     console.log(`[search] START q="${query}" @${new Date().toISOString()}`);
     const t0 = performance.now();
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`, {
+    const params = new URLSearchParams({q:query, limit:'20', ...readerPreferences()});
+    if(refresh)params.set('refresh','1');
+    const response = await fetch(`/api/search?${params}`, {
       headers: { Accept: "text/event-stream" },
+      signal: controller.signal,
     });
     console.log(`[search] response received status=${response.status} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
     if (!response.ok) {
@@ -1006,36 +1035,58 @@ async function performSearch(rawQuery) {
     if (!response.body) throw new Error("此浏览器不支持流式响应");
 
     await consumeSSE(response.body, (event, data) => {
+      if (revision !== searchRevision) return;
       if (event === "meta") {
+        cachedResult=Boolean(data.cached);generatedAt=data.generated_at || '';
+        expectedPapers=Number(data.total) || 0;
         state.source = data.source || "Open papers";
+        state.aiModel = data.ai_model || state.aiModel;
         state.imageEnabled = Boolean(data.image_enabled);
         elements.searchNote.textContent = data.warning || "";
-        elements.resultSource.textContent = `${state.source} · loading…`;
+        elements.resultSource.textContent = `${state.source} · 正在整理论文摘要`;
         elements.resultQuery.textContent = data.query || query;
         setEngineStatus(Boolean(data.ai_enabled));
+        const hero = elements.card.querySelector('#cardHero');
+        if (hero && data.total > 0) hero.textContent = data.ai_enabled ? '已找到论文，正在生成 AI 摘要…' : '已找到论文，正在整理卡片…';
       } else if (event === "batch") {
-        const incoming = Array.isArray(data.papers) ? data.papers : [];
-        if (!incoming.length) return;
-        const wasEmpty = state.papers.length === 0;
-        state.papers.push(...incoming);
-        renderUpcomingCards();
-        receivedAny = true;
-        elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates${state.streaming ? " (loading…)" : ""}`;
-        // Promote the deck if we were showing loading or skeleton.
-        if (wasEmpty || state.index >= state.papers.length - incoming.length) {
-          renderCard();
+        if (completed) return;
+        const wasWaiting = !currentPaper();
+        for (const paper of (Array.isArray(data.papers) ? data.papers : [])) {
+          if (paper.summary_status === 'pending' || finalPapers.has(paper.id)) continue;
+          finalPapers.set(paper.id, paper);
+          state.papers.push(paper);
         }
+        receivedAny = state.papers.length > 0;
+        elements.resultSource.textContent = `${state.source} · 已整理 ${finalPapers.size}/${expectedPapers || finalPapers.size} 篇`;
+        if (wasWaiting && currentPaper() && !state.actionBusy) renderCard();
+        // Never replace the active DOM: preserve flips, dragging and reading position.
+        if (!state.actionBusy && !dragging) { renderUpcomingCards(); updateProgress(); }
       } else if (event === "done") {
+        if (completed) return;
+        completed = true;
         state.streaming = false;
+        receivedAny = state.papers.length > 0;
+        if (receivedAny && !currentPaper() && !state.actionBusy) renderCard();
         elements.resultSource.textContent = `${state.source} · ${state.papers.length} candidates`;
         console.log(`[search] done total=${state.papers.length} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
         refreshSearches();
+        const succeeded = state.papers.filter(p => p.summary_status === 'success').length;
+        if (state.papers.length) elements.searchNote.textContent = succeeded === state.papers.length ? '已按本次搜索提交时的阅读设置生成，请以论文原文为准。' : `本次 ${state.papers.length - succeeded} 篇未获得 AI 摘要，保留原题；如需重新生成，请重新搜索。`;
+        if(cachedResult && state.papers.length){
+          const stamp=new Date(generatedAt);
+          const time=Number.isNaN(stamp.getTime())?'':stamp.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          const note=`已复用${time ? ' '+time+' 生成的' : '已有'}结果，未重复调用 AI；右上角可主动刷新。`;
+          elements.searchNote.textContent=note;showToast(note);
+        }
         if (state.papers.length === 0) {
-          renderErrorCard(elements.searchNote.textContent || "没有找到论文，请换关键词或稍后重试。");
+          renderErrorCard(elements.searchNote.textContent || "没有找到论文，请换关键词或稍后重试。", elements.searchNote.textContent ? '论文源暂不可用' : '本次检索没有匹配结果');
         }
       }
     });
+    if (!completed) throw new Error("搜索连接中断；已生成的卡片会保留，可重新搜索获取更多论文。");
   } catch (error) {
+    if (revision !== searchRevision) return;
+    if (error.name === 'AbortError') error = new Error('搜索等待超时；已生成的卡片会保留。');
     console.error("[search] failed", error);
     if (!receivedAny) {
       renderErrorCard(error.message);
@@ -1044,8 +1095,12 @@ async function performSearch(rawQuery) {
       showToast(`加载中断：${error.message}`);
     }
   } finally {
+    clearTimeout(searchTimeout);
+    if (revision !== searchRevision) return;
     state.loading = false;
+    document.querySelector('#refresh-search').disabled=false;
     state.streaming = false;
+    if (!currentPaper() && state.papers.length && !state.actionBusy) renderCard();
     if (state.papers.length && elements.resultSource) {
       elements.resultSource.textContent = `${state.source || "arXiv"} · ${state.papers.length} candidates`;
     }
@@ -1160,7 +1215,7 @@ function renderSkeletonCard() {
   updateProgress();
 }
 
-function renderErrorCard(message) {
+function renderErrorCard(message, title = '搜索暂未完成') {
   elements.card.className = "card theme-violet is-loading";
   elements.card.style.transform = "";
   elements.card.style.opacity = "";
@@ -1172,7 +1227,7 @@ function renderErrorCard(message) {
     <div class="card-inner" id="cardInner">
       <div class="card-face card-front" id="cardFront">
         <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;text-align:center;padding:30px;">
-          No papers found<br><small style="font-weight:400;opacity:.7;margin-top:8px;line-height:1.5;">${escapeHTML(message)}</small>
+          ${escapeHTML(title)}<br><small style="font-weight:400;opacity:.7;margin-top:8px;line-height:1.5;">${escapeHTML(message)}</small>
           <button id="retry-search" type="button" style="padding:12px 24px;margin-top:20px;border-radius:12px;cursor:pointer;">重新检索</button>
         </div>
       </div>
@@ -1418,251 +1473,79 @@ function refreshElementRefs() {
 }
 
 /* ── Polish a hook for the card front subtitle ── */
-function polishHook(raw, title) {
-  if (!raw || raw.length < 6) return null;
-  if (/research paper worth checking out|noteworthy paper/i.test(raw) && raw.length < 60) return null;
-  let s = raw.trim().replace(/\s+/g, " ");
-  const isChinese = /[\u4e00-\u9fff]/.test(s);
-
-  if (isChinese) {
-    /* Drop empty academic placeholders */
-    if (/^(摘要|确认|建议|未提供|未明确|未报告|值得一看)$/.test(s.replace(/[。！？.!?…]+$/u, ""))) return null;
-    s = s.replace(/[。！？.!?…]+$/u, "").trim();
-    const chars = [...s];
-    if (chars.length < 6) return null;
-    /* Soft-cap at 36 units for the front-of-card line */
-    if (chars.length > 36) {
-      s = chars.slice(0, 36).join("").replace(/[，、；：\s]+$/u, "") + "…";
-    } else if (!/[。！？…]$/.test(s)) {
-      s += "。";
-    }
-    return s;
-  }
-
-  if (s.length < 10) return null;
-  /* Strip trailing dots, ensure one clean sentence */
-  s = s.replace(/\.+$/, "").trim();
-  if (!/[.!?]$/.test(s)) s += ".";
-  /* Truncate to 120 chars at word boundary */
-  if (s.length > 120) {
-    const cut = s.lastIndexOf(" ", 117);
-    s = (cut > 60 ? s.slice(0, cut) : s.slice(0, 117)) + ".";
-  }
-  /* Remove boilerplate starts — rewrite as demo-style "A [concept]..." */
-  s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|demonstrate|show|study|explore|address|develop|describe|investigate|examine|consider|focus on)(s?)\s+(a |an |the )?/i, "A ");
-  /* Remove leading lowercase after "A " replacement */
-  s = s.replace(/^A ([a-z])/, (_, c) => "A " + c.toUpperCase());
-  /* Capitalize first letter */
-  s = s.charAt(0).toUpperCase() + s.slice(1);
-  /* Reject if it's essentially the same as the title (but be lenient) */
-  if (title && s.length > 20) {
-    const t = title.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-    const h = s.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (h.length > 30 && t.includes(h)) return null;
-    if (h === t) return null;
-  }
-  return s;
+function readerPreferences() {
+  return {identity:onboardingProfile.identity || 'graduate', discoveryStyle:onboardingProfile.discoveryStyle || 'focus', complexity:Number(onboardingProfile.complexity) || 3};
 }
 
-/* ── Pick the front-card one-liner from digest.hook (AI), else English heuristics ── */
+let readerCloseTimer;
+function renderReaderPicker() {
+  const identities={graduate:['研究生','研究问题与方法学习'],researcher:['研究人员','创新、证据与局限'],enthusiast:['爱好者','背景与实际意义']};
+  const value=identities[onboardingProfile.identity] ? onboardingProfile.identity : 'graduate';
+  document.querySelector('#reader-current').textContent=identities[value][0];
+  document.querySelector('#reader-current-description').textContent=identities[value][1];
+  document.querySelectorAll('[data-reader-identity]').forEach(button=>{
+    const selected=button.dataset.readerIdentity===value;
+    button.setAttribute('aria-checked',String(selected));button.tabIndex=selected?0:-1;
+  });
+  const icon=document.querySelector(`[data-reader-identity="${value}"] svg`);
+  if(icon)document.querySelector('.reader-symbol').innerHTML=icon.outerHTML;
+}
+function setReaderPickerOpen(open, restoreFocus=false) {
+  const picker=document.querySelector('#reader-picker'),panel=document.querySelector('#reader-options'),trigger=document.querySelector('#settings-identity');
+  clearTimeout(readerCloseTimer);
+  trigger.setAttribute('aria-expanded',String(open));
+  picker.classList.toggle('is-open',open);
+  if(open){
+    panel.hidden=false;panel.inert=false;panel.classList.remove('is-closing');
+    panel.scrollIntoView({block:'nearest',behavior:'auto'});
+  }else{
+    panel.inert=true;panel.classList.add('is-closing');
+    if(restoreFocus)trigger.focus({preventScroll:true});
+    if(reducedMotion())panel.hidden=true;
+    else readerCloseTimer=setTimeout(()=>{panel.hidden=true;panel.classList.remove('is-closing');},160);
+  }
+}
+function bindReaderPicker() {
+  const picker=document.querySelector('#reader-picker'),trigger=document.querySelector('#settings-identity'),panel=document.querySelector('#reader-options');
+  const buttons=[...panel.querySelectorAll('[data-reader-identity]')];
+  const choose=button=>{onboardingProfile.identity=button.dataset.readerIdentity;persistProfile();renderReaderPicker();};
+  trigger.addEventListener('click',()=>setReaderPickerOpen(trigger.getAttribute('aria-expanded')!=='true'));
+  trigger.addEventListener('keydown',event=>{
+    if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();setReaderPickerOpen(true);panel.querySelector('[aria-checked="true"]').focus({preventScroll:true});}
+  });
+  buttons.forEach(button=>{
+    button.addEventListener('click',()=>{choose(button);setReaderPickerOpen(false,true);showToast('身份已保存，下次搜索时生效');});
+    button.addEventListener('keydown',event=>{
+      const index=buttons.indexOf(button);let next;
+      if(['ArrowDown','ArrowRight'].includes(event.key))next=(index+1)%buttons.length;
+      if(['ArrowUp','ArrowLeft'].includes(event.key))next=(index+buttons.length-1)%buttons.length;
+      if(event.key==='Home')next=0;if(event.key==='End')next=buttons.length-1;
+      if(next!==undefined){event.preventDefault();choose(buttons[next]);buttons[next].focus({preventScroll:true});}
+    });
+  });
+  picker.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();setReaderPickerOpen(false,true);}});
+  picker.addEventListener('focusout',event=>{if(!picker.contains(event.relatedTarget))setReaderPickerOpen(false);});
+  document.addEventListener('pointerdown',event=>{if(!picker.contains(event.target)&&trigger.getAttribute('aria-expanded')==='true')setReaderPickerOpen(false);});
+}
+
+
+function polishHook(raw) {
+  const text = String(raw || "").replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
+  if (text.length < 6) return null;
+  // Old saved cards can contain promotional placeholders, not paper summaries.
+  if (/matches current research interests|research paper worth checking out|noteworthy paper|advances the state of the art|值得关注的新思路|^一文读懂：|^给 AI 装上更好的记忆机制：|^让检索更准一步：|^让智能体更会办事：/i.test(text)) return null;
+  if (/^(摘要|确认|建议|未提供|未明确|未报告|值得一看)[。.!！?？]*$/.test(text)) return null;
+  // Preserve complete claims and their qualifiers; never cut a finding mid-sentence.
+  return text;
+}
+
+/* The quote explains this paper, not why the user should like it. */
 function pickSubtitle(paper) {
-  const title = (paper.title || "").trim();
-  const aiHook = String(paper.digest?.hook || "").trim();
-
-  /* digest.hook is the front-of-card line. Prefer it always when present. */
-  if (aiHook) {
-    const polished = polishHook(aiHook, title);
-    if (polished) return polished;
-    /* Never drop a Chinese AI hook for English fallbacks */
-    if (/[\u4e00-\u9fff]/.test(aiHook)) {
-      const clipped = [...aiHook.replace(/[。！？.!?…]+$/u, "").trim()].slice(0, 36).join("");
-      return clipped ? clipped + "。" : aiHook;
-    }
-    return aiHook;
-  }
-
-  /* Fall through to heuristic synthesis (below) */
-  const d = paper.digest || {};
-
-  /* ── Step 1: Distill raw academic sentences into clean hook phrases ── */
-  function distill(raw) {
-    if (!raw) return null;
-    /* Reject Chinese text / placeholders outright */
-    if (/[一-鿿]|摘要|确认|建议|未提供|未明确|未报告|需要进入正文|值得快速/.test(raw)) return null;
-    /* Must start with a letter or digit */
-    if (!/^[A-Za-z0-9]/.test(raw)) return null;
-
-    let s = raw.replace(/\s+/g, ' ').trim();
-
-    /* Strip boilerplate prefixes */
-    s = s.replace(/^(We|In this (paper|work)|This (paper|work)) (propose|present|introduce|investigate|demonstrate|show|study|explore|address|develop|describe|consider|examine|focus on)(s| that| a novel| an)?\s*/i, '');
-
-    /* Strip trailing "We show / demonstrate / find / observe / report that..." */
-    s = s.replace(/,?\s*(we|and|&) (show|demonstrate|find|observe|report|conclude|argue|suggest) that[^.!?]*$/i, '');
-
-    /* Remove inline citations: [1], [2,3,4], (Author, 2020), (Author et al., 2020a) */
-    s = s.replace(/\s*[\[\(]\d+(?:[,\s]*\d+)*[\]\)]/g, '');
-    s = s.replace(/\s*\([A-Z][a-z]+(?:\s(?:et\s+al\.?))?,?\s*\d{4}[a-z]?\)/g, '');
-
-    /* Capitalize first letter */
-    s = s.trim();
-    if (s.length < 12) return null;
-    s = s.charAt(0).toUpperCase() + s.slice(1);
-
-    /* Ensure sentence-ending punctuation */
-    if (!/[.!?]$/.test(s)) s += '.';
-    return s;
-  }
-
-  /* ── Step 2: Extract a punchy result snippet (numbers / outperformance claims) ── */
-  function extractResult(raw) {
-    if (!raw) return null;
-    if (/[一-鿿]/.test(raw)) return null;
-    /* "X% improvement", "outperforms by X", "achieves X BLEU/accuracy/F1" */
-    const m = raw.match(/((?:achieve|improve|outperform|reach|boost|increase|reduce|surpass|rival|match|exceed)(?:s|d|ing)?\s+[^.!?]{10,100}?[.!]?)/i);
-    if (m) {
-      let r = m[1].trim().replace(/\s+/g, ' ');
-      if (!/[.!?]$/.test(r)) r += '.';
-      return r.charAt(0).toUpperCase() + r.slice(1);
-    }
-    /* Any sentence with a number or percentage */
-    const nm = raw.match(/([^.!?]{10,120}?\d+[%％]?[^.!?]{0,60}[.!]?)/);
-    if (nm) {
-      let r = nm[1].trim().replace(/\s+/g, ' ');
-      if (r.length < 15) return null;
-      if (!/[.!?]$/.test(r)) r += '.';
-      return r.charAt(0).toUpperCase() + r.slice(1);
-    }
-    return null;
-  }
-
-  /* ── Step 3: Assemble the hook ── */
-
-  const noveltyClean = distill(firstNoveltyBullet(paper));
-  const methodClean = distill(d.method);
-  const resultClean = extractResult(d.result);
-  const resultFull = distill(d.result);
-
-  /* (A) Novelty + Result combo — strongest hook */
-  if (noveltyClean && resultClean && noveltyClean !== resultClean) {
-    if (noveltyClean.length + resultClean.length < 180) {
-      return noveltyClean + ' ' + resultClean;
-    }
-    return noveltyClean;
-  }
-
-  /* (B) Novelty alone (clean, not boilerplate) */
-  if (noveltyClean && noveltyClean.length > 20) return noveltyClean;
-
-  /* (C) Method + Result combo */
-  if (methodClean && resultClean && methodClean !== resultClean) {
-    if (methodClean.length + resultClean.length < 180) {
-      return methodClean + ' ' + resultClean;
-    }
-    return methodClean;
-  }
-
-  /* (D) Method alone */
-  if (methodClean && methodClean.length > 20) return methodClean;
-
-  /* (E) Result alone (cleaned) */
-  if (resultClean) return resultClean;
-  if (resultFull && resultFull.length > 20) return resultFull;
-
-  /* (F) Scan abstract for the strongest standalone sentence */
-  const abstract = (paper.abstract || "").trim();
-  if (abstract && /^[A-Z]/.test(abstract)) {
-    const sentences = abstract.match(/[^.!?]+[.!?]+/g) || [];
-    for (const s of sentences) {
-      const d = distill(s);
-      if (d && d.length > 25 && d.length < 160 &&
-          /outperform|state.of.the.art|first|novel|significant|improves?|achieves?|enable|transform|reshape|unlock/i.test(d)) {
-        return d;
-      }
-    }
-    /* Fallback: distill the first decent sentence */
-    for (const s of sentences) {
-      const d = distill(s);
-      if (d && d.length > 20 && d.length < 160) return d;
-    }
-  }
-
-  /* (G) Synthesize from title — craft a demo-style one-liner */
-  if (title) {
-    /* G1: Title has a subtitle after colon — use that part (usually the most interesting) */
-    const colonIdx = Math.max(
-      title.indexOf(':'), title.indexOf('–'), title.indexOf('—'), title.indexOf('-')
-    );
-    if (colonIdx > 10 && colonIdx < title.length - 10) {
-      const hookPart = title.slice(colonIdx + 1).trim();
-      /* Remove common filler: "A Survey", "A Review", "A Comprehensive Study" */
-      const cleaned = hookPart.replace(/^(A |An )?(Survey|Review|Comprehensive Study|Systematic Review|Meta.Analysis)( of | on )?/i, '');
-      if (cleaned.length > 20 && cleaned.length < 130) return cleaned + '.';
-      if (hookPart.length > 20 && hookPart.length < 130) return hookPart + '.';
-    }
-
-    /* G2: For verb-heavy titles like "X Elicits Y" or "X Improves Y", extract and reformat */
-    const verbPatterns = [
-      { verb: 'elicits', adj: 'simple' },
-      { verb: 'improves', adj: 'novel' },
-      { verb: 'enables', adj: 'powerful' },
-      { verb: 'reshapes', adj: 'transformative' },
-      { verb: 'transforms', adj: 'revolutionary' },
-      { verb: 'matches', adj: 'new' },
-      { verb: 'achieves', adj: 'breakthrough' },
-      { verb: 'unlocks', adj: 'novel' },
-      { verb: 'redefines', adj: 'pioneering' },
-      { verb: 'outperforms', adj: 'powerful' },
-    ];
-    const titleLower = title.toLowerCase();
-    for (const {verb, adj} of verbPatterns) {
-      const pattern = new RegExp(`(.+?)\\s+${verb}\\s+(.+?)($|\\.)`, 'i');
-      const m = title.match(pattern);
-      if (m) {
-        const subject = m[1].trim();
-        const impact = m[2].trim().replace(/\.$/, '');
-        /* Clean subject: remove leading "A ", "The ", "On the ", "Towards " */
-        const cleanSubject = subject.replace(/^(A |An |The |On the |Towards |Toward )/i, '').toLowerCase();
-        const cleanImpact = impact.charAt(0).toLowerCase() + impact.slice(1);
-        if (cleanSubject.length > 5 && cleanImpact.length > 10) {
-          const hook = `A ${adj} ${cleanSubject} that ${verb}s ${cleanImpact}.`;
-          if (hook.length < 140) return hook;
-        }
-        break;
-      }
-    }
-
-    /* G3: Extract subject from title ending with common suffixes */
-    const suffixes = [
-      ' in Large Language Models', ' in Deep Learning', ' for Image Generation',
-      ' in Natural Language Processing', ' in Computer Vision', ' for Machine Learning',
-      ' in Neural Networks', ' for Sequence Modeling',
-    ];
-    let subject = title;
-    for (const suf of suffixes) {
-      if (titleLower.endsWith(suf.toLowerCase())) {
-        subject = title.slice(0, -suf.length).trim();
-        break;
-      }
-    }
-    if (subject !== title && subject.length > 8 && subject.length < 80) {
-      return `A novel ${subject.toLowerCase()} that advances the state of the art.`;
-    }
-
-    /* G4: Truncate long title */
-    if (title.length > 90) {
-      const cut = title.lastIndexOf(' ', 87);
-      return (cut > 40 ? title.slice(0, cut) : title.slice(0, 87)) + '…';
-    }
-
-    /* G5: For short declarative titles, prefix with "A" and reframe */
-    if (title.length < 100 && /^[A-Z]/.test(title)) {
-      /* Already a decent one-liner — just ensure period */
-      return title.endsWith('.') ? title : title + '.';
-    }
-  }
-
-  return "A research paper worth checking out.";
+  const hook = polishHook(paper.digest?.hook);
+  if (hook) return hook;
+  const title = String(paper.title || "").trim();
+  if (title) return "研究主题（原题）：" + title;
+  return "暂无足够的论文信息，暂不能生成可靠概括。";
 }
 
 /* Derive "Best for" audience tags from paper data */
@@ -1747,7 +1630,7 @@ function bindCardGestures() {
   const card = elements.card;
 
   function onDown(e) {
-    if (!currentPaper() || state.loading) return;
+    if (!currentPaper() || state.actionBusy) return;
     if (e.target.closest("button, a, [data-stop-click]")) return;
     if (isFlipped && e.target.closest(".back-details")) return;
     dragging = true; dragDX = 0; dragDY = 0;
@@ -1925,8 +1808,8 @@ function fly(action, velocity) {
 
 async function decide(action) {
   const paper = currentPaper();
-  if (!paper || state.loading) return;
-  state.loading = true;
+  if (!paper || state.actionBusy) return;
+  state.actionBusy = true;
 
   try {
     const response = await fetch("/api/actions", {
@@ -1947,14 +1830,14 @@ async function decide(action) {
     springBack();
     showToast(`未同步到 Library：${err.message || err}`);
   } finally {
-    state.loading = false;
+    state.actionBusy = false;
   }
 }
 
 
 async function refreshHealth() {
   try {
-    const response = await fetch("/api/health");
+    const response = await fetch("/api/ai-status");
     const payload = await response.json();
     const imageStateChanged = state.imageEnabled !== Boolean(payload.image_enabled);
     state.aiModel = String(payload.ai_model || "");
@@ -1968,7 +1851,7 @@ async function refreshHealth() {
 }
 
 function setEngineStatus(aiEnabled) {
-  elements.aiStatus.textContent = aiEnabled ? (state.aiModel || "LLM summary") : "Local summary";
+  elements.aiStatus.textContent = aiEnabled ? `${state.aiModel || 'AI'} · 已配置` : "AI 未配置";
   elements.aiStatus.parentElement.classList.toggle("is-ai", aiEnabled);
 }
 
@@ -3270,18 +3153,28 @@ function openTrendPaperOverlay(topicId, startIndex) {
   trendOverlayState.flipped = false;
   const overlay = document.querySelector("#trend-overlay");
   overlay.hidden = false;
+  clearTimeout(trendDismissTimer);
+  overlay.classList.remove('is-dismissing');
   overlay.setAttribute("aria-hidden", "false");
   document.body.classList.add("is-trend-overlay-open");
   bindTrendOverlayOnce();
   renderTrendOverlayCard();
 }
 
+let trendDismissTimer;
 function closeTrendOverlay() {
   const overlay = document.querySelector("#trend-overlay");
-  overlay.hidden = true;
-  overlay.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("is-trend-overlay-open");
-  trendOverlayState.topicId = null;
+  if (overlay.hidden || overlay.classList.contains('is-dismissing')) return;
+  const finish = () => {
+    overlay.hidden = true;
+    overlay.classList.remove('is-dismissing');
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("is-trend-overlay-open");
+    trendOverlayState.topicId = null;
+  };
+  if (reducedMotion()) { finish(); return; }
+  overlay.classList.add('is-dismissing');
+  trendDismissTimer = setTimeout(finish, 200);
 }
 
 function currentTrendPaper() {
@@ -3560,6 +3453,7 @@ function renderSettings() {
     button.setAttribute("aria-checked", String(selected));
   });
   elements.settingsComplexity.value = String(onboardingProfile.complexity);
+  renderReaderPicker();
   updateComplexityLabel(elements.settingsComplexityLabel, onboardingProfile.complexity);
   refreshIcons();
 }
@@ -3818,6 +3712,24 @@ function bindWeekPlanSwipe() {
 }
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const dialogDismissTimers = new WeakMap();
+function presentDialog(dialog) {
+  clearTimeout(dialogDismissTimers.get(dialog));
+  dialogDismissTimers.delete(dialog);
+  dialog.classList.remove('is-dismissing');
+  if (!dialog.open) dialog.showModal();
+}
+function dismissDialog(dialog) {
+  if (!dialog?.open || dialogDismissTimers.has(dialog)) return;
+  if (reducedMotion()) { dialog.close(); return; }
+  dialog.classList.add('is-dismissing');
+  const timer = setTimeout(() => {
+    dialogDismissTimers.delete(dialog);
+    dialog.close();
+    dialog.classList.remove('is-dismissing');
+  }, 200);
+  dialogDismissTimers.set(dialog, timer);
+}
 let settingsMotion;
 function animateLibraryChange() {
   if (reducedMotion()) return;
@@ -3834,6 +3746,7 @@ function openSettingsPage() {
 }
 
 function closeSettingsPage() {
+  setReaderPickerOpen(false);
   const page = elements.settingsPage;
   if (!page || page.hidden) return;
   settingsMotion?.cancel();
@@ -3853,24 +3766,65 @@ function removeSettingsTopic(topic) {
   renderSettings();
 }
 
-function saveSettingsTopics() {
+async function saveSettingsTopics() {
+  const button = document.querySelector('#save-topics-button');
+  if (button.disabled) return;
+  if (state.actionBusy) { showToast('请等待当前收藏操作完成'); return; }
   const customTopic = elements.settingsTopicInput.value.trim();
-  if (customTopic && !onboardingProfile.topics.some((topic) => topic.toLowerCase() === customTopic.toLowerCase())) {
-    onboardingProfile.topics = [customTopic, ...onboardingProfile.topics].slice(0, 8);
-    onboardingProfile.researchIntent = customTopic;
-    onboardingProfile.searchQuery = customTopic;
-    onboardingProfile.topicPlanAI = false;
-  }
-  if (!onboardingProfile.topics.length) {
-    showToast("至少添加一个研究主题");
+  if (state.streaming && (!customTopic || customTopic === onboardingProfile.researchIntent)) {
+    showToast('这个主题仍在搜索，无需重复点击 Update');
     return;
   }
-  elements.settingsTopicInput.value = "";
-  persistProfile();
-  renderSettings();
-  switchView("discover");
-  performSearch(onboardingProfile.searchQuery || onboardingProfile.topics[0]);
-  showToast("发现主题已更新");
+  const description = customTopic || onboardingProfile.searchQuery || onboardingProfile.topics[0] || '';
+  if (Array.from(description).length < 2) { showToast('请输入至少 2 个字符的研究主题'); return; }
+  const label = button.querySelector('span');
+  const previousLabel = label.textContent;
+  const revision = searchRevision;
+  button.disabled = true;
+  label.textContent = '正在更新主题…';
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 18000);
+  try {
+    let query = description;
+    let keywords = [description];
+    let usedAI = false;
+    // Use the same intent planner as onboarding for free-form descriptions.
+    if (customTopic && Array.from(description).length >= 6) {
+      const response = await fetch('/api/topic-plan', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({description}), signal:controller.signal
+      });
+      const plan = await response.json();
+      if (!response.ok) throw new Error(plan.error || '主题分析失败，请重试');
+      query = String(plan.search_query || '').trim();
+      if (!query) throw new Error('未生成有效检索词，请重试');
+      keywords = Array.isArray(plan.keywords) ? plan.keywords.filter(x => typeof x === 'string' && x.trim()).slice(0, 8) : [];
+      if (!keywords.length) keywords = [query];
+      usedAI = Boolean(plan.ai_enabled);
+    }
+    if (revision !== searchRevision) { showToast('已切换到其他搜索，本次主题更新未应用'); return; }
+    if (state.actionBusy) { showToast('请等待收藏完成后再更新主题'); return; }
+    if (customTopic) {
+      onboardingProfile.topics = keywords;
+      onboardingProfile.researchIntent = description;
+      onboardingProfile.searchQuery = query;
+      onboardingProfile.topicPlanAI = usedAI;
+    }
+    persistProfile();
+    elements.settingsTopicInput.value = '';
+    renderSettings();
+    // switchView returns early when Explore is already selected.
+    closeSettingsPage();
+    switchView('discover');
+    void performSearch(query);
+    showToast(usedAI ? '主题已更新，按 AI 检索词搜索' : '主题已更新，按关键词搜索');
+  } catch (error) {
+    showToast(error.name === 'AbortError' ? '主题分析超时，请重试；原主题已保留' : error.message);
+  } finally {
+    clearTimeout(timeout);
+    button.disabled = false;
+    label.textContent = previousLabel;
+  }
 }
 
 function selectAppearance(appearance) {
@@ -3916,7 +3870,7 @@ function openDetails(id) {
     <p>${escapeHTML(paper.abstract || "暂未取得摘要，请打开论文页面核验。")}</p>
     <div class="detail-links">${links}</div>`;
   refreshIcons();
-  elements.dialog.showModal();
+  presentDialog(elements.dialog);
 }
 
 function openLibraryCard(id) {
@@ -4038,7 +3992,7 @@ function openLibraryCard(id) {
       </div>
     </article>`;
   refreshIcons();
-  elements.libraryCardDialog.showModal();
+  presentDialog(elements.libraryCardDialog);
   const popCard = elements.libraryCardDialogContent.querySelector(".library-pop-card");
   const popInner = popCard && popCard.querySelector(".card-inner");
   if (popCard && popInner) {
@@ -4170,7 +4124,7 @@ function handleLibraryAction(action) {
     state.scheduleDraftDate = state.weekPlanAssign.get(id) || null;
     state.scheduleDraftPriority = state.weekPlanPriority.get(id) || null;
     renderScheduleGrid();
-    if (elements.libraryScheduleDialog) elements.libraryScheduleDialog.showModal();
+    if (elements.libraryScheduleDialog) presentDialog(elements.libraryScheduleDialog);
   }
 }
 
@@ -4182,7 +4136,7 @@ if (elements.libraryScheduleDialog) {
   elements.libraryScheduleDialog.addEventListener("click", (event) => {
     const rect = elements.libraryScheduleDialog.getBoundingClientRect();
     const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-    if (!inside) elements.libraryScheduleDialog.close();
+    if (!inside) dismissDialog(elements.libraryScheduleDialog);
   });
 }
 
@@ -4234,7 +4188,7 @@ function assignPaperToDate(dateKey) {
   state.weekPlanAssign.set(id, dateKey);
   state.scheduleDraftDate = null;
   state.scheduleDraftPriority = null;
-  if (elements.libraryScheduleDialog) elements.libraryScheduleDialog.close();
+  if (elements.libraryScheduleDialog) dismissDialog(elements.libraryScheduleDialog);
   renderLibrary();
   if (state.activeView === "todos") renderWeekPlan();
   showToast("Added to your reading schedule");

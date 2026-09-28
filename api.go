@@ -13,6 +13,7 @@ import (
 )
 
 type API struct {
+	cache      *searchCache
 	searcher   *PaperSearcher
 	summarizer *Summarizer
 	images     *ImageGenerator
@@ -21,14 +22,16 @@ type API struct {
 }
 
 func NewAPI(searcher *PaperSearcher, summarizer *Summarizer, images *ImageGenerator, store *Store, logger *slog.Logger) *API {
-	return &API{searcher: searcher, summarizer: summarizer, images: images, store: store, logger: logger}
+	return &API{searcher: searcher, summarizer: summarizer, images: images, store: store, logger: logger, cache: newSearchCache()}
 }
 
 func (a *API) Routes(static http.Handler) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", a.health)
+	mux.HandleFunc("GET /api/ai-status", a.health)
 	mux.HandleFunc("GET /api/me", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"user": "local"}) })
 	mux.HandleFunc("POST /api/topic-plan", a.topicPlan)
+	mux.HandleFunc("POST /api/summary-retry", a.retrySummary)
 	mux.HandleFunc("POST /api/paper-image", a.paperImage)
 	mux.HandleFunc("GET /api/search", a.search)
 	mux.HandleFunc("POST /api/actions", a.actions)
@@ -51,11 +54,21 @@ func (a *API) topicPlan(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "请用 6 到 360 个字符描述研究兴趣")
 		return
 	}
+	planKey := a.cacheKey("topic-plan", description, ReaderPreferences{}, 0)
+	if data, ok := a.cache.get(planKey); ok {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 12*time.Second)
 	defer cancel()
 	plan, usedAI := a.summarizer.PlanTopic(ctx, description)
 	plan.AIEnabled = usedAI
+	if usedAI {
+		data, _ := json.Marshal(plan)
+		a.cache.put(planKey, data)
+	}
 	writeJSON(w, http.StatusOK, plan)
 }
 
@@ -125,12 +138,36 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	searchCtx, cancelSearch := context.WithTimeout(r.Context(), 28*time.Second)
+	complexity, _ := strconv.Atoi(r.URL.Query().Get("complexity"))
+	prefs := normalizePreferences(ReaderPreferences{Identity: r.URL.Query().Get("identity"), DiscoveryStyle: r.URL.Query().Get("discoveryStyle"), Complexity: complexity})
+	key, _ := a.searchKey(r)
+	release, waited, lockErr := a.cache.acquire(r.Context(), key)
+	if lockErr != nil {
+		writeError(w, 408, "等待搜索已取消")
+		return
+	}
+	defer release()
+	if r.URL.Query().Get("refresh") != "1" || waited {
+		if data, hit := a.cache.get(key); hit {
+			writeCachedSearch(w, data)
+			if a.store != nil {
+				_ = a.store.RecordSearch(query)
+			}
+			return
+		}
+	}
+	requestCtx := withPreferences(r.Context(), prefs)
+	searchCtx, cancelSearch := context.WithTimeout(requestCtx, 28*time.Second)
 	logFlow("========== 新检索开始 ==========")
 	logFlow("【总览】检索词=%q | limit=%d | AI 摘要=%v | 模型=%s", query, limit, a.summarizer.Enabled(), a.summarizer.Model())
 	a.logger.Info("search start", "limit", limit)
 	searchStart := time.Now()
-	papers, source, err := a.searcher.Search(searchCtx, query, limit)
+	poolLimit := limit
+	if prefs.DiscoveryStyle == "broaden" {
+		poolLimit = min(60, limit*2)
+	}
+	papers, source, err := a.searcher.Search(searchCtx, query, poolLimit)
+	papers = selectForReader(papers, query, limit, prefs)
 	cancelSearch()
 	a.logger.Info("search fetched", "duration", time.Since(searchStart).Round(time.Millisecond), "papers", len(papers), "source", source, "failed", err != nil)
 	warning := ""
@@ -162,15 +199,18 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		return true
 	}
 
-	writeEvent("meta", map[string]any{
+	meta := map[string]any{
 		"query":         query,
+		"preferences":   prefs,
+		"ai_model":      a.summarizer.Model(),
 		"source":        source,
 		"total":         len(papers),
 		"warning":       warning,
 		"ai_enabled":    a.summarizer.Enabled(),
 		"image_enabled": a.images.Enabled(),
 		"generated_at":  time.Now().UTC(),
-	})
+	}
+	writeEvent("meta", meta)
 
 	if err := a.store.RecordSearch(query); err != nil {
 		a.logger.Warn("record search", "error", err)
@@ -183,7 +223,7 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	summaryCtx, cancelSummary := context.WithTimeout(r.Context(), 300*time.Second)
+	summaryCtx, cancelSummary := context.WithTimeout(requestCtx, 90*time.Second)
 	defer cancelSummary()
 	summaryStart := time.Now()
 	a.logger.Info("summary start", "papers", len(papers))
@@ -194,6 +234,16 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	logFlow("【总览】全流程完成 | AI 摘要 applied=%v | 摘要耗时 %s", aiApplied, time.Since(summaryStart).Round(time.Millisecond))
 	logFlow("========== 检索结束 ==========")
 
+	cacheable := len(papers) > 0 && summaryCtx.Err() == nil && r.Context().Err() == nil
+	for _, paper := range papers {
+		if paper.SummaryStatus != "success" {
+			cacheable = false
+			break
+		}
+	}
+	if cacheable {
+		a.cache.put(key, encodeCachedSearch(meta, papers))
+	}
 	writeEvent("done", map[string]any{"ai_applied": aiApplied})
 }
 

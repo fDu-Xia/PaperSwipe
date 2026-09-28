@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -102,17 +101,49 @@ func (s *PaperSearcher) Search(ctx context.Context, query string, limit int) ([]
 		logFlow("【检索】OpenAlex 无结果")
 	}
 
-	if err == nil {
-		err = errors.New("Semantic Scholar returned no papers")
-	}
-	if arxivErr == nil {
-		arxivErr = errors.New("arXiv returned no papers")
-	}
-	if openAlexErr == nil {
-		openAlexErr = errors.New("OpenAlex returned no papers")
+	// An empty, successful response is not an upstream outage.
+	if err == nil && arxivErr == nil && openAlexErr == nil {
+		return nil, "", nil
 	}
 	logFlow("【检索】全部论文源失败")
 	return nil, "", fmt.Errorf("paper sources unavailable: Semantic Scholar: %v; arXiv: %v; OpenAlex: %v", err, arxivErr, openAlexErr)
+}
+
+// Retry transient GET failures once, within the existing per-source deadline.
+// Never retry credentials/bad-query failures, nor successful empty responses.
+func (s *PaperSearcher) requestSource(req *http.Request) (*http.Response, error) {
+	for attempt := 0; ; attempt++ {
+		resp, err := s.client.Do(req)
+		retry := err != nil
+		if resp != nil {
+			retry = resp.StatusCode == 429 || resp.StatusCode == 408 || resp.StatusCode >= 500
+		}
+		if !retry || attempt == 1 || req.Context().Err() != nil {
+			return resp, err
+		}
+		delay := 400 * time.Millisecond
+		if resp != nil {
+			raw := resp.Header.Get("Retry-After")
+			if seconds, parseErr := strconv.Atoi(raw); parseErr == nil && seconds > 0 {
+				delay = time.Duration(seconds) * time.Second
+			} else if at, parseErr := http.ParseTime(raw); parseErr == nil && time.Until(at) > delay {
+				delay = time.Until(at)
+			}
+		}
+		if deadline, ok := req.Context().Deadline(); ok && time.Until(deadline) <= delay {
+			return resp, err
+		}
+		if resp != nil {
+			resp.Body.Close()
+		}
+		timer := time.NewTimer(delay)
+		select {
+		case <-req.Context().Done():
+			timer.Stop()
+			return nil, req.Context().Err()
+		case <-timer.C:
+		}
+	}
 }
 
 func (s *PaperSearcher) searchSemanticScholar(ctx context.Context, query string, limit int) ([]Paper, error) {
@@ -135,7 +166,7 @@ func (s *PaperSearcher) searchSemanticScholar(ctx context.Context, query string,
 		req.Header.Set("x-api-key", s.semanticScholarAPIKey)
 	}
 
-	resp, err := s.client.Do(req)
+	resp, err := s.requestSource(req)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +274,7 @@ func (s *PaperSearcher) searchArxiv(ctx context.Context, query string, limit int
 		return nil, err
 	}
 	req.Header.Set("User-Agent", "PaperSwipe/0.1 (research discovery prototype)")
-	resp, err := s.client.Do(req)
+	resp, err := s.requestSource(req)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +391,7 @@ func (s *PaperSearcher) searchOpenAlex(ctx context.Context, query string, limit 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "PaperSwipe/0.1 (research discovery prototype; mailto:hello@paperswipe.local)")
 
-	resp, err := s.client.Do(req)
+	resp, err := s.requestSource(req)
 	if err != nil {
 		return nil, err
 	}

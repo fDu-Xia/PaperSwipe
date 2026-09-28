@@ -150,7 +150,7 @@
           <button class="app-wordmark" type="button" data-view="discover" aria-label="PaperSwipe discovery">
             <img class="product-logo" src="/assets/paperswipe-logo.png" alt=""><strong>PaperSwipe</strong>
           </button>
-          <span class="topbar-spacer"></span>
+          <button id="refresh-search" class="topbar-button" type="button" aria-label="跳过缓存，重新检索并生成摘要" title="重新检索并生成摘要（消耗额度）"><i data-lucide="refresh-cw"></i></button>
         </header>
 
         <div id="search-panel" class="search-panel" hidden>
@@ -245,10 +245,6 @@
       <section id="network-view" class="view trend-view" aria-labelledby="network-title" hidden>
         <div class="trend-scroll">
           <header class="trend-hero">
-            <div class="trend-kicker">
-              <span class="trend-live-dot" aria-hidden="true"></span>
-              <span>DEMO · 预置示例数据</span>
-            </div>
             <h1 id="network-title" class="trend-title">Global Trending</h1>
             <p class="trend-sub">交互内测：榜单、数量、增幅及示例论文为预置内容，不代表实时热点或已核验研究结论。</p>
             <div class="trend-stat-row">
@@ -311,6 +307,20 @@
 
           <section class="setting-section" aria-labelledby="feed-settings-title">
             <div class="setting-heading"><div><h2 id="feed-settings-title">Discovery style</h2><p>Control whether recommendations stay focused or diverge.</p></div><i data-lucide="compass"></i></div>
+            <span class="settings-reader-label" id="reader-identity-label">阅读身份</span>
+            <div class="reader-picker" id="reader-picker">
+              <button id="settings-identity" type="button" class="reader-trigger" aria-expanded="false" aria-controls="reader-options" aria-labelledby="reader-identity-label reader-current">
+                <span class="reader-symbol" aria-hidden="true"><i data-lucide="graduation-cap"></i></span>
+                <span class="reader-trigger-copy"><strong id="reader-current">研究生</strong><small id="reader-current-description">研究问题与方法学习</small></span>
+                <i class="reader-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+              <div class="reader-options" id="reader-options" role="radiogroup" aria-labelledby="reader-identity-label" hidden>
+                <button type="button" role="radio" aria-checked="true" tabindex="0" data-reader-identity="graduate"><i data-lucide="graduation-cap" aria-hidden="true"></i><span><strong>研究生</strong><small>理解研究问题，学习研究方法</small></span><b aria-hidden="true">✓</b></button>
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-reader-identity="researcher"><i data-lucide="microscope" aria-hidden="true"></i><span><strong>研究人员</strong><small>关注创新差异、证据与局限</small></span><b aria-hidden="true">✓</b></button>
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-reader-identity="enthusiast"><i data-lucide="sparkles" aria-hidden="true"></i><span><strong>爱好者</strong><small>了解研究背景与实际意义</small></span><b aria-hidden="true">✓</b></button>
+                <p>只影响下一次搜索的解释方式</p>
+              </div>
+            </div>
             <div class="settings-segments" role="radiogroup" aria-label="发现风格">
               <button type="button" data-settings-style="focus" role="radio">Focus</button>
               <button type="button" data-settings-style="broaden" role="radio">Broaden</button>
@@ -320,6 +330,9 @@
               <input id="settings-complexity" type="range" min="1" max="5" value="3">
               <div><span>Accessible</span><span>Expert</span></div>
             </div>
+            <p class="reader-settings-note">Focus 优先主题匹配；Broaden 增加同主题论文的多样性。搜索按提交时的身份与难度生成完整卡片，首批就绪即可阅读，后续追加到卡堆底部；修改设置只影响下一次搜索，不会改写已有卡片或收藏。</p>
+            <button type="button" id="apply-reader-settings" class="settings-reader-apply">应用设置并重新搜索</button>
+            <p class="reader-settings-note">相同主题与阅读设置的完整结果可复用 30 分钟。Explore 右上角刷新按钮会跳过缓存，重新检索和生成，消耗 AI 额度。</p>
           </section>
 
           <section class="setting-section" aria-labelledby="zotero-title">
