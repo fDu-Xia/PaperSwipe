@@ -35,7 +35,10 @@ func (a *API) Routes(static http.Handler) http.Handler {
 	mux.HandleFunc("POST /api/paper-image", a.paperImage)
 	mux.HandleFunc("GET /api/search", a.search)
 	mux.HandleFunc("POST /api/actions", a.actions)
+	mux.HandleFunc("POST /api/schedule", a.schedule)
+	mux.HandleFunc("POST /api/translate", a.translate)
 	mux.HandleFunc("GET /api/library", a.library)
+	mux.HandleFunc("POST /api/library/delete", a.deleteLibrary)
 	mux.HandleFunc("GET /api/stats", a.stats)
 	mux.HandleFunc("GET /api/searches", a.searches)
 	mux.Handle("/", static)
@@ -261,7 +264,7 @@ func (a *API) actions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *API) library(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]any{"papers": a.store.Library()})
+	writeJSON(w, http.StatusOK, map[string]any{"papers": a.store.Library(), "schedule": a.store.Schedule()})
 }
 
 func (a *API) stats(w http.ResponseWriter, _ *http.Request) {

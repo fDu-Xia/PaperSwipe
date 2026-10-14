@@ -187,7 +187,7 @@ func TestBetaInvalidConfigAndExpiredSession(t *testing.T) {
 	}
 	b, h := betaFixture(t)
 	c := betaLogin(t, h, "alice-secret")
-	b.sessions[tokenHash(c.Value)] = betaSession{tokenHash("alice-secret"), time.Now().Add(-time.Minute)}
+	b.sessions[tokenHash(c.Value)] = betaSession{User: tokenHash("alice-secret"), Expires: time.Now().Add(-time.Minute)}
 	if w := betaRequest(h, "GET", "/api/me", "", c, ""); w.Code != 401 {
 		t.Fatal("expired session accepted")
 	}

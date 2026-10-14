@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -280,31 +279,7 @@ func truncateRunes(value string, maxRunes int) string {
 }
 
 func (s *Summarizer) Summarize(ctx context.Context, query string, papers []Paper) ([]Paper, bool) {
-	for i := range papers {
-		papers[i].Digest = heuristicDigest(query, papers[i])
-	}
-	if !s.Enabled() || len(papers) == 0 {
-		logFlow("【卡片】AI 未启用或无论文（ai=%v papers=%d）→ 使用本地启发式摘要", s.Enabled(), len(papers))
-		return papers, false
-	}
-
-	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
-	logFlow("【卡片】AI 开始生成摘要 | 检索词=%q | 共 %d 篇 → %d 批（每批最多 %d 篇，并发 %d）| 模型=%s",
-		query, len(papers), batchCount, summaryBatchSize, summaryMaxConcurrency, s.model)
-	started := time.Now()
-	digests := s.summarizeInBatches(ctx, query, papers)
-	applied := false
-	for i := range papers {
-		if item, ok := digests[papers[i].ID]; ok && item.Verdict != "" {
-			papers[i].Digest = item.Digest
-			if item.ReadMinutes > 0 {
-				papers[i].ReadMinutes = clampReadMinutes(item.ReadMinutes)
-			}
-			applied = true
-		}
-	}
-	logFlow("【卡片】AI 摘要全部完成（耗时 %s）| 成功 %d/%d 篇 applied=%v",
-		time.Since(started).Round(time.Millisecond), len(digests), len(papers), applied)
+	applied := s.SummarizeStream(ctx, query, papers, func([]Paper) {})
 	return papers, applied
 }
 
@@ -409,7 +384,7 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 				if result.err != nil {
 					papers[i].SummaryMessage = summaryFailure(result.err)
 				}
-				if item, ok := digests[papers[i].ID]; ok && item.Verdict != "" && strings.TrimSpace(item.Hook) != "" {
+				if item, ok := digests[papers[i].ID]; ok && validPaperHook(item.Hook, papers[i].Title) {
 					papers[i].Digest = item.Digest
 					papers[i].SummaryStatus = "success"
 					papers[i].SummaryMessage = "基于标题和摘要生成，未读取全文"
@@ -445,63 +420,6 @@ func (s *Summarizer) SummarizeStream(ctx context.Context, query string, papers [
 	logFlow("【卡片】AI 摘要全部完成（耗时 %s）| 成功 %d/%d 篇 applied=%v",
 		time.Since(started).Round(time.Millisecond), totalDigests, len(papers), applied)
 	return applied
-}
-
-func (s *Summarizer) summarizeInBatches(ctx context.Context, query string, papers []Paper) map[string]llmDigest {
-	type batchResult struct {
-		digests map[string]llmDigest
-	}
-
-	batchCount := (len(papers) + summaryBatchSize - 1) / summaryBatchSize
-	results := make(chan batchResult, batchCount)
-	semaphore := make(chan struct{}, summaryMaxConcurrency)
-	var workers sync.WaitGroup
-
-	for start := 0; start < len(papers); start += summaryBatchSize {
-		end := min(start+summaryBatchSize, len(papers))
-		batch := append([]Paper(nil), papers[start:end]...)
-		batchIdx := start/summaryBatchSize + 1
-		cardStart := start
-		cardEnd := end
-		workers.Add(1)
-		go func() {
-			defer workers.Done()
-			select {
-			case semaphore <- struct{}{}:
-				defer func() { <-semaphore }()
-			case <-ctx.Done():
-				logFlow("【卡片】第 %d/%d 批（%s）已取消，跳过", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd))
-				results <- batchResult{}
-				return
-			}
-			batchStart := time.Now()
-			logFlow("【卡片】第 %d/%d 批：正在为 %s 生成 AI 摘要…", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd))
-			for i := range batch {
-				logFlow("【卡片】等待 %s 返回中…（标题：%s）", fmt.Sprintf("卡片%d", cardStart+i+1), truncateRunes(batch[i].Title, 72))
-			}
-			digests, err := s.summarizeWithLLM(ctx, query, batch, cardStart)
-			if err != nil {
-				logFlow("【卡片】第 %d/%d 批（%s）失败（耗时 %s）：%v", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), err)
-				results <- batchResult{}
-				return
-			}
-			logFlow("【卡片】第 %d/%d 批（%s）完成（耗时 %s）| 成功 %d/%d", batchIdx, batchCount, cardRangeLabel(cardStart, cardEnd), time.Since(batchStart).Round(time.Millisecond), len(digests), len(batch))
-			results <- batchResult{digests: digests}
-		}()
-	}
-
-	go func() {
-		workers.Wait()
-		close(results)
-	}()
-
-	merged := make(map[string]llmDigest, len(papers))
-	for result := range results {
-		for id, digest := range result.digests {
-			merged[id] = digest
-		}
-	}
-	return merged
 }
 
 type llmDigest struct {
@@ -561,7 +479,9 @@ Other fields use concise Simplified Chinese adapted to reader preferences. Avoid
 
 EMPHASIS — inside "problem", "method", "result", and every "novelty" bullet, wrap the 1-3 most important phrases (e.g. the concrete number, the new mechanism name, the surprising finding) in **double asterisks** so a reader can skim the bold parts and still get the gist. Never bold whole sentences; bold the load-bearing noun phrase only. Example: "Achieves **89.4%% accuracy** on ImageNet using a **single-stage detector**."
 
-Return valid JSON: {"papers":[{"id":"...","hook":"...","verdict":"...","problem":"...","novelty":["...","..."],"method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}
+For immediate bilingual card fronts, also provide hook_en (faithful English translation of hook, one sentence). Provide title_zh for non-Chinese titles, or title_en for Chinese titles; omit the translation field matching the title's original language to avoid duplicate output. No new claims in translations. Do not return the original title as hook, and never prefix hook with 研究主题（原题）. For a review, state the concrete subject and the dimensions being reviewed instead of inventing a result.
+
+Return valid JSON: {"papers":[{"id":"...","hook":"...","hook_en":"...","title_zh":"...","title_en":"...","verdict":"...","problem":"...","novelty":["...","..."],"method":"...","result":"...","audience":"...","why_keep":"...","reading_focus":"..."}]}
 
 Papers: %s`, query, inputJSON)
 	prompt = strings.Replace(prompt, "\nPapers:", readerInstructions(ctx)+"\nPapers:", 1)
@@ -762,11 +682,18 @@ func pickNoveltyBullets(sentences []string, method string) Bullets {
 	return bullets
 }
 
-// buildChineseHook preserves the original topic when no AI summary is available.
-// A title is not evidence of improved performance, novelty, or experimental results.
+func validPaperHook(hook, title string) bool {
+	hook = strings.TrimSpace(hook)
+	return len([]rune(hook)) >= 6 && !strings.EqualFold(hook, strings.TrimSpace(title)) &&
+		!strings.Contains(hook, "研究主题（原题）") && !strings.HasPrefix(hook, "研究主题(原题)")
+}
+
+// On provider failure, quote one intact source sentence, never manufacture a
+// finding from the title. The UI labels this explicitly as an abstract excerpt.
 func buildChineseHook(novelty, method, result string, paper Paper) string {
-	if title := strings.TrimSpace(paper.Title); title != "" {
-		return "研究主题（原题）：" + title
+	sentences := splitSentences(paper.Abstract)
+	if len(sentences) > 0 {
+		return pickSentence(sentences, []string{"we review", "this review", "we survey", "we find", "results show", "we propose", "we introduce", "we investigate", "本文", "研究发现"}, 0)
 	}
 	return "暂无足够的论文信息，暂不能生成可靠概括。"
 }

@@ -7,3 +7,10 @@
 /*.exe
 /release/
 /backups/
+/invites-*/
+/tests/__pycache__/
+/mobile/node_modules/
+/mobile/www/
+/mobile/**/*.keystore
+/mobile/**/*.jks
+/mobile/android/app/src/main/res/drawable-nodpi/product_logo.png

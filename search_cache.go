@@ -15,20 +15,53 @@ import (
 
 const searchCacheTTL = 30 * time.Minute
 const searchCacheMaxBytes = 4 << 20
+const betaCacheBudget = 32 << 20
 
 type cachedResponse struct {
 	data    []byte
 	created time.Time
 }
 type searchCache struct {
-	mu      sync.Mutex
-	entries map[string]cachedResponse
-	flights map[string]chan struct{}
-	bytes   int
+	mu       sync.Mutex
+	entries  map[string]cachedResponse
+	flights  map[string]chan struct{}
+	bytes    int
+	maxBytes int
+	expiry   *time.Timer
 }
 
 func newSearchCache() *searchCache {
-	return &searchCache{entries: map[string]cachedResponse{}, flights: map[string]chan struct{}{}}
+	return &searchCache{entries: map[string]cachedResponse{}, flights: map[string]chan struct{}{}, maxBytes: searchCacheMaxBytes}
+}
+
+// One timer per non-empty cache; idle accounts release expired payloads too.
+func (c *searchCache) expireLocked(now time.Time) {
+	for key, item := range c.entries {
+		if now.Sub(item.created) >= searchCacheTTL {
+			delete(c.entries, key)
+			c.bytes -= len(item.data)
+		}
+	}
+}
+
+func (c *searchCache) scheduleExpiryLocked() {
+	if c.expiry != nil || len(c.entries) == 0 {
+		return
+	}
+	var earliest time.Time
+	for _, item := range c.entries {
+		deadline := item.created.Add(searchCacheTTL)
+		if earliest.IsZero() || deadline.Before(earliest) {
+			earliest = deadline
+		}
+	}
+	c.expiry = time.AfterFunc(time.Until(earliest), func() {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		c.expiry = nil
+		c.expireLocked(time.Now())
+		c.scheduleExpiryLocked()
+	})
 }
 func (c *searchCache) get(key string) ([]byte, bool) {
 	if c == nil {
@@ -53,14 +86,34 @@ func (c *searchCache) put(key string, data []byte) {
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.expireLocked(time.Now())
+	if len(data) > c.maxBytes {
+		return
+	}
 	if old, ok := c.entries[key]; ok {
 		c.bytes -= len(old.data)
 		delete(c.entries, key)
 	}
-	for len(c.entries) >= 16 || c.bytes+len(data) > searchCacheMaxBytes {
+	// Small translated fragments share the byte budget but not the 16-result
+	// search count. A single 24-fragment batch must not evict itself or searches.
+	translation := strings.HasPrefix(key, "translation:")
+	entryLimit := 16
+	if translation {
+		entryLimit = 256
+	}
+	count := 0
+	for k := range c.entries {
+		if strings.HasPrefix(k, "translation:") == translation {
+			count++
+		}
+	}
+	for count >= entryLimit || c.bytes+len(data) > c.maxBytes {
 		oldest := ""
 		var at time.Time
 		for k, e := range c.entries {
+			if count >= entryLimit && strings.HasPrefix(k, "translation:") != translation {
+				continue
+			}
 			if oldest == "" || e.created.Before(at) {
 				oldest = k
 				at = e.created
@@ -70,10 +123,14 @@ func (c *searchCache) put(key string, data []byte) {
 			break
 		}
 		c.bytes -= len(c.entries[oldest].data)
+		if strings.HasPrefix(oldest, "translation:") == translation {
+			count--
+		}
 		delete(c.entries, oldest)
 	}
 	c.entries[key] = cachedResponse{data: append([]byte(nil), data...), created: time.Now()}
 	c.bytes += len(data)
+	c.scheduleExpiryLocked()
 }
 
 // Serialize identical work within one account. Waiters reuse only completed results.

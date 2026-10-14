@@ -41,7 +41,7 @@ func TestSummarizeBatchesLargeDeck(t *testing.T) {
 		}
 		items := make([]llmDigest, 0, len(batch))
 		for _, paper := range batch {
-			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Verdict: "AI summary", Problem: "Research question"}})
+			items = append(items, llmDigest{ID: paper.ID, Digest: Digest{Hook: "A concrete supported finding", HookEN: "A concrete supported finding", TitleZH: "论文译名", Verdict: "AI summary", Problem: "Research question"}})
 		}
 		content, _ := json.Marshal(llmDigestResponse{Papers: items})
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -67,6 +67,9 @@ func TestSummarizeBatchesLargeDeck(t *testing.T) {
 	for _, paper := range result {
 		if paper.Digest.Verdict != "AI summary" {
 			t.Fatalf("paper %s did not receive its AI digest", paper.ID)
+		}
+		if paper.Digest.HookEN != "A concrete supported finding" || paper.Digest.TitleZH != "论文译名" {
+			t.Fatalf("paper %s lost its prepared bilingual front", paper.ID)
 		}
 	}
 }

@@ -22,7 +22,7 @@ const state = {
   libraryFilter: "save",
   libraryTags: [],
   librarySort: "recent",
-  appearance: "system",
+  appearance: "light",
   aiModel: "",
   imageEnabled: false,
   imageModel: "",
@@ -47,21 +47,6 @@ const state = {
   streaming: false,
 };
 
-/* ── Mock achievement badges (front-card banner) ── */
-// Each badge is a small "why this paper deserves attention" tag.
-// Placement is deterministic per paperId — same paper always gets same badge (or none).
-const MOCK_BADGES = [
-  { id: "top-agents",   emoji: "👑", text: "#1 in LLM Agents this week",   color: "#f59e0b" },
-  { id: "top-diffusion",emoji: "👑", text: "#1 in Diffusion Models this week", color: "#8b5cf6" },
-  { id: "top-rag",      emoji: "🏆", text: "Top 5 in RAG this week",        color: "#0ea5e9" },
-  { id: "top-vlm",      emoji: "🏆", text: "Top 5 in Vision-Language",      color: "#ec4899" },
-  { id: "cvpr-best",    emoji: "🎉", text: "CVPR 2024 Best Paper",          color: "#ef4444" },
-  { id: "neurips-oral", emoji: "🎤", text: "NeurIPS 2024 Oral",             color: "#7c3aed" },
-  { id: "icml-honor",   emoji: "🌟", text: "ICML 2024 Honorable Mention",   color: "#0891b2" },
-  { id: "trending",     emoji: "🔥", text: "Trending +48% this week",       color: "#f97316" },
-  { id: "citations",    emoji: "📈", text: "1k+ citations in 6 months",     color: "#14b8a6" },
-  { id: "editors",      emoji: "✨", text: "Editor's pick",                 color: "#a855f7" },
-];
 
 function hashString(str) {
   let h = 2166136261 >>> 0;
@@ -72,104 +57,7 @@ function hashString(str) {
   return h >>> 0;
 }
 
-// Deterministic: same paper id always resolves to the same (or no) badge.
-function pickFriendRec(paperId) {
-  return null; // Only verified awards may be displayed.
-  if (!paperId) return null;
-  const h = hashString(paperId);
-  // ~40% of cards get a badge
-  if ((h % 100) >= 40) return null;
-  const badge = MOCK_BADGES[h % MOCK_BADGES.length];
-  return { badge };
-}
-
-
-// Fallback papers used silently when the live search returns zero results.
-// These are real, well-known works so users still get browseable content
-// during upstream outages. No "offline / demo / mock" labels are surfaced.
-const FALLBACK_PAPERS = [
-  {
-    id: "arxiv:2303.11366v4",
-    title: "Reflexion: Language Agents with Verbal Reinforcement Learning",
-    abstract: "Large language models (LLMs) have been increasingly used to interact with external environments (e.g., games, compilers, APIs) as goal-driven agents. However, it remains challenging for these language agents to quickly and efficiently learn from trial-and-error as traditional reinforcement learning methods require extensive training samples and expensive model fine-tuning. We propose Reflexion, a novel framework to reinforce language agents not by updating weights, but instead through linguistic feedback. Concretely, Reflexion agents verbally reflect on task feedback signals, then maintain their own reflective text in an episodic memory buffer to induce better decision-making in subsequent trials. Reflexion is flexible enough to incorporate various types (scalar values or free-form language) and sources (external or internally simulated) of feedback signals, and obtains significant improvements over a baseline agent across diverse tasks (sequential decision-making, coding, language reasoning).",
-    hookZh: "让大模型把每次失败写成自省笔记,下一次决策就更聪明。",
-    authors: [{ name: "Noah Shinn" }, { name: "Federico Cassano" }, { name: "Ashwin Gopinath" }, { name: "Karthik Narasimhan" }, { name: "Shunyu Yao" }],
-    year: 2023,
-    publication_date: "2023-03-20",
-    venue: "NeurIPS 2023",
-    citation_count: 1420,
-    influential_citation_count: 180,
-    fields: ["cs.AI", "cs.CL"],
-    url: "https://arxiv.org/abs/2303.11366",
-    pdf_url: "https://arxiv.org/pdf/2303.11366",
-    external_ids: { ArXiv: "2303.11366v4" },
-    match_score: 92,
-    read_minutes: 55,
-    source: "arXiv",
-  },
-  {
-    id: "arxiv:2310.11511v1",
-    title: "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection",
-    abstract: "Despite their remarkable capabilities, large language models (LLMs) often produce responses containing factual inaccuracies due to their sole reliance on the parametric knowledge they encapsulate. Retrieval-Augmented Generation (RAG), an ad hoc approach that augments LMs with retrieval of relevant knowledge, decreases such issues. However, indiscriminately retrieving and incorporating a fixed number of retrieved passages, regardless of whether retrieval is necessary, or passages are relevant, diminishes LM versatility or can lead to unhelpful response generation. We introduce a new framework called Self-Reflective Retrieval-Augmented Generation (Self-RAG) that enhances an LM's quality and factuality through retrieval and self-reflection. Our framework trains a single arbitrary LM that adaptively retrieves passages on-demand, and generates and reflects on retrieved passages and its own generations using special tokens, called reflection tokens.",
-    hookZh: "教模型自己判断啥时候该查资料,回答少犯事实错误。",
-    authors: [{ name: "Akari Asai" }, { name: "Zeqiu Wu" }, { name: "Yizhong Wang" }, { name: "Avirup Sil" }, { name: "Hannaneh Hajishirzi" }],
-    year: 2023,
-    publication_date: "2023-10-17",
-    venue: "ICLR 2024",
-    citation_count: 980,
-    influential_citation_count: 112,
-    fields: ["cs.CL"],
-    url: "https://arxiv.org/abs/2310.11511",
-    pdf_url: "https://arxiv.org/pdf/2310.11511",
-    external_ids: { ArXiv: "2310.11511v1" },
-    match_score: 88,
-    read_minutes: 62,
-    source: "arXiv",
-  },
-  {
-    id: "arxiv:2310.08560v1",
-    title: "MemGPT: Towards LLMs as Operating Systems",
-    abstract: "Large language models (LLMs) have revolutionized AI, but are constrained by limited context windows, hindering their utility in tasks like extended conversations and document analysis. To enable using context beyond limited context windows, we propose virtual context management, a technique drawing inspiration from hierarchical memory systems in traditional operating systems that provide the appearance of large memory resources through data movement between fast and slow memory. Using this technique, we introduce MemGPT (Memory-GPT), a system that intelligently manages different memory tiers in order to effectively provide extended context within the LLM's limited context window, and utilizes interrupts to manage control flow between itself and the user.",
-    hookZh: "把操作系统内存分层的思路搬进大模型,超长对话也不失忆。",
-    authors: [{ name: "Charles Packer" }, { name: "Sarah Wooders" }, { name: "Kevin Lin" }, { name: "Vivian Fang" }, { name: "Shishir G. Patil" }, { name: "Ion Stoica" }, { name: "Joseph E. Gonzalez" }],
-    year: 2023,
-    publication_date: "2023-10-12",
-    venue: "arXiv",
-    citation_count: 640,
-    influential_citation_count: 78,
-    fields: ["cs.AI"],
-    url: "https://arxiv.org/abs/2310.08560",
-    pdf_url: "https://arxiv.org/pdf/2310.08560",
-    external_ids: { ArXiv: "2310.08560v1" },
-    match_score: 85,
-    read_minutes: 48,
-    source: "arXiv",
-  },
-];
-
-// Attaches a heuristic digest so back-of-card looks fully populated.
-function withFallbackDigest(paper) {
-  const abs = paper.abstract || "";
-  const firstSentence = abs.split(/(?<=[.!?])\s+/)[0] || abs.slice(0, 220);
-  return {
-    ...paper,
-    digest: {
-      verdict: "值得仔细读一读的高影响力工作",
-      hook: paper.hookZh || firstSentence,
-      problem: firstSentence,
-      novelty: [firstSentence.slice(0, 160)],
-      method: firstSentence,
-      result: "See the paper for quantitative results.",
-      audience: `Researchers interested in ${(paper.fields && paper.fields[0]) || "this area"}`,
-      why_keep: "Frequently cited and widely referenced in this space.",
-      reading_focus: "Read the method figures and main experiments first.",
-    },
-  };
-}
-
-function fallbackPapersForQuery(_query) {
-  return FALLBACK_PAPERS.map(withFallbackDigest);
-}
+function pickFriendRec() { return null; } // No unverified award labels.
 
 const ONBOARDING_STORAGE_KEY = "paperswipe-onboarding-v1" + (window.PAPERSWIPE_USER || "");
 const APPEARANCE_STORAGE_KEY = "paperswipe-appearance-v1" + (window.PAPERSWIPE_USER || "");
@@ -177,12 +65,13 @@ const elements = {};
 let toastTimer;
 let onboardingStep = 0;
 let onboardingProfile = { ...DEFAULT_PROFILE, topics: [...DEFAULT_PROFILE.topics] };
+let settingsTopicDraft = [];
+let topicEditRevision = 0;
 
 /* ── Card swipe state ── */
 let isFlipped = false;
 let flipGuard = false;
 let dragging = false;
-let dragDX = 0, dragDY = 0, dragStartX = 0, dragStartY = 0, dragStartTime = 0;
 let weekPlanSwipe = null;
 
 function initializeApp() {
@@ -445,6 +334,11 @@ function bindEvents() {
       return;
     }
     const libraryTag = event.target.closest("[data-library-tag]");
+    if (event.target.closest('[data-library-clear-filters]')) {
+      state.libraryTags = []; state.librarySearch = '';
+      elements.librarySearchInput.value = ''; elements.librarySearchClear.hidden = true;
+      renderLibrary(); animateLibraryChange(); return;
+    }
     if (libraryTag) {
       const tag = libraryTag.dataset.libraryTag;
       const index = state.libraryTags.indexOf(tag);
@@ -548,7 +442,7 @@ function bindEvents() {
       const action = event.target.closest("[data-library-export-action]")?.dataset.libraryExportAction;
       if (!action) return;
       if (action === "all") selectAllLibraryVisible();
-      else if (action === "clear") clearLibrarySelection();
+      else if (action === "delete") deleteLibraryPapers([...state.librarySelected]);
       else if (action === "cancel") toggleLibrarySelectMode(false);
       else if (action === "bibtex") exportSelectedBibTeX();
       else if (action === "zotero") exportSelectedToZotero();
@@ -572,11 +466,11 @@ function bindEvents() {
       const prompt = AI_BOT_PROMPTS.find((item) => item.id === suggestion.dataset.botPrompt);
       if (!prompt) return;
       if (prompt.autoSend) {
-        elements.aiBotInput.value = prompt.prefill;
+        elements.aiBotInput.value = window.PaperSwipeI18n?.t(prompt.prefill) || prompt.prefill;
         sendBotMessage();
         return;
       }
-      elements.aiBotInput.value = prompt.prefill;
+      elements.aiBotInput.value = window.PaperSwipeI18n?.t(prompt.prefill) || prompt.prefill;
       elements.aiBotInput.focus();
       elements.aiBotInput.dispatchEvent(new Event("input"));
       const cursor = elements.aiBotInput.value.indexOf("……");
@@ -628,6 +522,18 @@ function bindEvents() {
   });
 
   document.querySelector("#save-topics-button").addEventListener("click", saveSettingsTopics);
+  elements.settingsTopicInput.addEventListener('input', () => { topicEditRevision++; document.querySelector('#topic-update-error').hidden = true; });
+  elements.settingsTopicInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.isComposing && (event.ctrlKey || event.metaKey)) { event.preventDefault(); saveSettingsTopics(); }
+  });
+  document.querySelector('#reset-topic-draft').addEventListener('click', () => {
+    topicEditRevision++; settingsTopicDraft = [...onboardingProfile.topics];
+    elements.settingsTopicInput.value = onboardingProfile.researchIntent || onboardingProfile.searchQuery || settingsTopicDraft.join(' ');
+    document.querySelector('#topic-update-error').hidden = true; renderSettings();
+  });
+  // Keep research preferences together, then display preferences and optional integration.
+  const readerSection = document.querySelector('[aria-labelledby="feed-settings-title"]');
+  document.querySelector('[aria-labelledby="research-theme-title"]').after(readerSection);
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     button.addEventListener("click", () => selectAppearance(button.dataset.appearance));
   });
@@ -710,7 +616,7 @@ function loadOnboardingProfile() {
 
 function loadAppearance() {
   const saved = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-  return ["light", "system", "dark"].includes(saved) ? saved : "system";
+  return ["light", "system", "dark"].includes(saved) ? saved : "light";
 }
 
 function fireConfetti(popperBtn) {
@@ -919,12 +825,12 @@ async function prepareResearchIntent() {
   const label = elements.analyzeTopicButton.querySelector("span");
   const previousLabel = label.textContent;
   elements.analyzeTopicButton.disabled = true;
-  label.textContent = "Analyzing your topic…";
+  label.textContent = "等待服务并分析主题…";
 
   try {
     const response = await fetch("/api/topic-plan", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Prefer: 'wait=20' },
       body: JSON.stringify({ description }),
     });
     const payload = await response.json();
@@ -998,7 +904,7 @@ async function performSearch(rawQuery, {refresh=false} = {}) {
   const revision = ++searchRevision;
   const controller = new AbortController();
   activeSearchController = controller;
-  const searchTimeout = setTimeout(() => controller.abort(), 125000);
+  const searchTimeout = setTimeout(() => controller.abort(), 150000);
   state.loading = true;
   document.querySelector('#refresh-search').disabled=true;
   state.query = query;
@@ -1011,6 +917,8 @@ async function performSearch(rawQuery, {refresh=false} = {}) {
   elements.resultQuery.textContent = query;
   setActionEnabled(false);
   renderLoadingCard();
+  const waitingLabel = elements.card.querySelector('#cardHero');
+  if (waitingLabel) waitingLabel.textContent = '正在连接检索服务，繁忙时最多等待 20 秒…';
 
   let receivedAny = false;
   let completed = false;
@@ -1024,7 +932,7 @@ async function performSearch(rawQuery, {refresh=false} = {}) {
     const params = new URLSearchParams({q:query, limit:'20', ...readerPreferences()});
     if(refresh)params.set('refresh','1');
     const response = await fetch(`/api/search?${params}`, {
-      headers: { Accept: "text/event-stream" },
+      headers: { Accept: "text/event-stream", Prefer: 'wait=20' },
       signal: controller.signal,
     });
     console.log(`[search] response received status=${response.status} elapsed=${(performance.now()-t0).toFixed(0)}ms`);
@@ -1226,9 +1134,12 @@ function renderErrorCard(message, title = '搜索暂未完成') {
   elements.card.innerHTML = `
     <div class="card-inner" id="cardInner">
       <div class="card-face card-front" id="cardFront">
-        <div class="card-hero" id="cardHero" style="display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;text-align:center;padding:30px;">
-          ${escapeHTML(title)}<br><small style="font-weight:400;opacity:.7;margin-top:8px;line-height:1.5;">${escapeHTML(message)}</small>
-          <button id="retry-search" type="button" style="padding:12px 24px;margin-top:20px;border-radius:12px;cursor:pointer;">重新检索</button>
+        <div class="search-recovery" id="cardHero">
+          <span class="recovery-icon" aria-hidden="true"><i data-lucide="book-open-check"></i></span>
+          <h2>${escapeHTML(title)}</h2>
+          <p>${escapeHTML(message)}</p>
+          <div class="recovery-query"><span>当前主题</span><strong data-i18n-skip>${escapeHTML(state.query)}</strong></div>
+          <div class="recovery-actions"><button id="retry-search" type="button"><i data-lucide="rotate-cw"></i><span>重新检索</span></button><button id="change-search-topic" type="button">修改研究主题</button></div>
         </div>
       </div>
       <div class="card-face card-back" id="cardBack">
@@ -1240,11 +1151,14 @@ function renderErrorCard(message, title = '搜索暂未完成') {
   elements.cardBack = document.querySelector("#cardBack");
   elements.cardHero = document.querySelector("#cardHero");
   document.querySelector("#retry-search")?.addEventListener("click", (event) => { event.stopPropagation(); performSearch(state.query); });
+  document.querySelector('#change-search-topic')?.addEventListener('click', openSettingsPage);
+  refreshIcons();
   setActionEnabled(false);
   updateProgress();
 }
 
 function renderCard() {
+  seedFrontTranslations();
   const paper = currentPaper();
   renderUpcomingCards();
   /* Reset card state */
@@ -1342,7 +1256,7 @@ function renderCard() {
             Tap to flip
           </div>
           <div class="card-body">
-            <p class="card-subtitle" data-field="hook">${escapeHTML(c.hook)}</p>
+            ${hookNotice(paper)}<p class="card-subtitle" data-field="hook">${escapeHTML(c.hook)}</p>
             <h2 class="card-title" data-field="title">${escapeHTML(c.title)}</h2>
           </div>
           <div class="card-byline">
@@ -1461,6 +1375,8 @@ function renderCard() {
 
   // The next paper has already risen into place under the departing card.
   updateDeckProgress(0, false);
+  window.PaperSwipeI18n?.apply(elements.card);
+  window.PaperSwipeContentLanguage?.refresh();
 
 }
 
@@ -1530,8 +1446,9 @@ function bindReaderPicker() {
 
 
 function polishHook(raw) {
-  const text = String(raw || "").replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
+  const text = window.PaperSwipeText.clean(raw).replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
   if (text.length < 6) return null;
+  if (/研究主题[（(]原题[）)]|暂无足够的论文信息/.test(text)) return null;
   // Old saved cards can contain promotional placeholders, not paper summaries.
   if (/matches current research interests|research paper worth checking out|noteworthy paper|advances the state of the art|值得关注的新思路|^一文读懂：|^给 AI 装上更好的记忆机制：|^让检索更准一步：|^让智能体更会办事：/i.test(text)) return null;
   if (/^(摘要|确认|建议|未提供|未明确|未报告|值得一看)[。.!！?？]*$/.test(text)) return null;
@@ -1542,10 +1459,32 @@ function polishHook(raw) {
 /* The quote explains this paper, not why the user should like it. */
 function pickSubtitle(paper) {
   const hook = polishHook(paper.digest?.hook);
-  if (hook) return hook;
-  const title = String(paper.title || "").trim();
-  if (title) return "研究主题（原题）：" + title;
+  if (hook && hook.toLowerCase() !== String(paper.title || '').trim().toLowerCase()) return hook;
+  // Legacy cards keep original records; one intact source sentence is safer
+  // than manufacturing a finding from a title when the model was unavailable.
+  const sentences = window.PaperSwipeText.clean(paper.abstract).trim().match(/[^.!?。！？]+[.!?。！？]?/g) || [];
+  if (sentences.length) return (sentences.find(s => /we review|this review|we survey|we find|results show|we propose|we introduce|we investigate|本文|研究发现/i.test(s)) || sentences[0]).trim();
+  const title = window.PaperSwipeText.clean(paper.title).trim();
+  if (title) return title;
   return "暂无足够的论文信息，暂不能生成可靠概括。";
+}
+
+function hookNotice(paper) {
+  const hook = polishHook(paper.digest?.hook);
+  if (hook && hook !== paper.title && !['failed','disabled'].includes(paper.summary_status)) return '';
+  return `<span class="card-hook-note">${paper.abstract ? 'Abstract excerpt · summary unavailable' : 'Title only · abstract unavailable'}</span>`;
+}
+
+function seedFrontTranslations() {
+  const language = window.PaperSwipeContentLanguage;
+  if (!language?.remember) return;
+  for (const paper of [...state.papers,...state.library.map(entry => entry.paper)]) {
+    const digest = paper.digest || {};
+    language.remember(paper.title,'zh',digest.title_zh);
+    language.remember(paper.title,'en',digest.title_en);
+    const hook = polishHook(digest.hook);
+    if (hook) language.remember(hook,'en',digest.hook_en);
+  }
 }
 
 /* Derive "Best for" audience tags from paper data */
@@ -1608,6 +1547,36 @@ function deriveTags(paper) {
   return [...fields, firstNoveltyBullet(paper) ? "Novel method" : "Research", paper.pdf_url ? "Open PDF" : "Metadata"].slice(0, 3);
 }
 
+// Stable subject identities across providers and library tabs. Utility badges
+// (PDF availability, novelty) are not research disciplines.
+const SUBJECT_ALIASES = {
+  'cs.ai':'Artificial Intelligence', 'cs.cl':'Natural Language Processing',
+  'cs.cv':'Computer Vision', 'cs.lg':'Machine Learning', 'stat.ml':'Machine Learning',
+  'cs.ro':'Robotics', 'cs.hc':'Human-Computer Interaction', 'cs.se':'Software Engineering',
+  '计算机科学':'Computer Science', '人工智能':'Artificial Intelligence',
+  '自然语言处理':'Natural Language Processing', '计算机视觉':'Computer Vision', '机器学习':'Machine Learning',
+};
+function librarySubjects(paper) {
+  const subjects = new Set();
+  for (const raw of paper.fields || []) {
+    if (typeof raw !== 'string' || !raw.trim()) continue;
+    const field = raw.trim(), canonical = SUBJECT_ALIASES[field.toLowerCase()] || SUBJECT_ALIASES[field] || window.PaperSwipeI18n?.t(field,'en') || field;
+    subjects.add(canonical);
+    if (/^cs\./i.test(field) || ['Artificial Intelligence','Natural Language Processing','Computer Vision','Machine Learning','Robotics','Human-Computer Interaction','Software Engineering'].includes(canonical)) subjects.add('Computer Science');
+  }
+  return [...subjects];
+}
+
+window.paperTranslationLookahead = () => {
+  if (typeof state === 'undefined' || state.activeView !== 'discover' || document.body.classList.contains('is-onboarding')) return [];
+  return state.papers.slice(state.index + 1,state.index + 3).flatMap(paper => [
+    paper.title, pickSubtitle(paper), deriveTags(paper).join(' · '),
+    truncateText(paper.digest?.problem), truncateText(paper.digest?.method || firstNoveltyBullet(paper)), truncateText(paper.digest?.result),
+    ...noveltyBullets(paper), paper.digest?.why_keep, paper.digest?.audience || paper.digest?.reading_focus,
+    ...deriveBestFor(paper),
+  ]).filter(text => typeof text === 'string' && text.trim());
+};
+
 /* ── Stamp visibility (4-direction) ── */
 function updateStamps(dx, dy, strength) {
   const card = elements.card;
@@ -1628,94 +1597,38 @@ function updateStamps(dx, dy, strength) {
 /* ── Gesture system (drag = swipe, tap = flip) ── */
 function bindCardGestures() {
   const card = elements.card;
-
-  function onDown(e) {
-    if (!currentPaper() || state.actionBusy) return;
-    if (e.target.closest("button, a, [data-stop-click]")) return;
-    if (isFlipped && e.target.closest(".back-details")) return;
-    dragging = true; dragDX = 0; dragDY = 0;
-    dragStartX = e.clientX; dragStartY = e.clientY;
-    dragStartTime = Date.now();
-    card.classList.add("is-dragging");
-    card.setPointerCapture(e.pointerId);
-    document.body.style.userSelect = "none";
-    document.body.style.webkitUserSelect = "none";
-    if (window.getSelection) window.getSelection().removeAllRanges();
-  }
-
-  function onMove(e) {
-    if (!dragging) return;
-    dragDX = e.clientX - dragStartX;
-    dragDY = e.clientY - dragStartY;
-
-    /* Full 3D tilt */
-    const rx = (dragDY / 300) * 16;
-    const ry = (dragDX / 200) * 12;
-    card.style.transform = `translate(${dragDX}px, ${dragDY}px) rotateX(${-rx}deg) rotateY(${ry}deg)`;
-
-    const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
-    const lift = Math.min(dist / 30, 1);
-    const shadowAlpha = .10 + lift * .12;
-    card.style.boxShadow = `
-      0 1px 2px rgba(0,0,0,.04),
-      0 ${4 + lift * 8}px ${8 + lift * 10}px rgba(0,0,0,.06),
-      0 ${14 + lift * 16}px ${28 + lift * 20}px rgba(0,0,0,${shadowAlpha}),
-      0 ${28 + lift * 24}px ${56 + lift * 32}px rgba(0,0,0,${shadowAlpha * .8})`;
-
-    const strength = Math.min(1, Math.max(Math.abs(dragDX), Math.abs(dragDY)) / 110);
-    updateDeckProgress(strength, false);
-
-    updateStamps(dragDX, dragDY, strength);
-  }
-
-  function onUp() {
-    if (!dragging) return;
+  const resetDrag = () => {
     dragging = false;
-    card.classList.remove("is-dragging");
-    document.body.style.userSelect = "";
-    document.body.style.webkitUserSelect = "";
-
-    const dist = Math.sqrt(dragDX * dragDX + dragDY * dragDY);
-    const dt = Date.now() - dragStartTime;
-    const velocity = dt > 0 ? dist / dt : 0;
-
-    /* Tap: flip (front → back) or unflip (back → front) */
-    if (dist < 8 && dt < 300) {
+    document.body.style.userSelect = document.body.style.webkitUserSelect = '';
+  };
+  bindSwipeSurface(card, {
+    canStart: event => Boolean(currentPaper()) && !state.actionBusy && !(isFlipped && event.target.closest('.back-details')),
+    start() {
+      dragging = true;
+      document.body.style.userSelect = document.body.style.webkitUserSelect = 'none';
+      window.getSelection()?.removeAllRanges();
+    },
+    move(dx, dy) {
+      card.style.transform = `translate(${dx}px, ${dy}px) rotateX(${-dy / 300 * 16}deg) rotateY(${dx / 200 * 12}deg)`;
+      const lift = Math.min(Math.hypot(dx, dy) / 30, 1), alpha = .10 + lift * .12;
+      card.style.boxShadow = `0 1px 2px rgba(0,0,0,.04), 0 ${4+lift*8}px ${8+lift*10}px rgba(0,0,0,.06), 0 ${14+lift*16}px ${28+lift*20}px rgba(0,0,0,${alpha}), 0 ${28+lift*24}px ${56+lift*32}px rgba(0,0,0,${alpha*.8})`;
+      const strength = Math.min(1, Math.max(Math.abs(dx), Math.abs(dy)) / 110);
+      updateDeckProgress(strength, false);
+      updateStamps(dx, dy, strength);
+    },
+    end: resetDrag,
+    cancel() { resetDrag(); springBack(); },
+    tap() {
       springBack();
       flipGuard = true;
       setTimeout(() => { flipGuard = false; }, 100);
       isFlipped ? unflip() : flip();
-      return;
-    }
-
-    /* Dynamic thresholds: fast flick needs less distance */
-    const fastFlick = velocity > 0.65;
-    const thresholdX = fastFlick ? 50 : 95;
-    const thresholdY = fastFlick ? 42 : 85;
-
-    /* Swipe: fly away with velocity boost */
-    if (dragDX < -thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("dismiss"); }
-    else if (dragDX > thresholdX && Math.abs(dragDX) > Math.abs(dragDY)) { if (isFlipped) unflip(); decide("save"); }
-    else if (dragDY < -thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("priority"); }
-    else if (dragDY > thresholdY && Math.abs(dragDY) > Math.abs(dragDX) * .8) { if (isFlipped) unflip(); decide("read"); }
-    else { springBack(); }
-  }
-
-  card.addEventListener("pointerdown", onDown);
-  card.addEventListener("pointermove", onMove);
-  card.addEventListener("pointerup", onUp);
-  card.addEventListener("pointercancel", () => {
-    if (!dragging) return;
-    dragging = false;
-    card.classList.remove("is-dragging");
-    document.body.style.userSelect = document.body.style.webkitUserSelect = "";
-    springBack();
+    },
+    swipe(action) { if (isFlipped) unflip(); void decide(action); },
   });
-
-  /* Tap anywhere on back to flip back */
-  card.addEventListener("click", (e) => {
+  card.addEventListener('click', event => {
     if (flipGuard || !isFlipped || !currentPaper() || dragging) return;
-    if (e.target.closest("button, a, [data-stop-click]")) return;
+    if (event.target.closest('button, a, [data-stop-click]')) return;
     unflip();
   });
 }
@@ -1812,15 +1725,7 @@ async function decide(action) {
   state.actionBusy = true;
 
   try {
-    const response = await fetch("/api/actions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paper, action }),
-    });
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new Error(`HTTP ${response.status} ${body.slice(0, 120)}`);
-    }
+    await PaperSwipeAPI.saveAction(paper, action);
     state.session[action] += 1;
     unflip();
     fly(action, 0);
@@ -1893,7 +1798,7 @@ function renderBotGreeting() {
     <img class="product-logo ai-bot-hero-avatar" src="/assets/paperswipe-logo.png" alt="PaperSwipe">
     <p class="ai-bot-hero-title">Hi, I'm your paper assistant</p>
     <p class="ai-bot-hero-sub">${count
-      ? `You have <b>${count}</b> papers in your Library${intent ? ` around "${escapeHTML(shorten(intent, 24))}"` : ""}. Tell me your goal and I'll help you plan.`
+      ? `<span>You have</span> <b>${count}</b> <span>papers in your Library.</span>${intent ? ` <span>Your focus:</span> <span data-i18n-skip>“${escapeHTML(shorten(intent,24))}”</span>` : ''} <span>Tell me your goal and I'll help you plan.</span>`
       : "Swipe a few papers into your Library from Explore, then I can help you plan your reading."}</p>
   `;
   elements.aiBotMessages.appendChild(hero);
@@ -2422,12 +2327,21 @@ function clearBotWelcome() {
   elements.aiBotMessages.querySelectorAll(".ai-bot-hero, .ai-bot-suggestions").forEach((el) => el.remove());
 }
 
+let libraryMutationRevision = 0;
+let libraryDeleteBusy = false;
+
 async function refreshLibrary() {
+  const libraryRevision = libraryMutationRevision;
+  const revision = scheduleRevision;
   try {
     const response = await fetch("/api/library");
+    if (!response.ok) throw new Error('无法读取文献库');
     const payload = await response.json();
+    if (libraryDeleteBusy || libraryRevision !== libraryMutationRevision) return;
     state.library = payload.papers || [];
+    if (!scheduleBusy && revision === scheduleRevision) applyScheduleSnapshot(payload.schedule);
     const ids = new Set(state.library.map((entry) => entry.paper?.id).filter(Boolean));
+    state.librarySelected = new Set([...state.librarySelected].filter(id => ids.has(id)));
     state.weekPlanDone = new Set([...state.weekPlanDone].filter((id) => ids.has(id)));
     state.weekPlanRemoved = new Set([...state.weekPlanRemoved].filter((id) => ids.has(id)));
     updateLibraryCounts();
@@ -2438,17 +2352,17 @@ async function refreshLibrary() {
   }
 }
 
-function renderLibrary() {
+function filteredLibraryEntries() {
   let entries = state.library.filter((entry) => entry.action === state.libraryFilter);
   if (state.libraryTags.length) {
-    const selected = new Set(state.libraryTags);
-    entries = entries.filter((entry) => deriveTags(entry.paper).some((tag) => selected.has(tag)));
+    entries = entries.filter((entry) => state.libraryTags.every(tag => librarySubjects(entry.paper).includes(tag)));
   }
   if (state.librarySearch) {
     const q = state.librarySearch;
     entries = entries.filter((entry) => {
       const p = entry.paper;
       return (p.title || "").toLowerCase().includes(q) ||
+        (window.PaperSwipeContentLanguage?.lookup(p.title || '') || '').toLowerCase().includes(q) ||
         (p.authors || []).some((a) => (a.name || "").toLowerCase().includes(q)) ||
         (p.abstract || "").toLowerCase().includes(q) ||
         (p.venue || "").toLowerCase().includes(q);
@@ -2459,12 +2373,19 @@ function renderLibrary() {
   } else if (state.librarySort === "easy") {
     entries = [...entries].sort((a, b) => numberOrZero(a.paper.read_minutes) - numberOrZero(b.paper.read_minutes));
   }
+  return entries;
+}
 
+function renderLibrary() {
+  const entries = filteredLibraryEntries();
   renderLibraryTags();
   if (!entries.length) {
     const labels = { save: "Interested", priority: "Key", read: "Read" };
-    elements.libraryList.innerHTML = `<div class="library-empty"><i data-lucide="library"></i><h2>${labels[state.libraryFilter]} 还是空的</h2><p>回到 Explore，保留第一篇真正值得读的论文。</p></div>`;
+    elements.libraryList.innerHTML = state.libraryTags.length || state.librarySearch
+      ? `<div class="library-empty"><i data-lucide="list-filter"></i><h2>No matching papers</h2><button type="button" class="settings-secondary" data-library-clear-filters>Clear filters</button></div>`
+      : `<div class="library-empty"><i data-lucide="library"></i><h2>${labels[state.libraryFilter]} 还是空的</h2><p>回到 Explore，保留第一篇真正值得读的论文。</p></div>`;
     refreshIcons();
+    updateLibraryExportBar();
     return;
   }
 
@@ -2479,7 +2400,7 @@ function renderLibrary() {
     return `<article class="library-card ${theme}${isSelected ? " is-selected" : ""}" data-library-card data-id="${escapeAttribute(paper.id)}">
       ${selectMode ? `<span class="library-card-check" aria-hidden="true"><i data-lucide="${isSelected ? "check-square" : "square"}"></i></span>` : ""}
       <header class="library-card-hero">
-        <div class="library-card-title">${escapeHTML(paper.title)}</div>
+        ${hookNotice(paper)}<div class="library-card-title library-card-hook">${escapeHTML(pickSubtitle(paper))}</div>
         <div class="library-card-byline">
           <span class="author-avatar">${escapeHTML(authorInitials)}</span>
           <div><strong>${escapeHTML(authors)}</strong><span>${escapeAttribute(venue)}</span></div>
@@ -2494,14 +2415,14 @@ function renderLibrary() {
 function collectLibraryTags() {
   const tags = [];
   state.library
-    .filter((entry) => entry.action === state.libraryFilter)
-    .forEach((entry) => deriveTags(entry.paper).forEach((tag) => {
+    .forEach((entry) => librarySubjects(entry.paper).forEach((tag) => {
       if (tag && !tags.includes(tag)) tags.push(tag);
     }));
-  return tags;
+  return tags.sort((a,b) => a.localeCompare(b,'en'));
 }
 
 function toggleLibrarySelectMode(forceValue) {
+  if (libraryDeleteBusy) return;
   const next = typeof forceValue === "boolean" ? forceValue : !state.librarySelectMode;
   state.librarySelectMode = next;
   if (!next) state.librarySelected.clear();
@@ -2513,28 +2434,52 @@ function toggleLibrarySelectMode(forceValue) {
 }
 
 function toggleLibrarySelection(id) {
+  if (libraryDeleteBusy) return;
   if (state.librarySelected.has(id)) state.librarySelected.delete(id);
   else state.librarySelected.add(id);
   renderLibrary();
 }
 
 function visibleLibraryIds() {
-  let entries = state.library.filter((entry) => entry.action === state.libraryFilter);
-  if (state.libraryTags.length) {
-    const selected = new Set(state.libraryTags);
-    entries = entries.filter((entry) => deriveTags(entry.paper).some((tag) => selected.has(tag)));
-  }
-  return entries.map((entry) => entry.paper.id);
+  return filteredLibraryEntries().map((entry) => entry.paper.id);
 }
 
 function selectAllLibraryVisible() {
-  visibleLibraryIds().forEach((id) => state.librarySelected.add(id));
+  if (libraryDeleteBusy) return;
+  const ids = visibleLibraryIds();
+  const allSelected = ids.length > 0 && ids.every(id => state.librarySelected.has(id));
+  ids.forEach(id => allSelected ? state.librarySelected.delete(id) : state.librarySelected.add(id));
   renderLibrary();
 }
 
-function clearLibrarySelection() {
-  state.librarySelected.clear();
-  renderLibrary();
+async function deleteLibraryPapers(ids) {
+  if (libraryDeleteBusy || !ids.length) return;
+  if (scheduleBusy) { showToast('Please wait for the schedule to finish saving.'); return; }
+  const t = value => window.PaperSwipeI18n.t(value);
+  if (!window.confirm(t('Delete selected papers?') + ` (${ids.length})\n` + t('This removes them from your Library and Schedule. You can save them again from search.'))) return;
+  libraryDeleteBusy = true;
+  libraryMutationRevision++;
+  updateLibraryExportBar();
+  try {
+    const payload = await window.PaperSwipeAPI.post('/api/library/delete', {ids});
+    if (!Array.isArray(payload.papers) || !payload.schedule || !payload.stats) throw new Error('Invalid deletion response');
+    state.library = payload.papers;
+    state.stats = payload.stats;
+    scheduleRevision++;
+    applyScheduleSnapshot(payload.schedule);
+    const remaining = new Set(state.library.map(entry => entry.paper.id));
+    state.librarySelected = new Set([...state.librarySelected].filter(id => remaining.has(id)));
+    updateLibraryCounts(); updateTodosBadge();
+    renderLibrary();
+    if (state.activeView === 'todos') renderWeekPlan();
+    showToast('Selected papers deleted.');
+  } catch (_) {
+    showToast('Could not delete papers. Your selection is unchanged.');
+  } finally {
+    libraryDeleteBusy = false;
+    libraryMutationRevision++;
+    updateLibraryExportBar();
+  }
 }
 
 function updateLibraryExportBar() {
@@ -2547,9 +2492,16 @@ function updateLibraryExportBar() {
     elements.libraryExportCount.textContent = String(state.librarySelected.size);
   }
   const empty = state.librarySelected.size === 0;
-  elements.libraryExportBar.querySelectorAll('[data-library-export-action="bibtex"], [data-library-export-action="zotero"]').forEach((btn) => {
-    btn.disabled = empty;
+  const ids = visibleLibraryIds();
+  const allSelected = ids.length > 0 && ids.every(id => state.librarySelected.has(id));
+  const allButton = elements.libraryExportBar.querySelector('[data-library-export-action="all"]');
+  allButton.textContent = allSelected ? 'Deselect all' : 'Select all';
+  allButton.setAttribute('aria-pressed',String(allSelected));
+  allButton.disabled = !ids.length || libraryDeleteBusy;
+  elements.libraryExportBar.querySelectorAll('[data-library-export-action="bibtex"], [data-library-export-action="zotero"], [data-library-export-action="delete"]').forEach((btn) => {
+    btn.disabled = empty || libraryDeleteBusy || btn.dataset.busy === '1';
   });
+  window.PaperSwipeI18n.apply(elements.libraryExportBar);
 }
 
 function bibtexEscape(text) {
@@ -2662,17 +2614,24 @@ async function testZoteroConnection() {
   const { apiKey, userId } = loadZoteroCredentials();
   if (!apiKey || !userId) { setZoteroStatus("请先填写 API Key 和 userID。", "warn"); return; }
   setZoteroStatus("正在验证连接…", "muted");
+  const button = document.querySelector('#zotero-test-button');
+  if (button.disabled) return;
+  button.disabled = true;
+  const controller = new AbortController(), timeout = setTimeout(() => controller.abort(),15000);
   try {
-    const res = await fetch(`${ZOTERO_API_BASE}/users/${encodeURIComponent(userId)}/items?limit=1&format=json`, {
+    const res = await fetch(`${ZOTERO_API_BASE}/keys/current`, {
       headers: { "Zotero-API-Key": apiKey, "Zotero-API-Version": "3" },
+      signal:controller.signal,
     });
-    if (res.status === 403 || res.status === 401) { setZoteroStatus("鉴权失败：请检查 API Key 是否有写入权限，以及 userID 是否正确。", "warn"); return; }
+    if (res.status === 403 || res.status === 401) { setZoteroStatus("Authentication failed. Check your API key and library access.", "warn"); return; }
     if (!res.ok) { setZoteroStatus(`连接失败：HTTP ${res.status}`, "warn"); return; }
-    const total = res.headers.get("Total-Results") || "?";
-    setZoteroStatus(`✓ 已连接。你的 library 当前有 ${total} 条 items。`, "ok");
+    const info = await res.json();
+    if (String(info.userID) !== userId) { setZoteroStatus('The user ID does not match this API key.','warn'); return; }
+    if (!info.access?.user?.library) { setZoteroStatus('Authentication failed. Check your API key and library access.','warn'); return; }
+    setZoteroStatus(info.access.user.write ? 'Connection verified with write access to your personal library.' : 'This key is read-only. Enable personal-library write access to export papers.', info.access.user.write ? 'ok' : 'warn');
   } catch (err) {
     setZoteroStatus(`连接失败：${err.message || err}`, "warn");
-  }
+  } finally { clearTimeout(timeout); button.disabled = false; }
 }
 
 function paperToZoteroItem(paper) {
@@ -2718,6 +2677,8 @@ async function exportSelectedToZotero() {
   if (!apiKey || !userId) {
     showToast("请先在 Settings → Zotero 里填 API Key 和 userID");
     openSettingsPage();
+    document.querySelector('#zotero-settings').open = true;
+    document.querySelector('#zotero-settings').scrollIntoView({block:'center'});
     return;
   }
   const papers = state.library
@@ -2767,6 +2728,7 @@ async function exportSelectedToZotero() {
 }
 
 function renderLibraryTags() {
+  const scrollLeft = elements.libraryTags.scrollLeft;
   const tags = collectLibraryTags();
   if (!tags.length) {
     elements.libraryTags.innerHTML = "";
@@ -2776,23 +2738,14 @@ function renderLibraryTags() {
     const active = state.libraryTags.includes(tag);
     return `<button type="button" class="library-tag${active ? " is-active" : ""}" data-library-tag="${escapeAttribute(tag)}" aria-pressed="${active}">${escapeHTML(tag)}</button>`;
   }).join("");
+  if (state.libraryTags.length) elements.libraryTags.insertAdjacentHTML('beforeend','<button type="button" class="library-filter-clear" data-library-clear-filters>Clear filters</button>');
+  window.PaperSwipeI18n.apply(elements.libraryTags);
+  window.PaperSwipeContentLanguage.refresh();
+  elements.libraryTags.scrollLeft = scrollLeft;
 }
 
 async function removeFromLibrary(id) {
-  const entry = state.library.find((item) => item.paper.id === id);
-  if (!entry) return;
-  try {
-    const response = await fetch("/api/actions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paper: entry.paper, action: "dismiss" }),
-    });
-    if (!response.ok) throw new Error("移除失败");
-    showToast("已移出 Library");
-    await Promise.all([refreshLibrary(), refreshStats()]);
-  } catch (error) {
-    showToast(error.message);
-  }
+  if (state.library.some(item => item.paper.id === id)) await deleteLibraryPapers([id]);
 }
 
 async function refreshStats() {
@@ -3142,12 +3095,13 @@ function toggleTrendExpand(id) {
 /* ── Trend paper overlay — reuses the home-card CSS but with its own,
    non-persisting state. Swiping cycles through the topic's papers instead
    of firing /api/actions. ── */
-const trendOverlayState = { topicId: null, index: 0, flipped: false };
+const trendOverlayState = { topicId: null, index: 0, flipped: false, busy: false, revision: 0 };
 let trendOverlayBound = false;
 
 function openTrendPaperOverlay(topicId, startIndex) {
   const papers = TRENDING_TOPIC_PAPERS[topicId];
   if (!papers || !papers.length) return;
+  trendOverlayState.revision++;
   trendOverlayState.topicId = topicId;
   trendOverlayState.index = Math.max(0, Math.min(papers.length - 1, startIndex || 0));
   trendOverlayState.flipped = false;
@@ -3163,6 +3117,7 @@ function openTrendPaperOverlay(topicId, startIndex) {
 
 let trendDismissTimer;
 function closeTrendOverlay() {
+  trendOverlayState.revision++;
   const overlay = document.querySelector("#trend-overlay");
   if (overlay.hidden || overlay.classList.contains('is-dismissing')) return;
   const finish = () => {
@@ -3304,11 +3259,30 @@ function renderTrendOverlayCard() {
   }));
 }
 
-function trendOverlayFly(action, velocity) {
+async function trendOverlayFly(action, velocity) {
   const card = document.querySelector("#trend-overlay-card");
   const papers = TRENDING_TOPIC_PAPERS[trendOverlayState.topicId] || [];
   const paper = papers[trendOverlayState.index];
-  if (!paper) return;
+  if (!paper || trendOverlayState.busy) return;
+  trendOverlayState.busy = true;
+  const revision = trendOverlayState.revision;
+  try {
+    if (action !== 'dismiss') {
+      await PaperSwipeAPI.saveAction(paper, action);
+      void refreshLibrary();
+      void refreshStats();
+    }
+  } catch (error) {
+    if (revision === trendOverlayState.revision) {
+      card.style.transform = '';
+      card.style.opacity = '';
+      updateOverlayStamps(0, 0, 0);
+      showToast(`未保存：${error.message}`);
+    }
+    trendOverlayState.busy = false;
+    return;
+  }
+  if (revision !== trendOverlayState.revision) { trendOverlayState.busy = false; return; }
   card.style.transition = "transform 340ms cubic-bezier(.4,0,1,1), opacity 300ms ease";
   const boost = Math.min(1.6, 1 + (velocity || 0) * 0.7);
   let tx = 0, ty = 0, rx = 0, ry = 0;
@@ -3323,18 +3297,9 @@ function trendOverlayFly(action, velocity) {
   const labels = { dismiss: "Skipped", save: "Saved!", priority: "Marked Key!", read: "Marked Read" };
   showToast(labels[action] || action);
 
-  /* Persist to Library for save/priority/read — same as home decide(). Dismiss just advances. */
-  if (action !== "dismiss") {
-    fetch("/api/actions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paper, action }),
-    }).then((r) => {
-      if (r.ok) { refreshLibrary(); refreshStats(); }
-    }).catch((err) => console.warn("[trend] action failed", err));
-  }
-
   setTimeout(() => {
+    trendOverlayState.busy = false;
+    if (revision !== trendOverlayState.revision) return;
     if (trendOverlayState.index < papers.length - 1) {
       trendOverlayState.index += 1;
       renderTrendOverlayCard();
@@ -3379,49 +3344,20 @@ function bindTrendOverlayOnce() {
     }
   });
 
-  let dx = 0, dy = 0, startX = 0, startY = 0, startT = 0, active = false;
-  card.addEventListener("pointerdown", (e) => {
-    if (e.target.closest("button, a, [data-stop-click]")) return;
-    if (trendOverlayState.flipped && e.target.closest(".back-details")) return;
-    active = true; dx = 0; dy = 0;
-    startX = e.clientX; startY = e.clientY; startT = Date.now();
-    card.classList.add("is-dragging");
-    card.setPointerCapture(e.pointerId);
-  });
-  card.addEventListener("pointermove", (e) => {
-    if (!active) return;
-    dx = e.clientX - startX; dy = e.clientY - startY;
-    const rx = (dy / 300) * 16, ry = (dx / 200) * 12;
-    card.style.transform = `translate(${dx}px, ${dy}px) rotateX(${-rx}deg) rotateY(${ry}deg)`;
-    const strength = Math.min(1, Math.max(Math.abs(dx), Math.abs(dy)) / 110);
-    updateOverlayStamps(dx, dy, strength);
-  });
-  const finish = () => {
-    if (!active) return;
-    active = false;
-    card.classList.remove("is-dragging");
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const dt = Date.now() - startT;
-    if (dist < 8 && dt < 300) {
-      card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4)";
-      card.style.transform = "";
-      updateOverlayStamps(0, 0, 0);
-      toggleTrendOverlayFlip();
-      return;
-    }
-    const fast = dt > 0 && dist / dt > 0.65;
-    const tx = fast ? 50 : 95, ty = fast ? 42 : 85;
-    const velocity = dt > 0 ? dist / dt : 0;
-    if (dx < -tx && Math.abs(dx) > Math.abs(dy)) return trendOverlayFly("dismiss", velocity);
-    if (dx >  tx && Math.abs(dx) > Math.abs(dy)) return trendOverlayFly("save", velocity);
-    if (dy < -ty && Math.abs(dy) > Math.abs(dx) * .8) return trendOverlayFly("priority", velocity);
-    if (dy >  ty && Math.abs(dy) > Math.abs(dx) * .8) return trendOverlayFly("read", velocity);
-    card.style.transition = "transform 520ms cubic-bezier(.17,.67,.38,1.4)";
-    card.style.transform = "";
+  const reset = () => {
+    card.style.transform = '';
     updateOverlayStamps(0, 0, 0);
   };
-  card.addEventListener("pointerup", finish);
-  card.addEventListener("pointercancel", finish);
+  bindSwipeSurface(card, {
+    canStart: event => !trendOverlayState.busy && !(trendOverlayState.flipped && event.target.closest('.back-details')),
+    move(dx, dy) {
+      card.style.transform = `translate(${dx}px, ${dy}px) rotateX(${-dy / 300 * 16}deg) rotateY(${dx / 200 * 12}deg)`;
+      updateOverlayStamps(dx, dy, Math.min(1, Math.max(Math.abs(dx), Math.abs(dy)) / 110));
+    },
+    cancel: reset,
+    tap() { reset(); toggleTrendOverlayFlip(); },
+    swipe: trendOverlayFly,
+  });
 }
 
 function toggleTrendOverlayFlip() {
@@ -3441,7 +3377,7 @@ function setTrendScope(scope) {
 function renderSettings() {
   const identities = { graduate: "Graduate / PhD", researcher: "Professor / Researcher", enthusiast: "Explorer" };
   const styleLabel = onboardingProfile.discoveryStyle === "broaden" ? "Broaden discovery" : "Focused discovery";
-  elements.settingsTopicChips.innerHTML = onboardingProfile.topics.map((topic) => `<button type="button" data-settings-topic-remove="${escapeAttribute(topic)}"><span>${escapeHTML(topic)}</span><i data-lucide="x"></i></button>`).join("");
+  elements.settingsTopicChips.innerHTML = settingsTopicDraft.map((topic) => `<button type="button" data-settings-topic-remove="${escapeAttribute(topic)}" aria-label="${escapeAttribute((window.PaperSwipeI18n?.t('Remove topic') || 'Remove topic') + ': ' + topic)}"><span>${escapeHTML(topic)}</span><i data-lucide="x"></i></button>`).join("");
   document.querySelectorAll("[data-appearance]").forEach((button) => {
     const selected = button.dataset.appearance === state.appearance;
     button.classList.toggle("is-active", selected);
@@ -3529,7 +3465,7 @@ function buildWeekPlan(offset) {
   const seed = hashString(`${start.toISOString().slice(0, 10)}`);
   let cursor = 0;
   // Rotate task order per week so different weeks show different subsets.
-  const rotated = tasks.filter((t) => !placedIds.has(t.id));
+  const rotated = tasks.filter((t) => !placedIds.has(t.id) && !state.weekPlanAssign.has(t.id));
   rotated.sort((a, b) => a.order - b.order);
   const rotatedFull = rotated.length ? rotated.slice(seed % rotated.length).concat(rotated.slice(0, seed % rotated.length)) : rotated;
   for (let i = 0; i < days.length && cursor < rotatedFull.length; i++) {
@@ -3648,21 +3584,15 @@ function renderWeekPlan() {
   refreshIcons();
 }
 
-function handleWeekPlanAction(id, action) {
+async function handleWeekPlanAction(id, action) {
   if (!id) return;
   if (action === "remove") {
-    state.weekPlanRemoved.add(id);
-    state.weekPlanDone.delete(id);
-    renderWeekPlan();
-    updateTodosBadge();
-    removeFromLibrary(id);
+    if (await saveSchedulePatch(id, {removed:true, done:false})) showToast('已移出日程，文献库收藏保留');
     return;
   }
   if (action === "done") {
-    if (state.weekPlanDone.has(id)) state.weekPlanDone.delete(id);
-    else state.weekPlanDone.add(id);
-    renderWeekPlan();
-    showToast(state.weekPlanDone.has(id) ? "已标记完成" : "已取消完成");
+    const done = !state.weekPlanDone.has(id);
+    if (await saveSchedulePatch(id, {done})) showToast(done ? "已标记完成" : "已取消完成");
   }
 }
 
@@ -3738,6 +3668,12 @@ function animateLibraryChange() {
 }
 function openSettingsPage() {
   if (!elements.settingsPage) return;
+  if (elements.settingsPage.hidden) {
+    settingsTopicDraft = [...onboardingProfile.topics];
+    elements.settingsTopicInput.value = onboardingProfile.researchIntent || onboardingProfile.searchQuery || settingsTopicDraft.join(' ');
+    document.querySelector('#topic-update-error').hidden = true;
+    topicEditRevision++;
+  }
   renderSettings();
   elements.settingsPage.hidden = false;
   settingsMotion?.cancel();
@@ -3756,13 +3692,9 @@ function closeSettingsPage() {
 }
 
 function removeSettingsTopic(topic) {
-  if (onboardingProfile.topics.length === 1) {
-    showToast("至少保留一个研究主题");
-    return;
-  }
-  onboardingProfile.topics = onboardingProfile.topics.filter((item) => item !== topic);
-  onboardingProfile.searchQuery = onboardingProfile.topics.join(" ");
-  persistProfile();
+  settingsTopicDraft = settingsTopicDraft.filter((item) => item !== topic);
+  elements.settingsTopicInput.value = settingsTopicDraft.join(' ');
+  topicEditRevision++;
   renderSettings();
 }
 
@@ -3775,23 +3707,28 @@ async function saveSettingsTopics() {
     showToast('这个主题仍在搜索，无需重复点击 Update');
     return;
   }
-  const description = customTopic || onboardingProfile.searchQuery || onboardingProfile.topics[0] || '';
+  const description = customTopic;
   if (Array.from(description).length < 2) { showToast('请输入至少 2 个字符的研究主题'); return; }
   const label = button.querySelector('span');
   const previousLabel = label.textContent;
   const revision = searchRevision;
+  const editRevision = topicEditRevision;
+  const errorLabel = document.querySelector('#topic-update-error');
+  errorLabel.hidden = true;
   button.disabled = true;
   label.textContent = '正在更新主题…';
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 18000);
+  const timeout = setTimeout(() => controller.abort(), 40000);
   try {
     let query = description;
     let keywords = [description];
     let usedAI = false;
     // Use the same intent planner as onboarding for free-form descriptions.
-    if (customTopic && Array.from(description).length >= 6) {
+    if (customTopic === onboardingProfile.researchIntent && onboardingProfile.searchQuery) {
+      query = onboardingProfile.searchQuery; keywords = [...onboardingProfile.topics]; usedAI = onboardingProfile.topicPlanAI;
+    } else if (customTopic && Array.from(description).length >= 6) {
       const response = await fetch('/api/topic-plan', {
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST', headers:{'Content-Type':'application/json', Prefer:'wait=20'},
         body:JSON.stringify({description}), signal:controller.signal
       });
       const plan = await response.json();
@@ -3803,6 +3740,7 @@ async function saveSettingsTopics() {
       usedAI = Boolean(plan.ai_enabled);
     }
     if (revision !== searchRevision) { showToast('已切换到其他搜索，本次主题更新未应用'); return; }
+    if (editRevision !== topicEditRevision) { showToast('主题草稿已改变，请确认后重新搜索'); return; }
     if (state.actionBusy) { showToast('请等待收藏完成后再更新主题'); return; }
     if (customTopic) {
       onboardingProfile.topics = keywords;
@@ -3811,7 +3749,7 @@ async function saveSettingsTopics() {
       onboardingProfile.topicPlanAI = usedAI;
     }
     persistProfile();
-    elements.settingsTopicInput.value = '';
+    settingsTopicDraft = [...keywords];
     renderSettings();
     // switchView returns early when Explore is already selected.
     closeSettingsPage();
@@ -3819,7 +3757,9 @@ async function saveSettingsTopics() {
     void performSearch(query);
     showToast(usedAI ? '主题已更新，按 AI 检索词搜索' : '主题已更新，按关键词搜索');
   } catch (error) {
-    showToast(error.name === 'AbortError' ? '主题分析超时，请重试；原主题已保留' : error.message);
+    const message = error.name === 'AbortError' ? '主题分析超时，请重试；原主题已保留' : error.message;
+    errorLabel.textContent = message; errorLabel.hidden = false;
+    showToast(message);
   } finally {
     clearTimeout(timeout);
     button.disabled = false;
@@ -3845,7 +3785,16 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if
 
 function updateComplexityLabel(node, complexity) {
   const labels = ["Easy", "Accessible", "Balanced", "Advanced", "Expert"];
-  node.textContent = labels[Math.max(1, Math.min(5, Number(complexity))) - 1];
+  const value = Math.max(1, Math.min(5, Number(complexity)));
+  const changed = node.dataset.level && node.dataset.level !== String(value);
+  node.dataset.level = String(value);
+  node.textContent = labels[value - 1];
+  const input = node.id === 'settings-complexity-label' ? elements.settingsComplexity : elements.complexitySlider;
+  input?.style.setProperty('--range-progress', `${(value - 1) * 25}%`);
+  if (changed && !reducedMotion()) {
+    node.getAnimations().forEach(animation => animation.cancel());
+    node.animate([{transform:'translateY(4px) scale(.94)',opacity:.45},{transform:'translateY(0) scale(1)',opacity:1}], {duration:220,easing:'cubic-bezier(.22,1,.36,1)'});
+  }
 }
 
 function openDetails(id) {
@@ -3912,7 +3861,7 @@ function openLibraryCard(id) {
               Tap to flip
             </div>
             <div class="card-body">
-              <p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
+              ${hookNotice(paper)}<p class="card-subtitle">${escapeHTML(c.subtitle)}</p>
               <h2 class="card-title">${escapeHTML(paper.title)}</h2>
             </div>
             <div class="card-byline">
@@ -4180,12 +4129,11 @@ function setPaperPriority(priority) {
   renderScheduleGrid();
 }
 
-function assignPaperToDate(dateKey) {
+async function assignPaperToDate(dateKey) {
   const id = state.actionPaperId;
   if (!id || !dateKey) return;
   const prio = state.scheduleDraftPriority || state.weekPlanPriority.get(id) || "medium";
-  state.weekPlanPriority.set(id, prio);
-  state.weekPlanAssign.set(id, dateKey);
+  if (!await saveSchedulePatch(id, {date:dateKey, priority:prio, removed:false})) return;
   state.scheduleDraftDate = null;
   state.scheduleDraftPriority = null;
   if (elements.libraryScheduleDialog) dismissDialog(elements.libraryScheduleDialog);
@@ -4265,8 +4213,33 @@ function anyDialogOpen() {
   return Array.from(document.querySelectorAll("dialog")).some((dialog) => dialog.open);
 }
 
+// Native back closes the topmost in-app surface before leaving the app.
+document.addEventListener('paperswipe:back', event => {
+  const dialog = Array.from(document.querySelectorAll('dialog[open]')).at(-1);
+  if (dialog) { dismissDialog(dialog); event.preventDefault(); return; }
+  const trending = document.querySelector('#trend-overlay');
+  if (trending && !trending.hidden) { closeTrendOverlay(); event.preventDefault(); return; }
+  if (elements.aiBotPage && !elements.aiBotPage.hidden) { closeAiBotPage(); event.preventDefault(); return; }
+  if (elements.settingsPage && !elements.settingsPage.hidden) { closeSettingsPage(); event.preventDefault(); return; }
+  if (isFlipped) { unflip(); event.preventDefault(); return; }
+  if (state.started && state.activeView !== 'discover') { switchView('discover'); event.preventDefault(); }
+});
+let nativeResumeBusy = false;
+document.addEventListener('paperswipe:resume', async () => {
+  if (!state.started || nativeResumeBusy) return;
+  nativeResumeBusy = true;
+  try {
+    const account = await fetch('/api/me');
+    if (account.ok) await refreshLibrary();
+  } catch (_) { showToast('暂时无法连接，已保留当前卡片'); }
+  finally { nativeResumeBusy = false; }
+});
+
 function refreshIcons() {
+  seedFrontTranslations();
   if (window.lucide) window.lucide.createIcons();
+  window.PaperSwipeI18n?.apply();
+  window.PaperSwipeContentLanguage?.refresh();
 }
 
 function setText(selector, value) {

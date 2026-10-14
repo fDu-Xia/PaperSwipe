@@ -15,6 +15,7 @@
 <body class="is-onboarding">
   <section id="onboarding" class="onboarding" aria-label="PaperSwipe setup">
     <div class="onboarding-frame">
+      <div class="language-compact" role="radiogroup" aria-label="Language"><button type="button" role="radio" data-language="zh">简体中文</button><button type="button" role="radio" data-language="en">English</button></div>
       <div class="onboarding-progress" aria-label="Setup progress">
         <span class="is-active"></span><span></span><span></span>
       </div>
@@ -222,9 +223,9 @@
         <div id="library-export-bar" class="library-export-bar" hidden>
           <span class="library-export-count"><b id="library-export-n">0</b> selected</span>
           <div class="library-export-actions">
-            <button type="button" data-library-export-action="all">All</button>
+            <button type="button" data-library-export-action="all" aria-pressed="false">Select all</button>
             <span class="library-export-sep" aria-hidden="true">·</span>
-            <button type="button" data-library-export-action="clear">Clear</button>
+            <button type="button" class="is-danger" data-library-export-action="delete">Delete</button>
             <button type="button" class="is-secondary" data-library-export-action="bibtex" aria-label="导出为 BibTeX">
               <i data-lucide="download"></i><span>BibTeX</span>
             </button>
@@ -246,7 +247,6 @@
         <div class="trend-scroll">
           <header class="trend-hero">
             <h1 id="network-title" class="trend-title">Global Trending</h1>
-            <p class="trend-sub">交互内测：榜单、数量、增幅及示例论文为预置内容，不代表实时热点或已核验研究结论。</p>
             <div class="trend-stat-row">
               <div class="trend-stat">
                 <span class="trend-stat-num" id="trend-total-papers">128.4k</span>
@@ -275,7 +275,7 @@
           <ol class="trend-board" id="trend-board"></ol>
 
           <footer class="trend-foot">
-            <span>示例榜单，未接入实时投稿、引用、收藏或社交信号。</span>
+            <p>交互内测：榜单、数量、增幅及示例论文为预置内容，不代表实时热点或已核验研究结论。</p>
           </footer>
         </div>
       </section>
@@ -289,20 +289,34 @@
         </header>
 
         <div class="settings-scroll">
-          <section class="setting-section" aria-labelledby="research-theme-title">
+          <section class="setting-section research-settings" aria-labelledby="research-theme-title">
             <div class="setting-heading"><div><h2 id="research-theme-title">Research themes</h2><p>Changes refresh your paper discovery feed.</p></div><i data-lucide="brain-circuit"></i></div>
             <div id="settings-topic-chips" class="settings-topic-chips"></div>
-            <label class="settings-input"><i data-lucide="search"></i><input id="settings-topic-input" type="text" placeholder="Add a new research theme" maxlength="120"></label>
-            <button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="refresh-cw"></i><span>Update themes</span></button>
+            <label class="topic-editor-label" for="settings-topic-input">What would you like to explore?</label>
+            <textarea id="settings-topic-input" class="topic-editor" rows="3" placeholder="Describe a topic, question or research goal" maxlength="120" aria-describedby="topic-editor-help"></textarea>
+            <p id="topic-editor-help" class="reader-settings-note">Edit your topic or remove keywords above. Changes apply only after you search.</p>
+            <p id="topic-update-error" class="topic-update-error" role="alert" hidden></p>
+            <div class="topic-editor-actions"><button id="reset-topic-draft" class="settings-secondary" type="button">Reset edits</button><button id="save-topics-button" class="settings-primary" type="button"><i data-lucide="search"></i><span>Search this topic</span></button></div>
           </section>
 
           <section class="setting-section" aria-labelledby="appearance-title">
             <div class="setting-heading"><div><h2 id="appearance-title">Appearance</h2><p>Choose the display theme of the main interface.</p></div><i data-lucide="palette"></i></div>
             <div class="appearance-options" role="radiogroup" aria-label="显示主题">
               <button type="button" data-appearance="light" role="radio"><i data-lucide="sun"></i><span>Light</span></button>
-              <button type="button" data-appearance="system" role="radio"><i data-lucide="monitor"></i><span>System</span></button>
               <button type="button" data-appearance="dark" role="radio"><i data-lucide="moon"></i><span>Dark</span></button>
+              <button type="button" data-appearance="system" role="radio"><i data-lucide="monitor"></i><span>System</span></button>
             </div>
+          </section>
+
+          <section class="setting-section" aria-labelledby="language-title">
+            <div class="setting-heading"><div><h2 id="language-title">Language</h2><p>Choose the language for the interface and paper translations.</p></div><i data-lucide="languages"></i></div>
+            <div class="settings-segments language-options" role="radiogroup" aria-label="Language">
+              <button type="button" data-language="zh" role="radio">简体中文</button>
+              <button type="button" data-language="en" role="radio">English</button>
+            </div>
+            <details class="settings-help"><summary>About paper translations</summary><p class="reader-settings-note">Translations are reused on this device for up to 30 days. First-time translations use AI quota. Switching language never changes saved paper conclusions.</p></details>
+            <p id="translation-status" class="reader-settings-note" role="status" hidden></p>
+            <button type="button" id="retry-translations" class="settings-secondary" hidden>重试翻译</button>
           </section>
 
           <section class="setting-section" aria-labelledby="feed-settings-title">
@@ -330,13 +344,14 @@
               <input id="settings-complexity" type="range" min="1" max="5" value="3">
               <div><span>Accessible</span><span>Expert</span></div>
             </div>
-            <p class="reader-settings-note">Focus 优先主题匹配；Broaden 增加同主题论文的多样性。搜索按提交时的身份与难度生成完整卡片，首批就绪即可阅读，后续追加到卡堆底部；修改设置只影响下一次搜索，不会改写已有卡片或收藏。</p>
+            <p class="reader-settings-note">Reading preferences apply to your next search. Existing cards and saved papers stay unchanged.</p>
             <button type="button" id="apply-reader-settings" class="settings-reader-apply">应用设置并重新搜索</button>
-            <p class="reader-settings-note">相同主题与阅读设置的完整结果可复用 30 分钟。Explore 右上角刷新按钮会跳过缓存，重新检索和生成，消耗 AI 额度。</p>
+            <details class="settings-help"><summary>How discovery works</summary><p class="reader-settings-note">Focus 优先主题匹配；Broaden 增加同主题论文的多样性。搜索按提交时的身份与难度生成完整卡片，首批就绪即可阅读，后续追加到卡堆底部；修改设置只影响下一次搜索，不会改写已有卡片或收藏。</p><p class="reader-settings-note">相同主题与阅读设置的完整结果可复用 30 分钟。Explore 右上角刷新按钮会跳过缓存，重新检索和生成，消耗 AI 额度。</p></details>
           </section>
 
-          <section class="setting-section" aria-labelledby="zotero-title">
-            <div class="setting-heading"><div><h2 id="zotero-title">Zotero</h2><p>Once connected, send papers from Library to Zotero in one tap.</p></div><i data-lucide="link"></i></div>
+          <details class="setting-section zotero-settings" id="zotero-settings">
+            <summary class="setting-heading"><span><strong id="zotero-title">Zotero</strong><small>Connect your reference manager</small></span><i data-lucide="chevron-down"></i></summary>
+            <p class="reader-settings-note">Export selected references from Library to your personal Zotero library. PDFs and two-way synchronization are not included.</p>
             <label class="settings-input"><i data-lucide="key-round"></i><input id="zotero-api-key" type="password" placeholder="API Key (zotero.org/settings/keys)" autocomplete="off"></label>
             <label class="settings-input"><i data-lucide="user-round"></i><input id="zotero-user-id" type="text" placeholder="userID (numbers, see top of keys page)" autocomplete="off" inputmode="numeric"></label>
             <div class="zotero-actions">
@@ -344,7 +359,9 @@
               <button id="zotero-clear-button" class="settings-secondary" type="button">Clear</button>
             </div>
             <p id="zotero-status" class="zotero-status" hidden></p>
-          </section>
+            <p class="reader-settings-note">Your key is stored only in this browser. Use a personal-library key with write access; clear it on shared devices.</p>
+            <a class="zotero-help-link" href="https://www.zotero.org/settings/keys" target="_blank" rel="noopener noreferrer">Get a Zotero API key</a>
+          </details>
 
           <button id="restart-onboarding" class="restart-onboarding" type="button"><i data-lucide="rotate-ccw"></i><span>Restart setup</span></button>
           <p class="settings-footnote">Paper metadata from Semantic Scholar, arXiv and OpenAlex. Verify AI conclusions against the original source.</p>
@@ -354,7 +371,6 @@
       <section id="todos-view" class="view todos-view" aria-labelledby="todos-title" hidden>
         <h1 id="todos-title" class="sr-only">Reading Week</h1>
         <div class="todos-scroll">
-          <p class="prototype-notice">日程内测：当前安排与完成标记尚未完整持久化，刷新或退出后可能重置，不跨设备同步。重要安排请另行记录。</p>
           <section class="week-plan-section" aria-labelledby="week-plan-title">
             <div class="week-plan-head">
               <div>
@@ -364,8 +380,9 @@
             </div>
             <div id="week-plan-grid" class="week-plan-grid" role="list"></div>
           </section>
+          <p class="prototype-notice page-footnote">手动安排、优先级和完成标记会保存到当前账号；重新登录或刷新可恢复。移出日程不会删除文献库收藏。未指定日期的论文为自动排程建议。</p>
         </div>
-        <button id="ai-bot-button" class="ai-bot-fab" type="button" aria-label="Open AI assistant" title="AI assistant"><i data-lucide="bot"></i></button>
+        <button id="ai-bot-button" class="ai-bot-fab" type="button" aria-label="Open AI assistant" title="Drag to move; click to open" aria-describedby="assistant-move-help"><i data-lucide="bot"></i></button><span id="assistant-move-help" class="sr-only">Drag to move, or use arrow keys when focused. Enter opens the assistant.</span>
       </section>
     </main>
 
@@ -444,6 +461,15 @@
 
   <script src="/vendor/lucide.min.js"></script>
   <script src="/mockdata/roadmap.js"></script>
+  <script src="/client-api.js"></script>
+  <script src="/card-gestures.js"></script>
+  <script src="/schedule-state.js"></script>
+  <script src="/platform.js"></script>
+  <script src="/locales.js"></script>
+  <script src="/i18n.js"></script>
+  <script src="/paper-text.js"></script>
+  <script src="/content-language.js"></script>
+  <script src="/floating-assistant.js"></script>
   <script src="/bootstrap.js"></script>
 </body>
 </html>

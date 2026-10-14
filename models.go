@@ -50,6 +50,9 @@ func (b *Bullets) UnmarshalJSON(data []byte) error {
 type Digest struct {
 	Verdict      string  `json:"verdict"`
 	Hook         string  `json:"hook"`
+	HookEN       string  `json:"hook_en,omitempty"`
+	TitleZH      string  `json:"title_zh,omitempty"`
+	TitleEN      string  `json:"title_en,omitempty"`
 	Problem      string  `json:"problem"`
 	Novelty      Bullets `json:"novelty"`
 	Method       string  `json:"method"`
@@ -134,11 +137,12 @@ type SearchRecord struct {
 }
 
 type AppState struct {
-	QuotaDay       string                 `json:"quota_day,omitempty"`
-	QuotaCount     int                    `json:"quota_count,omitempty"`
-	Version        int                    `json:"version"`
-	Actions        map[string]ActionEntry `json:"actions"`
-	RecentSearches []SearchRecord         `json:"recent_searches"`
+	Schedule       map[string]ScheduleEntry `json:"schedule,omitempty"`
+	QuotaDay       string                   `json:"quota_day,omitempty"`
+	QuotaCount     int                      `json:"quota_count,omitempty"`
+	Version        int                      `json:"version"`
+	Actions        map[string]ActionEntry   `json:"actions"`
+	RecentSearches []SearchRecord           `json:"recent_searches"`
 }
 
 type Stats struct {

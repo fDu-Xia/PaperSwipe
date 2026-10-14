@@ -1,0 +1,9 @@
+{
+  "appId": "site.paperswipe.app",
+  "appName": "PaperSwipe",
+  "webDir": "www",
+  "loggingBehavior": "debug",
+  "server": {"hostname": "localhost", "androidScheme": "https", "iosScheme": "capacitor"},
+  "android": {"allowMixedContent": false},
+  "plugins": {"CapacitorHttp": {"enabled": false}, "CapacitorCookies": {"enabled": false}}
+}

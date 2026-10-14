@@ -1,0 +1,20 @@
+{
+  "name": "paperswipe-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "doctor": "node doctor.mjs",
+    "build": "node build.mjs",
+    "sync:android": "npm run build && cap sync android",
+    "open:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/app": "8.1.2",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {"@capacitor/cli": "8.5.3", "esbuild": "0.28.2"},
+  "overrides": {"xcode": {"uuid": "11.1.1"}}
+}

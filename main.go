@@ -63,6 +63,7 @@ func main() {
 			logger.Error("invalid beta configuration", "error", err)
 			os.Exit(1)
 		}
+		beta.mobileEnabled = os.Getenv("ENABLE_MOBILE_APP") == "1"
 		handler = beta.Handler(static)
 	}
 	server := &http.Server{
