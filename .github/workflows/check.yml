@@ -12,16 +12,18 @@ jobs:
           go-version: '1.26.x'
       - run: go test -race ./...
       - run: go vet ./...
-      - run: for file in web/*.js; do node --check "$file"; done
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/native_transport.cjs
+      - run: find web -name '*.js' -not -path 'web/vendor/*' -print0 | xargs -0 -n 1 node --check
+      - run: node --test tests/*.cjs
+      - run: python tests/project_structure.py
       - run: npm ci && npm run sync:android
         working-directory: mobile
       - run: pip install playwright==1.63.0
       - run: python -m playwright install --with-deps chromium
       - run: PAPERSWIPE_TEST_BROWSER=chromium python tests/mobile_stability.py
       - run: PAPERSWIPE_TEST_BROWSER=chromium python tests/language_ui.py
+      - run: PAPERSWIPE_TEST_BROWSER=chromium python tests/login_ui.py
       - run: PAPERSWIPE_TEST_BROWSER=chromium PAPERSWIPE_ASSERT_PRIORITY=1 python tests/translation_priority.py
       - run: docker build -t paperswipe-beta:test .

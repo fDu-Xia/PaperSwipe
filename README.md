@@ -10,6 +10,13 @@ PaperSwipe 是一个手机优先的论文发现与阅读整理 H5 应用。你�
 
 > **当前版本定位：可运行的产品原型 / MVP。** 检索、摘要、收藏和文献导出已有实际实现；Trending、部分卡片指标和学习路线包含演示数据，日程与助手也有明确的实现边界。本文以当前代码为准，详见[功能状态与已知限制](#limitations)。
 
+## 项目导航（先看这里）
+
+当前代码、宣传页、Android、部署和历史材料的职责见 [项目导航与维护约定](docs/PROJECT_MAP.md)。整理前的文件保存在本机 `backups/`，旧宣传页和素材完整归档在 `archive/legacy/`。
+
+- [当前宣传页](marketing/README.md) · [Android 开发](mobile/README.md) · [应用更新](deploy/UPDATE_FROM_WINDOWS.md)
+- [迁移记录](docs/APP_MIGRATION.md) · [阅读助手说明](docs/READER_AI_GUIDE.md) · [历史修改记录](docs/CHANGE_SUMMARY.md)
+
 ## 目录
 
 - [产品概览](#overview)
@@ -66,13 +73,13 @@ Schedule 与阅读助手：辅助安排阅读
 
 | Explore：卡片正面 | Explore：卡片背面 | Library：文献库 |
 | :---: | :---: | :---: |
-| <img src="introweb/images/explore-front.png" alt="Explore 论文卡片正面" width="240"> | <img src="introweb/images/explore-back.png" alt="Explore 论文卡片背面" width="240"> | <img src="introweb/images/library-home.png" alt="Library 文献库" width="240"> |
+| <img src="archive/legacy/introweb/images/explore-front.png" alt="Explore 论文卡片正面" width="240"> | <img src="archive/legacy/introweb/images/explore-back.png" alt="Explore 论文卡片背面" width="240"> | <img src="archive/legacy/introweb/images/library-home.png" alt="Library 文献库" width="240"> |
 
 | Schedule：阅读日程 | PaperSwipe AI：阅读助手 | Trending：趋势展示 |
 | :---: | :---: | :---: |
-| <img src="introweb/images/schedule-home.png" alt="Schedule 阅读日程" width="240"> | <img src="introweb/images/robot-home.png" alt="PaperSwipe 阅读助手" width="240"> | <img src="introweb/images/trending-home.png" alt="Trending 趋势展示" width="240"> |
+| <img src="archive/legacy/introweb/images/schedule-home.png" alt="Schedule 阅读日程" width="240"> | <img src="archive/legacy/introweb/images/robot-home.png" alt="PaperSwipe 阅读助手" width="240"> | <img src="archive/legacy/introweb/images/trending-home.png" alt="Trending 趋势展示" width="240"> |
 
-仓库还提供[初始化演示视频](introweb/videos/initialize.mp4)与[滑动筛选演示视频](introweb/videos/explore-swipe.mp4)。
+仓库还提供[初始化演示视频](archive/legacy/introweb/videos/initialize.mp4)与[滑动筛选演示视频](archive/legacy/introweb/videos/explore-swipe.mp4)。
 
 <a id="quick-start"></a>
 
@@ -638,7 +645,7 @@ go vet ./...
 - 流式摘要的原始顺序保持。
 - 图片请求的端点、配置与缓存命中。
 
-模型相关测试使用本地模拟 HTTP 服务，不要求真实模型密钥。仓库尚未包含完整浏览器端到端测试、真实论文源联调测试或 Zotero 写入测试。
+模型相关测试使用本地模拟 HTTP 服务，不要求真实模型密钥。`tests/` 另有浏览器交互和模拟 Zotero 回归测试；这些测试不能替代真实论文源、真实 Zotero 账户和真机联调。
 
 `Makefile` 提供 `make run`、`make test`、`make fmt`。其中格式化命令会修改 Go 源文件；仅检查或阅读项目时不需要运行它。
 
@@ -646,19 +653,19 @@ go vet ./...
 
 ```powershell
 # Windows
-go build -o paperswipe.exe .
-.\paperswipe.exe
+go build -o release/paperswipe.exe .
+.\release\paperswipe.exe
 ```
 
 ```bash
 # macOS / Linux
-go build -o paperswipe .
-./paperswipe
+go build -o release/paperswipe .
+./release/paperswipe
 ```
 
 默认构建包含 `web/`，发布运行时不需要 Node.js，也不要求单独部署这些静态资源。`DEV=1` 则仍要求运行目录中有 `web/`。
 
-`.env.local` 与 `data/` 不会通过 `go:embed web` 被嵌入二进制，需要按运行目录或环境变量另外管理。仓库根目录已有名为 `paperswipe` 的文件；构建同名输出会覆盖它，可根据需要另选输出路径。根目录构建产物目前也未被 `.gitignore` 排除，提交前应核对变更。
+`.env.local` 与 `data/` 不会通过 `go:embed web` 被嵌入二进制，需要按运行目录或环境变量另外管理。旧程序已移至 `archive/legacy/paperswipe`。新构建结果统一放在被 Git 忽略的 `release/`，不要使用历史程序替代当前源码构建。
 
 <a id="deployment"></a>
 
@@ -676,62 +683,36 @@ go build -o paperswipe .
 
 搜索接口发送 `X-Accel-Buffering: no`，但代理仍需确认没有缓存或缓冲事件流。检索与摘要合计可能持续超过 5 分钟，且首批完成前没有定时心跳事件；代理超时设置需考虑这些等待阶段。
 
-应用本身没有登录、鉴权、请求限流或多用户隔离；开放访问意味着访问者可以读写同一份文献库，也可能触发已配置的模型调用。部署到公网前应先补充对应的访问控制。当前仓库没有 Dockerfile、容器编排文件或自动部署工作流。
+原型模式和公网内测模式必须区分：公网部署应开启 `BETA_MODE=1`，使用邀请码、用户隔离和额度限制。仓库已包含 `Dockerfile`、Compose 配置和自动检查工作流；具体部署以 [内测部署指南](deploy/README.md) 和 [Windows 更新说明](deploy/UPDATE_FROM_WINDOWS.md) 为准，不要直接把未设访问控制的原型模式公开。
 
 <a id="structure"></a>
 
 ## 项目结构
 
+详细职责和维护方法见 [项目导航](docs/PROJECT_MAP.md)。
+
 ```text
 PaperSwipe/
-├── README.md                  # 项目说明、使用与接口文档
-├── go.mod                     # Go 模块声明，Go 1.24
-├── main.go                    # 启动服务、超时、嵌入资源与 DEV 静态托管
-├── config.go                  # .env.local 解析与环境变量辅助函数
-├── api.go                     # HTTP 路由、校验、SSE、响应头与请求日志
-├── papers.go                  # 三个论文源、元数据转换、评分与时长估计
-├── summarizer.go              # 主题规划、本地摘要、LLM 分批与流式协调
-├── image_generator.go         # 图片生成接口、响应校验与内存缓存
-├── models.go                  # Paper / Digest / Action / State 等模型
-├── store.go                   # JSON 状态加载、保存、检索历史与统计
-├── main_test.go               # 摘要、评分、主题规划与存储测试
-├── config_test.go             # 配置加载测试
-├── summarizer_test.go         # 摘要批处理与流式顺序测试
-├── image_generator_test.go    # 图片调用与缓存测试
-├── Makefile                   # run / test / fmt
-├── .env.example               # 示例配置；使用前替换密钥字段
-├── .gitignore                 # 当前仅排除 .env、.env.local、.DS_Store
-├── web/                       # Go 服务实际托管并嵌入的应用
-│   ├── index.html             # 引导、四个主页面、设置与弹窗
-│   ├── app.js                 # 页面状态、手势、SSE、导出、日程与助手
-│   ├── styles.css             # 应用布局、主题与交互样式
-│   ├── assets/                # 应用图像和 favicon
-│   ├── mockdata/roadmap.js     # 助手使用的预置学习路线
-│   └── vendor/                # 本地 Lucide 图标脚本及其许可证
-├── data/
-│   ├── .gitkeep
-│   ├── state.json             # 仓库已有状态，默认运行时也使用此路径
-│   └── state.json.bak.2026-07-25
-├── introweb/                  # 产品介绍网站及独立展示页面
-│   ├── index.html
-│   ├── PaperSwipe-Contact.html
-│   ├── PaperSwipe-iphone.html
-│   ├── script.js
-│   ├── styles.css
-│   ├── images/
-│   └── videos/
-├── PaperSwipe.html            # 独立产品介绍页面
-├── webassets/                 # 产品文案、截图、录屏、海报与联系素材
-├── webassets.zip              # 素材压缩包
-├── paperswipe                 # 仓库已有的程序产物，使用前核对目标平台
-├── CLAUDE.md                  # 开发助手相关约定
-├── skills-lock.json           # 开发助手技能锁定信息
-└── .agents/skills/            # 仓库内的开发助手技能文件
+├── *.go、*_test.go            # 后端业务与对应测试（保持 Go 单包结构）
+├── web/                      # 唯一的应用页面源码，随 Go 服务嵌入
+│   ├── app.js                # 页面状态、渲染与交互协调
+│   ├── bibliography.js       # BibTeX / Zotero 数据转换
+│   ├── event-stream.js       # 搜索结果事件流解析
+│   ├── mockdata/             # 预置趋势与学习路线，不是真实统计
+│   └── …                     # 语言、手势、日程、样式及资源
+├── marketing/                # 当前宣传网站与素材
+├── mobile/                   # Android 壳与打包配置
+├── deploy/                   # 应用、宣传页部署和更新工具
+├── tests/                    # 浏览器、前端模块、打包与部署回归
+├── docs/                     # 项目导航、迁移与历史说明
+├── tools/                    # 本地源码备份工具
+├── archive/legacy/           # 旧宣传页、原始素材、旧二进制
+├── data/                     # 本地运行数据，不做整理性删除
+├── release/                  # 生成产物（Git 忽略）
+└── backups/                  # 本地恢复备份（Git 忽略）
 ```
 
-**应用入口是 `web/index.html`，但应通过 Go 服务访问。** 根目录 `PaperSwipe.html` 与 `introweb/` 用于产品介绍，不是 `/api/` 驱动的主应用入口；默认 Go 服务也不会直接托管 `introweb/` 或 `webassets/`。
-
-`webassets/` 的文字介绍包含产品愿景；其中部分 Markdown 文件目前为空。判断某项能力是否完成，应以 `web/` 和 Go 代码为准，不能仅依赖宣传页面或截图。
+**应用入口是 `web/index.html`，通过 Go 服务访问；宣传网站入口是 `marketing/index.html`。** 历史目录不参与应用构建。功能是否完成，以当前代码和测试为准，不能以旧宣传文案或截图为准。
 
 <a id="limitations"></a>
 

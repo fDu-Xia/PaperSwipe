@@ -2001,88 +2001,6 @@
       "action": "dismiss",
       "updated_at": "2026-09-27T13:31:42.4244287Z"
     },
-    "adac5790581d785203a8e8a1debf7d4bcd3a9204": {
-      "paper": {
-        "summary_status": "success",
-        "summary_message": "基于标题和摘要生成，未读取全文",
-        "summary_model": "deepseek-v4-pro",
-        "summary_preferences": {
-          "identity": "graduate",
-          "discoveryStyle": "focus",
-          "complexity": 3
-        },
-        "id": "adac5790581d785203a8e8a1debf7d4bcd3a9204",
-        "title": "MemGuide: Intent-Driven Memory Selection for Goal-Oriented Multi-Session LLM Agents",
-        "abstract": "Modern task-oriented dialogue (TOD) systems increasingly rely on large language model (LLM) agents, leveraging Retrieval-Augmented Generation (RAG) and long-context capabilities for long-term memory utilization. However, these methods prioritise semantic similarity over task intent, degrading multi-session coherence. We propose MemGuide, a two-stage intent-driven memory selection framework: (1) Intent‑Aligned Retrieval retrieves goal-consistent QA‑formatted memory units; (2) Missing‑Slot Guided Filtering reranks units by slot-completion gain via a chain‑of‑thought reasoner and fine‑tuned LLaMA‑8B filter. We also introduce the MS-TOD, the first multi-session TOD benchmark with 132 diverse personas, 956 task goals, and annotated intent-aligned memory targets. Evaluations on MS-TOD show that MemGuide boosts task success rate by 11% (88%→99%) and reduces dialogue length by 2.84 turns, and matches single‑session performance.",
-        "authors": [
-          {
-            "name": "Yi-Ming Du"
-          },
-          {
-            "name": "Bingbing Wang"
-          },
-          {
-            "name": "Yangfan He"
-          },
-          {
-            "name": "Bin Liang"
-          },
-          {
-            "name": "Bao-Jun Wang"
-          },
-          {
-            "name": "Zhongyang Li"
-          },
-          {
-            "name": "Lin Gui"
-          },
-          {
-            "name": "Jeff Z. Pan"
-          },
-          {
-            "name": "Rui-Feng Xu"
-          },
-          {
-            "name": "Kam-Fai Wong"
-          }
-        ],
-        "year": 2025,
-        "publication_date": "2025-05-26",
-        "venue": "AAAI Conference on Artificial Intelligence",
-        "citation_count": 15,
-        "influential_citation_count": 0,
-        "fields": [
-          "Computer Science"
-        ],
-        "url": "https://www.semanticscholar.org/paper/adac5790581d785203a8e8a1debf7d4bcd3a9204",
-        "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/40313/44274",
-        "external_ids": {
-          "ArXiv": "2505.20231",
-          "CorpusId": "2.78911777e+08",
-          "DBLP": "conf/aaai/DuWHLWLGPXW26",
-          "DOI": "10.1609/aaai.v40i36.40313"
-        },
-        "match_score": 69,
-        "read_minutes": 40,
-        "source": "Semantic Scholar",
-        "digest": {
-          "verdict": "值得精读：针对多会话任务型对话，提出意图驱动的记忆选择，显著提升成功率。",
-          "hook": "按用户意图而非表面相似度来挑选记忆，能让多轮对话助手更准确地完成任务。",
-          "problem": "现有任务型对话系统在利用长期记忆时，**优先语义相似度而非任务意图**，导致多会话连贯性下降。",
-          "novelty": [
-            "提出**MemGuide**，两阶段意图驱动记忆选择框架。",
-            "引入**MS-TOD**，首个多会话任务型对话基准，含132个角色、956个任务目标和意图对齐的记忆标注。"
-          ],
-          "method": "第一阶段意图对齐检索：检索与目标一致的问答格式记忆单元；第二阶段缺失槽引导过滤：利用思维链推理器和微调的LLaMA-8B过滤器，按槽位完成增益对记忆单元重排序。",
-          "result": "在MS-TOD上，MemGuide将任务成功率从88%提升至**99%**（提升11%），对话轮数减少**2.84轮**，并达到单会话性能水平。",
-          "audience": "可借鉴其意图驱动记忆选择机制，用于提升目标导向多会话LLM智能体的连贯性和效率。",
-          "why_keep": "解决了长期记忆中语义相似度与任务意图不匹配的关键问题，并提供了新基准。",
-          "reading_focus": "关注意图对齐检索和缺失槽过滤的具体实现，以及MS-TOD基准的构建和评估指标。"
-        }
-      },
-      "action": "save",
-      "updated_at": "2026-10-14T03:24:04.1288959Z"
-    },
     "arxiv:1002.1154v1": {
       "paper": {
         "summary_status": "failed",
@@ -2541,6 +2459,14 @@
     },
     "arxiv:1808.05205v1": {
       "paper": {
+        "summary_status": "success",
+        "summary_message": "基于标题和摘要生成，未读取全文",
+        "summary_model": "deepseek-v4-pro",
+        "summary_preferences": {
+          "identity": "graduate",
+          "discoveryStyle": "focus",
+          "complexity": 3
+        },
         "id": "arxiv:1808.05205v1",
         "title": "Building medical image classifiers with very limited data using segmentation networks",
         "abstract": "Deep learning has shown promising results in medical image analysis, however, the lack of very large annotated datasets confines its full potential. Although transfer learning with ImageNet pre-trained classification models can alleviate the problem, constrained image sizes and model complexities can lead to unnecessary increase in computational cost and decrease in performance. As many common morphological features are usually shared by different classification tasks of an organ, it is greatly beneficial if we can extract such features to improve classification with limited samples. Therefore, inspired by the idea of curriculum learning, we propose a strategy for building medical image classifiers using features from segmentation networks. By using a segmentation network pre-trained on similar data as the classification task, the machine can first learn the simpler shape and structural concepts before tackling the actual classification problem which usually involves more complicated concepts. Using our proposed framework on a 3D three-class brain tumor type classification problem, we achieved 82% accuracy on 191 testing samples with 91 training samples. When applying to a 2D nine-class cardiac semantic level classification problem, we achieved 86% accuracy on 263 testing samples with 108 training samples. Comparisons with ImageNet pre-trained classifiers and classifiers trained from scratch are presented.",
@@ -2572,22 +2498,24 @@
         "read_minutes": 46,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "研究主题（原题）：Building medical image classifiers with very limited data using segmentation networks",
-          "problem": "Although transfer learning with ImageNet pre-trained classification models can alleviate the problem, constrained image sizes and model complexities can lead to unnecessary increase in computational cost and decrease in performance.",
+          "verdict": "值得阅读：利用分割特征缓解数据稀缺，方法简单有效。",
+          "hook": "先学器官形状再学分类，很少的标注数据也能训练医学图像分类器。",
+          "hook_en": "Learning organ shapes before classification enables training medical image classifiers with very limited annotated data.",
+          "title_zh": "利用分割网络构建极少量数据下的医学图像分类器",
+          "problem": "医学图像分类缺乏大量标注数据，而ImageNet预训练模型受限于图像尺寸和模型复杂度。",
           "novelty": [
-            "Therefore, inspired by the idea of curriculum learning, we propose a strategy for building medical image classifiers using features from segmentation networks.",
-            "By using a segmentation network pre-trained on similar data as the classification task, the machine can first learn the simpler shape and structural concepts before tackling the actual classification…"
+            "提出**课程学习启发策略**，先利用分割网络学习形状结构特征，再用于分类任务。",
+            "在**3D脑肿瘤分类**和**2D心脏语义分类**上验证了少量样本下的有效性。"
           ],
-          "method": "Although transfer learning with ImageNet pre-trained classification models can alleviate the problem, constrained image sizes and model complexities can lead to unnecessary increase in computational cost and decrease in performance.",
-          "result": "Deep learning has shown promising results in medical image analysis, however, the lack of very large annotated datasets confines its full potential.",
-          "audience": "Researchers interested in visual foundation models few-shot medical image…, especially in cs.CV",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "使用在相似数据上预训练的分割网络提取特征，再训练分类器，遵循从简单形状概念到复杂分类概念的课程学习原则。",
+          "result": "3D脑肿瘤分类：91训练样本，191测试样本，准确率82%；2D心脏分类：108训练样本，263测试样本，准确率86%。",
+          "audience": "为你的少样本医学图像分析提供利用分割特征提升分类性能的思路。",
+          "why_keep": "展示了分割网络特征在数据稀缺时的价值，为后续研究提供基础。",
+          "reading_focus": "关注分割网络预训练数据与分类任务的相关性，以及课程学习的具体实现。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-09-27T13:51:28.0052469Z"
+      "updated_at": "2026-10-14T15:15:10.4107292Z"
     },
     "arxiv:1811.08772v1": {
       "paper": {
@@ -3040,6 +2968,14 @@
     },
     "arxiv:2203.02048v1": {
       "paper": {
+        "summary_status": "success",
+        "summary_message": "基于标题和摘要生成，未读取全文",
+        "summary_model": "deepseek-v4-pro",
+        "summary_preferences": {
+          "identity": "graduate",
+          "discoveryStyle": "focus",
+          "complexity": 3
+        },
         "id": "arxiv:2203.02048v1",
         "title": "Anomaly Detection-Inspired Few-Shot Medical Image Segmentation Through Self-Supervision With Supervoxels",
         "abstract": "Recent work has shown that label-efficient few-shot learning through self-supervision can achieve promising medical image segmentation results. However, few-shot segmentation models typically rely on prototype representations of the semantic classes, resulting in a loss of local information that can degrade performance. This is particularly problematic for the typically large and highly heterogeneous background class in medical image segmentation problems. Previous works have attempted to address this issue by learning additional prototypes for each class, but since the prototypes are based on a limited number of slices, we argue that this ad-hoc solution is insufficient to capture the background properties. Motivated by this, and the observation that the foreground class (e.g., one organ) is relatively homogeneous, we propose a novel anomaly detection-inspired approach to few-shot medical image segmentation in which we refrain from modeling the background explicitly. Instead, we rely solely on a single foreground prototype to compute anomaly scores for all query pixels. The segmentation is then performed by thresholding these anomaly scores using a learned threshold. Assisted by a novel self-supervision task that exploits the 3D structure of medical images through supervoxels, our proposed anomaly detection-inspired few-shot medical image segmentation model outperforms previous state-of-the-art approaches on two representative MRI datasets for the tasks of abdominal organ segmentation and cardiac segmentation.",
@@ -3075,23 +3011,24 @@
         "read_minutes": 47,
         "source": "arXiv",
         "digest": {
-          "verdict": "Promising few-shot segmentation method using anomaly detection and self-supervision.",
-          "hook": "仅用一个前景原型计算异常分数，不显式建模背景，就能在少量标注的MRI上分割腹部器官和心脏。",
-          "problem": "Few-shot segmentation models rely on prototypes that lose local information, especially for the large heterogeneous background class in medical images.",
+          "verdict": "值得精读：创新地将异常检测用于少样本分割，有效处理背景异质性。",
+          "hook": "把背景当成异常，只用前景原型就能分割医学图像。",
+          "hook_en": "Treating the background as anomaly, medical images can be segmented using only a foreground prototype.",
+          "title_zh": "通过超体素自监督的异常检测启发式少样本医学图像分割",
+          "problem": "少样本医学图像分割中，基于原型的方法难以建模**大而异质的背景类**，导致性能下降。",
           "novelty": [
-            "Treats segmentation as **anomaly detection** using only a single foreground prototype",
-            "Introduces **supervoxel-based self-supervision** to exploit 3D structure",
-            "Learns a **threshold** for anomaly scores instead of fixed thresholding"
+            "提出**异常检测启发式方法**，不显式建模背景，仅用前景原型计算异常分数。",
+            "利用**超体素自监督**任务挖掘3D结构信息，增强特征表示。"
           ],
-          "method": "Compute anomaly scores for all query pixels against a single foreground prototype, then threshold using a learned value; self-supervision via supervoxels.",
-          "result": "Outperforms previous state-of-the-art on two MRI datasets for abdominal organ and cardiac segmentation.",
-          "audience": "Shows a novel way to handle background heterogeneity in few-shot medical segmentation, relevant to your focus on data efficiency.",
-          "why_keep": "Addresses a key limitation of prototype-based few-shot segmentation in medical imaging.",
-          "reading_focus": "How anomaly scores and supervoxel self-supervision improve segmentation."
+          "method": "仅使用单个前景原型计算查询像素的异常分数，通过学习的阈值进行分割，并辅以基于超体素的自监督任务。",
+          "result": "在两个MRI数据集（腹部器官分割和心脏分割）上优于先前最先进方法。",
+          "audience": "为你的少样本分割研究提供处理背景异质性的新思路，可借鉴异常检测视角。",
+          "why_keep": "将异常检测引入少样本分割，简化背景建模，提升医学图像分割性能。",
+          "reading_focus": "关注异常分数计算和阈值学习机制，以及超体素自监督任务的设计。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-09-27T13:51:26.6699868Z"
+      "updated_at": "2026-10-14T15:14:59.7461126Z"
     },
     "arxiv:2203.14669v1": {
       "paper": {
@@ -3458,6 +3395,14 @@
     },
     "arxiv:2309.02144v1": {
       "paper": {
+        "summary_status": "success",
+        "summary_message": "基于标题和摘要生成，未读取全文",
+        "summary_model": "deepseek-v4-pro",
+        "summary_preferences": {
+          "identity": "graduate",
+          "discoveryStyle": "focus",
+          "complexity": 3
+        },
         "id": "arxiv:2309.02144v1",
         "title": "Making Large Language Models Better Reasoners with Alignment",
         "abstract": "Reasoning is a cognitive process of using evidence to reach a sound conclusion. The reasoning capability is essential for large language models (LLMs) to serve as the brain of the artificial general intelligence agent. Recent studies reveal that fine-tuning LLMs on data with the chain of thought (COT) reasoning process can significantly enhance their reasoning capabilities. However, we find that the fine-tuned LLMs suffer from an \\textit{Assessment Misalignment} problem, i.e., they frequently assign higher scores to subpar COTs, leading to potential limitations in their reasoning abilities. To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses for each question, and categorizing them into positive and negative ones based on whether they achieve the correct answer; 3) calibrating the scores of positive and negative responses given by LLMs with a novel constraint alignment loss. Specifically, the constraint alignment loss has two objectives: a) Alignment, which guarantees that positive scores surpass negative scores to encourage answers with high-quality COTs; b) Constraint, which keeps the negative scores confined to a reasonable range to prevent the model degradation. Beyond just the binary positive and negative feedback, the constraint alignment loss can be seamlessly adapted to the ranking situations when ranking feedback is accessible. Furthermore, we also delve deeply into recent ranking-based alignment methods, such as DPO, RRHF, and PRO, and discover that the constraint, which has been overlooked by these approaches, is also crucial for their performance. Extensive experiments on four reasoning benchmarks with both binary and ranking feedback demonstrate the effectiveness of AFT.",
@@ -3502,25 +3447,28 @@
         "external_ids": {
           "ArXiv": "2309.02144v1"
         },
-        "match_score": 66,
+        "match_score": 65,
         "read_minutes": 52,
         "source": "arXiv",
         "digest": {
-          "verdict": "Peripheral match — confirm relevance before investing time",
-          "hook": "让智能体更会办事：Making Large Language Model",
-          "problem": "However, we find that the fine-tuned LLMs suffer from an \\textit{Assessment Misalignment} problem, i.",
+          "verdict": "适合研究推理增强和偏好对齐的读者，方法具体，实验较扎实。",
+          "hook": "微调后的模型常常给错误的推理步骤打高分，通过校准评分能让它更准确地判断推理质量。",
+          "hook_en": "Fine-tuned models often give high scores to flawed reasoning steps; calibrating these scores helps them judge reasoning quality more accurately.",
+          "title_zh": "通过对齐让大语言模型更好地推理",
+          "problem": "微调LLM存在**评估错位**问题：模型会给较差的思维链（COT）打高分，限制推理能力。",
           "novelty": [
-            "To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses fo…"
+            "提出**对齐微调（AFT）**范式，通过约束对齐损失校准正负样本评分。",
+            "发现现有排序对齐方法（如DPO、RRHF、PRO）**忽略了约束项**，而该约束对性能至关重要。"
           ],
-          "method": "The reasoning capability is essential for large language models (LLMs) to serve as the brain of the artificial general intelligence agent.",
-          "result": "To address this problem, we introduce an \\textit{Alignment Fine-Tuning (AFT)} paradigm, which involves three steps: 1) fine-tuning LLMs with COT training data; 2) generating multiple COT responses for each question, and categorizing them into positive and negative ones based on…",
-          "audience": "Researchers interested in large language model agents large language mode…, especially in cs.CL / cs.AI",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "三步：用COT数据微调；生成多个COT并分为正负样本；用约束对齐损失校准评分，使正样本分数高于负样本且负样本分数受限。",
+          "result": "在四个推理基准上，AFT在**二值和排序反馈**下均有效，但未报告具体数值。",
+          "audience": "可学习如何将评分校准融入对齐流程，并关注损失函数的设计。",
+          "why_keep": "揭示了推理微调中的评分偏差问题，并提出通用解决方案，对提升推理可靠性有参考价值。",
+          "reading_focus": "重点理解约束对齐损失的原理，并核对不同基准上的提升幅度。"
         }
       },
-      "action": "dismiss",
-      "updated_at": "2026-09-27T08:08:10.067831Z"
+      "action": "read",
+      "updated_at": "2026-10-14T14:59:14.5473641Z"
     },
     "arxiv:2309.14364v1": {
       "paper": {
@@ -4333,6 +4281,14 @@
     },
     "arxiv:2408.08058v1": {
       "paper": {
+        "summary_status": "success",
+        "summary_message": "基于标题和摘要生成，未读取全文",
+        "summary_model": "deepseek-v4-pro",
+        "summary_preferences": {
+          "identity": "graduate",
+          "discoveryStyle": "focus",
+          "complexity": 3
+        },
         "id": "arxiv:2408.08058v1",
         "title": "Navigating Data Scarcity using Foundation Models: A Benchmark of Few-Shot and Zero-Shot Learning Approaches in Medical Imaging",
         "abstract": "Data scarcity is a major limiting factor for applying modern machine learning techniques to clinical tasks. Although sufficient data exists for some well-studied medical tasks, there remains a long tail of clinically relevant tasks with poor data availability. Recently, numerous foundation models have demonstrated high suitability for few-shot learning (FSL) and zero-shot learning (ZSL), potentially making them more accessible to practitioners. However, it remains unclear which foundation model performs best on FSL medical image analysis tasks and what the optimal methods are for learning from limited data. We conducted a comprehensive benchmark study of ZSL and FSL using 16 pretrained foundation models on 19 diverse medical imaging datasets. Our results indicate that BiomedCLIP, a model pretrained exclusively on medical data, performs best on average for very small training set sizes, while very large CLIP models pretrained on LAION-2B perform best with slightly more training samples. However, simply fine-tuning a ResNet-18 pretrained on ImageNet performs similarly with more than five training examples per class. Our findings also highlight the need for further research on foundation models specifically tailored for medical applications and the collection of more datasets to train these models.",
@@ -4363,21 +4319,24 @@
         "read_minutes": 45,
         "source": "arXiv",
         "digest": {
-          "verdict": "Worth a quick skim of methods and experiments",
-          "hook": "研究主题（原题）：Navigating Data Scarcity using Foundation Models: A Benchmark of Few-Shot and Zero-Shot Learning Approaches in Medical Imaging",
-          "problem": "Data scarcity is a major limiting factor for applying modern machine learning techniques to clinical tasks.",
+          "verdict": "值得精读：为医学影像少样本学习提供大规模基准，指导模型选择。",
+          "hook": "医学影像数据太少时，哪种预训练模型学得最好？",
+          "hook_en": "Which pretrained model learns best when medical imaging data is scarce?",
+          "title_zh": "利用基础模型应对数据稀缺：医学影像少样本与零样本学习方法的基准评测",
+          "problem": "医学影像分析中，**数据稀缺**限制了深度学习应用，但不同基础模型在少样本和零样本学习下的表现缺乏系统比较。",
           "novelty": [
-            "Recently, numerous foundation models have demonstrated high suitability for few-shot learning (FSL) and zero-shot learning (ZSL), potentially making them more accessible to practitioners."
+            "首次在**19个医学影像数据集**上系统评测16个基础模型的少样本与零样本性能。",
+            "发现**BiomedCLIP**在极少量样本下平均最优，而**LAION-2B预训练的大CLIP模型**在样本稍多时更佳。"
           ],
-          "method": "Recently, numerous foundation models have demonstrated high suitability for few-shot learning (FSL) and zero-shot learning (ZSL), potentially making them more accessible to practitioners.",
-          "result": "Recently, numerous foundation models have demonstrated high suitability for few-shot learning (FSL) and zero-shot learning (ZSL), potentially making them more accessible to practitioners.",
-          "audience": "Researchers interested in visual foundation models few-shot medical image…, especially in cs.CV / cs.AI",
-          "why_keep": "Matches the search direction well — open access PDF available for quick verification",
-          "reading_focus": "Focus on the method framework, main experiments, and limitations."
+          "method": "在19个医学影像数据集上，对16个预训练基础模型进行少样本和零样本学习评测，比较不同训练样本量下的性能。",
+          "result": "BiomedCLIP在极少量样本下平均最优；LAION-2B预训练的大CLIP模型在样本稍多时最佳；每类超过5个样本时，微调ImageNet预训练的ResNet-18性能相当。",
+          "audience": "为你的少样本医学图像分割研究提供模型选择依据，并提示需要更多医学专用基础模型。",
+          "why_keep": "为医学影像少样本学习建立了基准，揭示了不同预训练策略的适用条件。",
+          "reading_focus": "关注不同训练样本量下的性能变化，以及医学专用预训练与通用预训练的权衡。"
         }
       },
       "action": "dismiss",
-      "updated_at": "2026-09-27T13:51:27.4036823Z"
+      "updated_at": "2026-10-14T15:14:59.0248964Z"
     },
     "arxiv:2410.21006v2": {
       "paper": {
@@ -7438,61 +7397,6 @@
       "action": "dismiss",
       "updated_at": "2026-09-27T07:59:21.0882362Z"
     },
-    "openalex:W2007176911": {
-      "paper": {
-        "summary_status": "success",
-        "summary_message": "基于标题和摘要生成，未读取全文",
-        "summary_model": "deepseek-v4-pro",
-        "summary_preferences": {
-          "identity": "graduate",
-          "discoveryStyle": "focus",
-          "complexity": 3
-        },
-        "id": "openalex:W2007176911",
-        "title": "Bacteria as computers making computers",
-        "abstract": "Various efforts to integrate biological knowledge into networks of interactions have produced a lively microbial systems biology. Putting molecular biology and computer sciences in perspective, we review another trend in systems biology, in which recursivity and information replace the usual concepts of differential equations, feedback and feedforward loops and the like. Noting that the processes of gene expression separate the genome from the cell machinery, we analyse the role of the separation between machine and program in computers. However, computers do not make computers. For cells to make cells requires a specific organization of the genetic program, which we investigate using available knowledge. Microbial genomes are organized into a paleome (the name emphasizes the role of the corresponding functions from the time of the origin of life), comprising a constructor and a replicator, and a cenome (emphasizing community-relevant genes), made up of genes that permit life in a particular context. The cell duplication process supposes rejuvenation of the machine and replication of the program. The paleome also possesses genes that enable information to accumulate in a ratchet-like process down the generations. The systems biology must include the dynamics of information creation in its future developments.",
-        "authors": [
-          {
-            "name": "Antoine Danchin"
-          }
-        ],
-        "year": 2008,
-        "publication_date": "2008-11-11",
-        "venue": "FEMS Microbiology Reviews",
-        "citation_count": 160,
-        "influential_citation_count": 0,
-        "fields": [
-          "Philosophy and History of Science",
-          "History and Philosophy of Science",
-          "Arts and Humanities"
-        ],
-        "url": "https://doi.org/10.1111/j.1574-6976.2008.00137.x",
-        "pdf_url": "https://academic.oup.com/femsre/article-pdf/33/1/3/8431372/33-1-3.pdf",
-        "external_ids": {
-          "DOI": "10.1111/j.1574-6976.2008.00137.x",
-          "OpenAlex": "https://openalex.org/W2007176911"
-        },
-        "match_score": 88,
-        "read_minutes": 46,
-        "source": "OpenAlex",
-        "digest": {
-          "verdict": "适合对生命起源、系统生物学与计算机科学交叉感兴趣的研究生，提供独特的概念框架。",
-          "hook": "细菌像计算机一样靠程序复制自己，但计算机造不出计算机，细菌却能。",
-          "problem": "现有系统生物学多依赖微分方程和反馈回路，难以解释**细胞如何自我复制**这一根本问题。",
-          "novelty": [
-            "将细菌基因组分为**古基因组（paleome）**和**群落基因组（cenome）**，前者负责构造与复制，后者适应环境。",
-            "强调**信息在代际间的棘轮式积累**，而非仅关注物质和能量流动。"
-          ],
-          "method": "通过类比计算机的**机器与程序分离**，分析细菌基因组的组织方式，整合现有生物学知识进行概念性探讨。",
-          "result": "提出细胞复制需要**机器的更新**和**程序的复制**，并指出古基因组包含使信息跨代积累的基因。",
-          "audience": "为你提供从信息处理角度理解生命系统的新视角，可启发对生物计算和人工生命的研究思路。",
-          "why_keep": "挑战传统系统生物学范式，将**递归性和信息**置于核心，为理解生命本质提供新概念工具。",
-          "reading_focus": "关注作者如何论证基因组分区与计算机类比的合理性，以及信息积累机制的具体证据。"
-        }
-      },
-      "action": "save",
-      "updated_at": "2026-10-14T03:59:55.6491287Z"
-    },
     "openalex:W2029709911": {
       "paper": {
         "summary_status": "success",
@@ -8565,53 +8469,6 @@
       "action": "dismiss",
       "updated_at": "2026-09-27T07:51:50.0814489Z"
     },
-    "openalex:W2990280801": {
-      "paper": {
-        "id": "openalex:W2990280801",
-        "title": "小学语文阅读教学中的“互动”艺术",
-        "abstract": "小学语文阅读教学中如何在互动艺术的帮助下引导学生真正爱上阅读,这不仅是小学语文教师应重点思考的问题,同时也是调动学生学习积极性、强化语文阅读思维的重要基础。本文简述了如何利用情景课堂、多媒体以及分组活动等多种互动方式强化学生的阅读兴趣。",
-        "authors": [
-          {
-            "name": "红珍 蹇"
-          }
-        ],
-        "year": 2019,
-        "publication_date": "2019-11-21",
-        "venue": "教育研究",
-        "citation_count": 6,
-        "influential_citation_count": 0,
-        "fields": [
-          "Military Technology and Strategies",
-          "Aerospace Engineering",
-          "Engineering"
-        ],
-        "url": "https://doi.org/10.32629/er.v2i11.2173",
-        "pdf_url": "https://www.educ-res.com/index.php/er/article/view/2173/1996",
-        "external_ids": {
-          "DOI": "10.32629/er.v2i11.2173",
-          "OpenAlex": "https://openalex.org/W2990280801"
-        },
-        "match_score": 81,
-        "read_minutes": 33,
-        "source": "OpenAlex",
-        "digest": {
-          "verdict": "Keep for its practical strategies on interactive reading instruction.",
-          "hook": "这篇论文讨论小学语文阅读教学中如何通过情景课堂、多媒体和分组活动等互动方式激发学生的阅读兴趣。",
-          "problem": "How to use **interactive teaching methods** to foster reading interest in primary school Chinese classes.",
-          "novelty": [
-            "Highlights **situational classrooms, multimedia, and group activities** as key interactive tools.",
-            "Connects interactive art to **reading interest and thinking development**."
-          ],
-          "method": "Descriptive analysis of interactive teaching strategies.",
-          "result": "No quantitative results; provides practical suggestions for teachers.",
-          "audience": "Relevant for educators seeking engaging reading instruction techniques.",
-          "why_keep": "Offers concrete classroom strategies applicable to primary education.",
-          "reading_focus": "Note the specific interactive methods and their intended effects."
-        }
-      },
-      "action": "save",
-      "updated_at": "2026-09-27T13:57:48.9886633Z"
-    },
     "openalex:W299318040": {
       "paper": {
         "id": "openalex:W299318040",
@@ -9440,53 +9297,6 @@
       },
       "action": "save",
       "updated_at": "2026-09-27T13:57:44.0017684Z"
-    },
-    "openalex:W4242743316": {
-      "paper": {
-        "id": "openalex:W4242743316",
-        "title": "新时代艺术院校思政课程和课程思政建设浅探",
-        "abstract": "新时代艺术院校的“课程思政”建设，需要使艺术院校各类课程与思想政治理论课逐步形成良性互动，实现“立德树人”和“艺德育人”的有机统一。“课程思政”建设实施以来，取得了一定的成效，但也存在一些阻碍因素，只有深入分析其原因，不断寻求解决办法，才能逐步走出一条具有艺术院校特色的“课程思政”建设之路。本文就新时代艺术院校思政课程和课程思政建设进行探讨。",
-        "authors": [
-          {
-            "name": "绍琼 贾"
-          }
-        ],
-        "year": 2020,
-        "publication_date": "2020-08-06",
-        "venue": "现代教育论坛",
-        "citation_count": 11,
-        "influential_citation_count": 0,
-        "fields": [
-          "Military Technology and Strategies",
-          "Aerospace Engineering",
-          "Engineering"
-        ],
-        "url": "https://doi.org/10.32629/mef.v3i5.946",
-        "pdf_url": "https://cn.front-sci.com/index.php/mef/article/view/946/915",
-        "external_ids": {
-          "DOI": "10.32629/mef.v3i5.946",
-          "OpenAlex": "https://openalex.org/W4242743316"
-        },
-        "match_score": 83,
-        "read_minutes": 33,
-        "source": "OpenAlex",
-        "digest": {
-          "verdict": "Keep for its direct relevance to art education policy and ideological integration.",
-          "hook": "这篇论文探讨新时代艺术院校如何让专业课程与思政课形成良性互动，以实现立德树人与艺德育人的统一。",
-          "problem": "How to integrate **ideological and political education** into art college curricula while overcoming existing obstacles.",
-          "novelty": [
-            "Proposes a path for **art college-specific** ideological education construction.",
-            "Analyzes **hindering factors** in current curriculum ideology implementation."
-          ],
-          "method": "Qualitative discussion based on policy analysis and practical experience.",
-          "result": "No quantitative results; identifies obstacles and suggests solutions for art college ideological education.",
-          "audience": "Useful for understanding policy-driven curriculum reform in Chinese art education.",
-          "why_keep": "Addresses a current policy priority in Chinese higher art education.",
-          "reading_focus": "Focus on the identified obstacles and proposed solutions."
-        }
-      },
-      "action": "save",
-      "updated_at": "2026-09-27T13:57:48.3281258Z"
     },
     "openalex:W4244073995": {
       "paper": {
@@ -11965,6 +11775,14 @@
   },
   "recent_searches": [
     {
+      "query": "visual foundation models few-shot medical image segmentation generalization data efficiency",
+      "created_at": "2026-10-14T15:14:25.7428031Z"
+    },
+    {
+      "query": "large language model agents long-term memory formation retrieval update complex task performance",
+      "created_at": "2026-10-14T15:11:20.6585331Z"
+    },
+    {
       "query": "large language model agents large language models long-term memory",
       "created_at": "2026-10-14T14:54:38.6751242Z"
     },
@@ -11987,14 +11805,6 @@
     {
       "query": "complex task performance",
       "created_at": "2026-10-14T03:25:04.8700971Z"
-    },
-    {
-      "query": "摄影",
-      "created_at": "2026-10-13T06:00:01.4169933Z"
-    },
-    {
-      "query": "graph neural networks",
-      "created_at": "2026-09-28T03:15:50.9043491Z"
     }
   ]
 }

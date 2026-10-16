@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f8fc">
+  <meta name="description" content="PaperSwipe，把论文发现变成轻松的卡片阅读。围绕研究主题探索论文，查看结构化解读，整理文献库，再安排自己的阅读日程。">
+  <meta property="og:title" content="PaperSwipe｜别再搜论文了，开始刷论文">
+  <meta property="og:description" content="从一个研究问题，到下一篇值得读的论文。探索、收藏与阅读计划，在这里连起来。">
+  <meta property="og:type" content="website">
+  <title>PaperSwipe｜别再搜论文了，开始刷论文</title>
+  <link rel="icon" href="paperswipe-assets/logo.png" type="image/png">
+  <link rel="stylesheet" href="paperswipe-assets/site.css">
+  <script src="paperswipe-assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <div class="nav-shell wrap">
+    <a class="brand" href="#top" aria-label="PaperSwipe 返回顶部"><img src="paperswipe-assets/logo.png" width="38" height="38" alt=""><span>PaperSwipe</span></a>
+    <nav class="nav-links" aria-label="产品功能">
+      <a href="#explore" title="探索论文">Explore</a><a href="#library" title="文献库">Library</a><a href="#schedule" title="阅读日程">Schedule</a><a href="#trending" title="研究趋势">Trending</a>
+    </nav>
+    <div class="nav-actions"><button class="theme-button" id="theme-toggle" type="button" aria-label="切换到深色模式">深色</button><a class="button button-small" href="https://paperswipe.site/login" target="_blank" rel="noopener noreferrer">立即体验 <span aria-hidden="true">↗</span></a></div>
+  </div>
+</header>
+<main id="main">
+  <section class="hero wrap" id="top" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">别再搜论文了，<span>开始刷论文。</span></h1>
+      <p class="hero-intro">从研究主题出发，用一句话抓住重点。<br>把感兴趣的论文，变成读得完的计划。</p>
+      <div class="hero-actions"><a class="button" href="https://paperswipe.site/login" target="_blank" rel="noopener noreferrer">立即体验 <span aria-hidden="true">↗</span></a><button class="button button-secondary" type="button" data-watch><span class="play-symbol" aria-hidden="true">▷</span> 观看演示</button></div>
+    </div>
+    <figure class="hero-visual" aria-label="最新版 PaperSwipe 探索页与文献库">
+      <div class="hero-disc" aria-hidden="true"></div>
+      <div class="screen hero-screen-back"><img src="paperswipe-assets/library.png" width="585" height="1266" alt="最新版文献库，用一句话卡片呈现已收藏的示例论文" fetchpriority="high"></div>
+      <div class="screen hero-screen-front"><img src="paperswipe-assets/explore.png" width="585" height="1266" alt="最新版探索页，卡片正面展示一句话要点，底部可进入文献库和日程" fetchpriority="high"></div>
+      <figcaption>真实产品界面 · 示例论文数据</figcaption>
+    </figure>
+  </section>
+
+  <section class="explore-section section wrap" id="explore" aria-labelledby="explore-title">
+    <div class="explore-copy" data-reveal>
+      <h2 id="explore-title">先读一句话，<br>再决定是否深入。</h2>
+      <p class="section-intro">不用一开始就埋进全文。先了解研究在做什么，再把时间留给真正相关的内容。</p>
+      <div class="feature-tabs" role="tablist" aria-label="查看探索功能" aria-orientation="vertical">
+        <button id="tab-front" role="tab" aria-selected="true" aria-controls="explore-preview" data-preview="explore.png" data-caption="卡片正面：一句话要点与论文标题" tabindex="0"><span class="tab-mark" aria-hidden="true">↗</span><span><strong>正面，抓住重点</strong><small>从研究主题出发，快速浏览一句话要点。</small></span></button>
+        <button id="tab-back" role="tab" aria-selected="false" aria-controls="explore-preview" data-preview="explore-back.png" data-caption="卡片背面：研究问题、方法与结果" tabindex="-1"><span class="tab-mark" aria-hidden="true">↔</span><span><strong>翻面，看清思路</strong><small>研究问题、方法、结果与适读人群，分开呈现。</small></span></button>
+        <button id="tab-settings" role="tab" aria-selected="false" aria-controls="explore-preview" data-preview="settings.png" data-caption="阅读设置：语言、阅读深度与主题偏好" tabindex="-1"><span class="tab-mark" aria-hidden="true">◎</span><span><strong>按自己的方式读</strong><small>切换中英文、阅读深度与浅深色外观。</small></span></button>
+      </div>
+      <p class="quiet-note">AI 解读帮助初筛，重要结论仍需回到论文原文核对。</p>
+    </div>
+    <figure class="explore-stage" id="explore-preview" role="tabpanel" aria-labelledby="tab-front" tabindex="0" data-reveal>
+      <div class="screen preview-screen"><img id="preview-image" src="paperswipe-assets/explore.png" width="585" height="1266" alt="卡片正面：一句话要点与论文标题" loading="lazy"></div>
+      <figcaption id="preview-caption">卡片正面：一句话要点与论文标题</figcaption>
+    </figure>
+  </section>
+
+  <section class="library-section section" id="library" aria-labelledby="library-title">
+    <div class="wrap">
+      <header class="section-heading" data-reveal><h2 id="library-title">不只收藏，<br>还要随时找得到。</h2><p class="section-intro">感兴趣、重点、已读，各有归处。那些让你停下来的想法，不必再散落在浏览器标签页里。</p></header>
+      <div class="library-layout">
+        <figure class="library-showcase" data-reveal><img src="paperswipe-assets/library.png" width="585" height="1266" alt="文献库的搜索框、分类标签与一句话论文卡片" loading="lazy"><figcaption>最新版文献库，演示数据</figcaption></figure>
+        <div class="library-benefits" data-reveal>
+          <article><span class="feature-label">找到相关的</span><h3>筛得更细，读得更准。</h3><p>搜索标题或作者，叠加学科筛选。所选分类都匹配，才留下这篇文献。</p></article>
+          <article><span class="feature-label">整理留下的</span><h3>批量操作，少一点重复。</h3><p>全选、取消全选、删除选中文献。整理自己的阅读清单，不用一篇篇重来。</p></article>
+          <article><span class="feature-label">接上已有习惯</span><h3>你的文献，不被困在这里。</h3><p>导出 BibTeX；也可配置自己的 Zotero 账号凭据，将选中文献导入 Zotero。</p></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="schedule-section section wrap" id="schedule" aria-labelledby="schedule-title">
+    <header class="section-heading" data-reveal><h2 id="schedule-title">让“以后读”，<br>有一个具体的日期。</h2><p class="section-intro">把论文安排进一周，用日历直接跳转。读过什么、接下来读什么，自己掌握。</p></header>
+    <div class="schedule-stage" data-reveal>
+      <div class="schedule-notes"><h3>阅读计划，<br>不用从头翻。</h3><p>点击周标题打开日历，直接选择想看的那一周。</p><div class="schedule-note"><strong>按自己的节奏安排</strong><span>日期、优先级和完成标记<br>保存在当前账号。</span></div><div class="schedule-note"><strong>需要时，问问助手</strong><span>围绕阅读目标获取建议，<br>再决定自己的下一步。</span></div></div>
+      <figure class="screen schedule-screen"><img src="paperswipe-assets/schedule.png" width="585" height="1266" alt="按日期展示的每周阅读计划" loading="lazy"></figure>
+      <figure class="screen calendar-screen"><img src="paperswipe-assets/calendar.png" width="585" height="1266" alt="点击周标题后打开的年月日选择日历" loading="lazy"></figure>
+    </div>
+  </section>
+
+  <section class="reading-section section wrap" id="pain" aria-labelledby="reading-title">
+    <figure class="editorial-image" data-reveal><img src="paperswipe-assets/reading-editorial.png" width="1536" height="1024" alt="一叠展开的研究文稿与紫色书签，象征从筛选走向阅读" loading="lazy"></figure>
+    <div class="reading-copy" data-reveal><p class="eyebrow">把时间，还给阅读本身</p><h2 id="reading-title">从“这篇是什么”，<br>走到“这篇值得读”。</h2><p>PaperSwipe 不是替你完成研究，而是帮你少做一些重复筛选，多留一点空间给判断、理解和新的问题。</p><button class="text-button" type="button" data-watch>观看完整操作演示 <span aria-hidden="true">↗</span></button></div>
+  </section>
+
+  <section class="trending-section section wrap" id="trending" aria-labelledby="trending-title">
+    <div class="trending-layout" data-reveal>
+      <div class="trending-copy"><h2 id="trending-title">熟悉的方向之外，<br>也有新的可能。</h2><p>在 Trending 中浏览不同领域的主题，给下一次探索找一点灵感。</p><div class="honest-note"><strong>关于当前趋势功能</strong><p>目前为交互演示。榜单、数量、增幅和示例论文是预置内容，不代表实时热点，也不代表已经核验的研究结论。</p></div></div>
+      <figure class="trend-preview"><img src="paperswipe-assets/trending-user-20261015.png" width="424" height="680" alt="全球研究趋势页面：LLM 智能体长期记忆主题、相关论文列表，以及工具使用与函数调用智能体主题" loading="lazy"><figcaption>趋势功能预览，不是实时数据</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="faq-section section wrap" aria-labelledby="faq-title">
+    <h2 id="faq-title" data-reveal><span>开始之前，</span><span>你可能想知道。</span></h2>
+    <div class="faq-list" data-reveal>
+      <details><summary>现在怎么使用 PaperSwipe？<span aria-hidden="true">+</span></summary><p>点击“立即体验”打开网站，用团队发给你的个人邀请码登录。目前为邀请制内测；还没有邀请码，请联系邀请你参与内测的人。邀请码是登录凭证，请勿转发。</p></details>
+      <details><summary>中英文切换包含论文内容吗？<span aria-hidden="true">+</span></summary><p>界面、论文标题和摘要都支持切换。作者姓名、期刊名称等专有名称可能保留原样。首次内容翻译需要等待，已有翻译会复用缓存；AI 翻译可能有误，请结合原文阅读。</p></details>
+      <details><summary>视频里展示的是什么版本？<span aria-hidden="true">+</span></summary><p>视频为团队提供的 10 月 15 日操作录屏。页面中的功能截图另使用演示数据，线上功能以实际部署版本为准。</p></details>
+      <details><summary>这是网站，还是已经发布的手机 App？<span aria-hidden="true">+</span></summary><p>现在可以通过浏览器进入内测。手机 App 的安装包与上架进度以团队通知为准，本页不提供尚未发布的平台下载。</p></details>
+    </div>
+  </section>
+
+  <section class="closing wrap" id="cta" aria-labelledby="closing-title" data-reveal>
+    <img src="paperswipe-assets/logo.png" width="64" height="64" alt="PaperSwipe 标志" loading="lazy">
+    <h2 id="closing-title">下一篇值得读的论文，<br>从这里开始。</h2>
+    <a class="button" href="https://paperswipe.site/login" target="_blank" rel="noopener noreferrer">立即体验 <span aria-hidden="true">↗</span></a>
+    <p>邀请制内测，期待你的真实反馈。</p>
+  </section>
+</main>
+<p class="compliance-notice"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026152562号-1</a></p>
+
+<dialog id="demo-dialog" aria-labelledby="demo-title">
+  <button class="dialog-close" type="button" aria-label="关闭演示">×</button>
+  <div class="demo-layout">
+    <div class="video-container"><video id="demo-video" controls playsinline preload="none" poster="paperswipe-assets/video-poster.jpg" aria-label="PaperSwipe 10 月 15 日操作演示"><source src="paperswipe-assets/product-demo-20261015.mp4" type="video/mp4"></video></div>
+    <div class="demo-description"><h2 id="demo-title">看看 PaperSwipe 怎么用。</h2><p>10 月 15 日操作演示 · 支持暂停、拖动进度和全屏观看。</p><p id="video-error" hidden>视频未能加载。请确认整个 paperswipe-assets 文件夹与 HTML 一起保存，或查看页面中的界面截图。</p></div>
+  </div>
+</dialog>
+</body>
+</html>

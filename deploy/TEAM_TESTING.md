@@ -1,6 +1,6 @@
 # 四人团队内部测试（当前服务器）
 
-> 历史说明：以下是备案前的 SSH 隧道测试流程。公网 HTTPS 已上线后不要照此切回 preflight 配置。新的 App 迁移与稳定性改动见 [APP_MIGRATION.md](../APP_MIGRATION.md)。
+> 历史说明：以下是备案前的 SSH 隧道测试流程。公网 HTTPS 已上线后不要照此切回 preflight 配置。新的 App 迁移与稳定性改动见 [APP_MIGRATION.md](../docs/APP_MIGRATION.md)。
 
 本说明针对 /opt/paperswipe-beta 下已运行的 compose.preflight.yaml。ICP 仍在审核，保持应用只监听服务器 127.0.0.1:18080，不开放公网 18080/8080，不启动 compose.public.yaml。此内部测试方案不等于公网发布许可。
 

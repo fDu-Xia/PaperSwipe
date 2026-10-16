@@ -435,6 +435,21 @@
     <div id="dialog-content" class="dialog-content"></div>
   </dialog>
 
+  <dialog id="week-calendar-dialog" class="app-dialog week-calendar-dialog" aria-labelledby="week-calendar-title" aria-describedby="week-calendar-help">
+    <div class="dialog-header"><strong id="week-calendar-title">Choose a week</strong><button type="button" class="icon-button" data-close-week-calendar aria-label="Close"><i data-lucide="x"></i></button></div>
+    <div class="week-calendar-body">
+      <p id="week-calendar-help">Pick any date to view its week.</p>
+      <div class="week-calendar-month">
+        <button type="button" class="wp-nav-btn" data-calendar-month="-1" aria-label="Previous month"><i data-lucide="chevron-left"></i></button>
+        <label><span class="sr-only">Year</span><input id="week-calendar-year" type="number" min="1900" max="2100" inputmode="numeric" aria-label="Year"></label>
+        <label><span class="sr-only">Month</span><select id="week-calendar-month" aria-label="Month"></select></label>
+        <button type="button" class="wp-nav-btn" data-calendar-month="1" aria-label="Next month"><i data-lucide="chevron-right"></i></button>
+      </div>
+      <div id="week-calendar-days" class="week-calendar-grid" role="group" aria-label="Choose a date"></div>
+      <button type="button" class="settings-secondary week-calendar-today" data-calendar-today>Back to this week</button>
+    </div>
+  </dialog>
+
   <dialog id="library-card-dialog" class="library-card-dialog">
     <div id="library-card-dialog-content"></div>
   </dialog>
@@ -461,9 +476,13 @@
 
   <script src="/vendor/lucide.min.js"></script>
   <script src="/mockdata/roadmap.js"></script>
+<script src="/mockdata/trends.js"></script>
+<script src="/bibliography.js"></script>
+<script src="/event-stream.js"></script>
   <script src="/client-api.js"></script>
   <script src="/card-gestures.js"></script>
   <script src="/schedule-state.js"></script>
+  <script src="/schedule-calendar.js"></script>
   <script src="/platform.js"></script>
   <script src="/locales.js"></script>
   <script src="/i18n.js"></script>

@@ -68,7 +68,13 @@ try:
         # Warm the next card before it is advanced; both sides reuse the cache.
         page.evaluate("state.papers.push({...state.papers[0],id:'next',title:'A second paper',digest:{...state.papers[0].digest,method:'New retrieval method evidence'}});renderCard()")
         page.wait_for_function("PaperSwipeContentLanguage.lookup('New retrieval method evidence') === '翻译后的研究内容。'")
+        upcoming_badge = page.evaluate("elements.stack1.querySelector('.card-badge').textContent")
+        assert upcoming_badge == 'arXiv 2025'
         assert page.evaluate("""() => {state.index=1;renderCard();return document.querySelector('#card .card-title').textContent;}""") == '翻译后的研究内容。'
+        assert page.locator('#card .card-front .card-badge').text_content() == upcoming_badge
+        assert page.evaluate("paperVenueBadge({source:'arXiv',year:2023})") == 'arXiv 2023'
+        assert page.evaluate("paperVenueBadge({year:2023})") == '2023'
+        assert page.evaluate('paperVenueBadge({})') == 'Publication'
         page.evaluate("state.papers=state.papers.slice(0,1);state.index=0;renderCard()")
         page.evaluate("flip()")
         page.wait_for_timeout(650)
@@ -129,6 +135,53 @@ try:
         assert 'page-footnote' in page.locator('.todos-scroll > :last-child').get_attribute('class')
         assert page.locator('.todos-scroll > .page-footnote').evaluate("el=>el.getBoundingClientRect().top-el.previousElementSibling.getBoundingClientRect().bottom") <= 12
         page.screenshot(path=str(OUT/f'{engine}-schedule.png'))
+        # Jump directly to past/future weeks without modifying reading dates.
+        schedule_before = page.evaluate('JSON.stringify([...state.weekPlanAssign])')
+        page.locator('[data-open-week-calendar]').click()
+        calendar = page.locator('#week-calendar-dialog')
+        assert calendar.is_visible()
+        assert page.locator('.week-calendar-day').count() == 42
+        page.locator('#week-calendar-year').fill('2024')
+        page.locator('#week-calendar-year').press('Tab')
+        page.locator('#week-calendar-month').select_option('11')
+        page.screenshot(path=str(OUT/f'{engine}-week-calendar-dark.png'))
+        page.locator('[data-calendar-date="2024-12-31"]').click()
+        page.wait_for_timeout(300)
+        assert not calendar.is_visible()
+        assert page.evaluate("(()=>{const d=weekStartDate(state.weekPlanOffset);return [d.getFullYear(),d.getMonth()+1,d.getDate()]})()") == [2024,12,30]
+        assert '2024/12/30 – 2025/1/5' in page.locator('.wp-nav-center small').inner_text()
+        assert page.locator('[data-open-week-calendar]').evaluate('el=>el===document.activeElement')
+        page.locator('[data-week-nav="1"]').click()
+        assert page.evaluate('weekStartDate(state.weekPlanOffset).getDate()') == 6
+        page.locator('[data-open-week-calendar]').click()
+        page.locator('#week-calendar-year').fill('2024')
+        page.locator('#week-calendar-year').press('Tab')
+        page.locator('#week-calendar-month').select_option('1')
+        page.locator('[data-calendar-date="2024-02-29"]').click()
+        page.wait_for_timeout(300)
+        assert page.evaluate('weekStartDate(state.weekPlanOffset).getDate()') == 26
+        page.locator('[data-open-week-calendar]').click()
+        page.locator('#week-calendar-month').select_option('2')
+        page.locator('[data-calendar-date="2024-03-10"]').click()
+        page.wait_for_timeout(300)
+        assert page.evaluate('weekStartDate(state.weekPlanOffset).getDate()') == 4
+        page.locator('[data-open-week-calendar]').click()
+        page.evaluate("PaperSwipeI18n.setLanguage('en');applyAppearance('light')")
+        page.set_viewport_size({'width':320,'height':568})
+        page.wait_for_timeout(350)
+        assert page.locator('#week-calendar-month option').nth(2).inner_text() == 'March'
+        page.screenshot(path=str(OUT/f'{engine}-week-calendar-light.png'))
+        assert calendar.evaluate('el=>el.scrollWidth<=el.clientWidth+1') # WebKit rounds fractional grid widths.
+        assert calendar.evaluate("el=>[...el.querySelectorAll('button,input,select')].every(n=>n.getBoundingClientRect().right<=el.getBoundingClientRect().right+1)")
+        page.locator('[data-calendar-today]').click()
+        page.wait_for_timeout(300)
+        assert page.evaluate('state.weekPlanOffset') == 0
+        assert page.evaluate('JSON.stringify([...state.weekPlanAssign])') == schedule_before
+        page.locator('[data-open-week-calendar]').click()
+        page.keyboard.press('Escape');page.wait_for_timeout(300)
+        assert not calendar.is_visible()
+        page.set_viewport_size({'width':390,'height':844})
+        page.evaluate("PaperSwipeI18n.setLanguage('zh');applyAppearance('dark')")
         page.evaluate("switchView('todos');document.querySelector('#ai-bot-button').click()")
         page.wait_for_timeout(350)
         assert page.locator('[data-bot-prompt="daily"] strong').inner_text() == '规划今天的阅读'

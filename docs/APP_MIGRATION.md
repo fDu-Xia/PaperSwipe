@@ -22,13 +22,21 @@ python tests/mobile_stability.py
 
 The browser test uses a private mock server and does not call a model or touch user data. It requires Python Playwright and Edge by default; set `PAPERSWIPE_TEST_BROWSER=chromium` to use bundled Chromium. CI installs Playwright and Chromium. Existing account-isolation, quota, summary and cache tests remain in place; new tests cover schedule recovery, failed writes, global cache budgeting, idle expiration and bounded waiting.
 
-No iOS/Android/HarmonyOS native package has been built at this milestone. No live production load test, paid model benchmark or iPhone-device validation is implied.
+The original milestone had no native packages. As of 2026-10-15, an Android 0.1.0 debug APK has been built locally and its APK v2 signature and bundled current UI verified. No iOS/HarmonyOS package, live production load test, paid model benchmark or physical-device validation is implied.
 
 ## Next milestones
 
 ### Mobile foundation added locally (2026-10-13)
 
-Android project and bundled UI build now live in `mobile/`. The opt-in backend mobile-auth channel, per-channel sessions, strict CORS and Android encrypted session vault are implemented. Browser cookie/CSRF behavior remains intact. No server was updated; `ENABLE_MOBILE_APP` stays off unless explicitly enabled in deployment. See [mobile/README.md](mobile/README.md) for prerequisites, tests and Windows build instructions. Native device validation and iOS/HarmonyOS projects remain outstanding.
+Android project and bundled UI build now live in `mobile/`. The opt-in backend mobile-auth channel, per-channel sessions, strict CORS and Android encrypted session vault are implemented. Browser cookie/CSRF behavior remains intact. No server was updated; `ENABLE_MOBILE_APP` stays off unless explicitly enabled in deployment. See [mobile/README.md](../mobile/README.md) for prerequisites, tests and Windows build instructions. Native device validation and iOS/HarmonyOS projects remain outstanding.
+
+### Android test APK built locally (2026-10-15)
+
+- `mobile/Build-Android.ps1` reproduces the Windows build and exports a signature-verified debug APK to ignored `release/android/`.
+- Built `site.paperswipe.app` version 0.1.0 (versionCode 1), API 24 minimum / API 36 target, with latest shared frontend including the new invitation page and weekly calendar.
+- Verified all bundled web assets against source and absence of private configuration/data files with `tests/android_package.py`. Go tests/vet, native transport tests and browser stability tests passed.
+- Read-only production mobile-login preflight returned 403. Server opt-in remains required; no server setting was changed.
+- Debug signing is for local/device evaluation, not a finished public release. Stable release signing, real-device checks, iOS and HarmonyOS NEXT remain next steps.
 
 1. Further separate feature modules and centralize rendering without redesigning the existing screens. Do not remove demo content still used by Trending or the reading assistant as if it were dead code.
 2. Explicit API origin and Android platform-aware authentication/storage are implemented; validate on a real device and add corresponding iOS/HarmonyOS secure storage. Preserve browser CSRF protections.

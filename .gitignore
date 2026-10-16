@@ -6,6 +6,7 @@
 /data/users/
 /*.exe
 /release/
+/paperswipe
 /backups/
 /invites-*/
 /tests/__pycache__/

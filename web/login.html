@@ -2,35 +2,148 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PaperSwipe · 内测登录</title>
-<style>
-:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#11131a;background:#e7e9ed;color-scheme:light;--accent:#6657e8;--muted:#626776}*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}button:focus-visible,summary:focus-visible{outline:3px solid #6657e8;outline-offset:4px}main{position:relative;isolation:isolate;overflow:hidden;width:min(100%,430px);min-height:100dvh;margin:auto;padding:calc(28px + env(safe-area-inset-top)) 26px calc(24px + env(safe-area-inset-bottom));background:#f4f5f7;box-shadow:0 0 65px #181b2324;display:flex;flex-direction:column}main:before{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:450px;background:radial-gradient(ellipse at 85% 0%,#c8bcff99,transparent 65%),radial-gradient(ellipse at 0% 45%,#b5e8e466,transparent 65%);pointer-events:none}.brand{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:800;letter-spacing:-.6px}.brand svg{width:28px;height:28px;color:var(--accent)}.beta{margin-left:auto;font-size:11px;letter-spacing:0;font-weight:600;color:#503bd5;background:#ebe8ff;padding:6px 10px;border-radius:20px}.intro{margin-top:46px}.paper-mark{position:relative;width:76px;height:83px;margin-bottom:26px}.paper-mark:before{content:"";position:absolute;inset:7px 10px 0 0;border-radius:13px;background:#d8d1fb;transform:rotate(-12deg)}.paper-mark svg{position:relative;width:64px;height:78px}h1{font-size:34px;line-height:1.32;letter-spacing:-1.3px;margin:0 0 14px;font-weight:800}.intro p{font-size:14px;line-height:1.8;color:var(--muted);margin:0}form{margin-top:32px}label{font-size:14px;font-weight:650;display:block;margin-bottom:10px}.input-wrap{display:flex;align-items:center;border:1px solid #ccd0db;border-radius:16px;background:#fff}.input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px #6657e81a}.input-wrap:has([aria-invalid="true"]){border-color:#b42335}input{width:100%;min-width:0;border:0;background:transparent;padding:18px 0 18px 16px;font-size:16px;outline:none;color:#11131a}input::placeholder{color:#797f8b;font-size:14px}#reveal{flex:none;background:none;border:0;color:#503bd5;padding:12px;margin-right:4px;border-radius:10px;font-size:13px;min-height:44px}.hint{margin:10px 0 0;font-size:12px;line-height:1.7;color:var(--muted)}#submit{width:100%;min-height:54px;margin-top:24px;border:0;border-radius:18px;background:var(--accent);color:white;font-size:16px;font-weight:650;box-shadow:0 7px 18px #6657e82b;transition:background .15s,transform .15s}#submit:hover{background:#503bd5}#submit:active{transform:scale(.985)}#submit:disabled{background:#7769db;cursor:wait}#error{font-size:13px;line-height:1.65;color:#a31e30;margin:12px 0 0}#error:empty{display:none}.support{font-size:12px;color:var(--muted);text-align:center;margin:20px 0 32px;line-height:1.8}.privacy{margin-top:auto;border-top:1px solid #dfe2e8;padding-top:18px;color:var(--muted);font-size:12px;line-height:1.8}summary{cursor:pointer;min-height:32px;color:#4b5161;font-weight:600}details p{margin:8px 0 12px}.footnote{margin:6px 0 0;font-size:11px;color:var(--muted)}@media(max-width:360px){main{padding-inline:20px}.intro{margin-top:30px}h1{font-size:30px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
 <link rel="icon" href="/assets/paperswipe-logo.png" type="image/png">
 <link rel="apple-touch-icon" href="/assets/paperswipe-logo.png">
-<style>.brand .product-logo{width:32px;height:32px;border-radius:8px}.paper-mark:before{display:none}.paper-mark .product-logo{width:78px;height:78px;border-radius:18px}</style>
+<script>
+(() => {
+  let appearance='light';
+  try { appearance=localStorage.getItem('paperswipe-appearance-v1') || 'light'; } catch (_) {}
+  const update=()=>{ document.documentElement.dataset.theme=appearance==='dark'||appearance==='system'&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; };
+  update();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',update);
+})();
+</script>
+<style>
+:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color-scheme:light;--bg:#f5f4fa;--panel:#fff;--ink:#242131;--muted:#696578;--line:#e4e0ef;--accent:#6657e8;--accent-strong:#503bd5;--soft:#efecff;--success:#16766b;--error:#b42335;--shadow:0 16px 48px #34236a0b;--halo:#b9a8ff40;--halo-teal:#a5e0d52b}
+html[data-theme="dark"]{color-scheme:dark;--bg:#0d0d13;--panel:#1b1a25;--ink:#f5f3fc;--muted:#b1acbf;--line:#383344;--accent:#aa99ff;--accent-strong:#c0b3ff;--soft:#302947;--success:#80d9c7;--error:#ffadb7;--shadow:0 16px 48px #0003;--halo:#7353dc30;--halo-teal:#1889781c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);min-width:280px}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 85% 10%,var(--halo),transparent 55%),radial-gradient(ellipse at 5% 80%,var(--halo-teal),transparent 55%)}
+button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:wait}button,a,input,summary{-webkit-tap-highlight-color:transparent}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+main{width:min(100%,1020px);min-height:100dvh;margin:auto;padding:calc(28px + env(safe-area-inset-top)) 40px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+.login-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:800;letter-spacing:-.6px}
+.product-logo{width:34px;height:34px;border-radius:10px}
+.language-compact{position:relative;isolation:isolate;display:grid;grid-template-columns:1fr 1fr;padding:4px;border:1px solid var(--line);border-radius:12px;flex-shrink:0}
+.language-compact:before{content:"";position:absolute;z-index:-1;inset:4px auto 4px 4px;width:calc(50% - 4px);border-radius:8px;background:var(--panel);box-shadow:0 2px 5px #2014330d;transition:transform 260ms cubic-bezier(.22,1,.36,1)}
+.language-compact[data-selected-language="en"]:before{transform:translateX(100%)}
+.language-compact button{border:0;background:transparent;color:var(--muted);min-height:32px;padding:6px 12px;font-size:12px;border-radius:8px;transition:color 180ms,transform 180ms}
+.language-compact button+button{border-left:1px solid var(--line)}
+.language-compact button.is-selected{color:var(--accent-strong);font-weight:650}
+.language-compact button:active{transform:scale(.94)}
+.login-layout{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:56px;margin:auto 0;padding:60px 0 44px;animation:login-arrive 500ms cubic-bezier(.22,1,.36,1) both}
+.intro{min-width:0}
+.beta{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:11px;font-weight:600;color:var(--muted);background:var(--panel)}
+.beta:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+h1{font-size:46px;line-height:1.2;letter-spacing:-1.8px;margin:24px 0 18px;font-weight:800;text-wrap:balance}
+.intro-copy{font-size:15px;line-height:1.85;color:var(--muted);margin:0;max-width:29em;text-wrap:pretty}
+.reading-flow{display:flex;gap:22px;list-style:none;padding:0;margin:28px 0 0;color:var(--muted);font-size:12px}
+.reading-flow li{display:flex;align-items:center;gap:7px}
+.reading-flow svg{width:17px;height:17px;color:var(--accent)}
+.entry{min-width:0}
+.login-panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+label{font-size:13px;font-weight:650;display:block;margin-bottom:9px}
+.input-wrap{display:flex;align-items:center;border:1px solid var(--line);border-radius:13px;background:var(--bg);transition:border-color 180ms,box-shadow 180ms,background 180ms}
+.input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--soft);background:var(--panel)}
+.input-wrap:has([aria-invalid="true"]){border-color:var(--error)}
+.input-wrap:has([data-complete="true"]):not(:focus-within){border-color:var(--success)}
+input{width:100%;min-width:0;border:0;background:transparent;padding:16px 0 16px 13px;font-size:16px;outline:none;color:var(--ink)}
+input::placeholder{color:var(--muted);font-size:12px}
+#reveal{flex:none;background:transparent;border:0;color:var(--accent-strong);padding:10px;margin:0 4px;border-radius:9px;font-size:12px;min-height:44px;transition:transform 180ms,background 180ms}
+#reveal:active{transform:scale(.9);background:var(--soft)}
+.hint{display:flex;gap:6px;margin:11px 0 0;font-size:11px;line-height:1.7;color:var(--muted)}
+.hint svg{width:14px;height:14px;margin-top:2px}
+#submit{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:52px;margin-top:22px;border:0;border-radius:13px;background:#6657e8;color:white;font-size:15px;font-weight:650;box-shadow:0 5px 14px #6657e824;transition:background 180ms,transform 180ms,box-shadow 180ms}
+#submit:hover:not(:disabled){background:#503bd5;box-shadow:0 7px 18px #6657e830}
+#submit:active:not(:disabled){transform:scale(.975);box-shadow:0 2px 6px #6657e824}
+#submit:disabled{opacity:.8}
+#submit:disabled:before{content:"";width:15px;height:15px;border:2px solid #fff6;border-top-color:#fff;border-radius:50%;animation:login-spin 750ms linear infinite}
+#error{font-size:12px;line-height:1.65;color:var(--error);margin:12px 0 0}
+#error:empty{display:none}
+#error:not(:empty){animation:login-feedback 200ms ease-out}
+.entry-note{font-size:11px;text-align:center;color:var(--muted);margin:14px 0 0}
+.login-help{display:grid;gap:10px;margin-top:16px}
+.info-block{border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--panel) 65%,transparent);overflow:hidden}
+.info-block summary{display:flex;align-items:center;gap:10px;padding:15px 16px;list-style:none;cursor:pointer;font-size:12px;font-weight:650;transition:background 180ms}
+.info-block summary::-webkit-details-marker{display:none}
+.info-icon{color:var(--accent);width:17px;height:17px}
+.chevron{margin-left:auto;width:15px;height:15px;color:var(--muted);transition:transform 220ms}
+.info-block[open] .chevron{transform:rotate(180deg)}
+.info-block summary:hover{background:var(--soft)}
+.info-content{padding:0 16px 16px 43px;font-size:12px;line-height:1.8;color:var(--muted)}
+.info-content p{margin:0 0 9px}.info-content p:last-child{margin-bottom:0}
+.info-block[open] .info-content{animation:login-feedback 220ms ease-out}
+footer{text-align:center;font-size:11px;line-height:1.8;color:var(--muted);padding:6px 0}
+@keyframes login-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes login-feedback{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes login-spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){
+ main{max-width:460px;padding:calc(20px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom))}
+ .brand{font-size:18px}.brand .product-logo{width:30px;height:30px}
+ .language-compact button{padding:5px 9px;font-size:11px}
+ .login-layout{grid-template-columns:1fr;gap:26px;padding:30px 0 26px;margin:0}
+ .intro{position:relative;padding-top:0}
+ h1{font-size:32px;letter-spacing:-1px;max-width:10em;margin:18px 0 10px}
+ .intro-copy{font-size:13px;line-height:1.75;max-width:25em}
+ .reading-flow{gap:22px;margin-top:18px;font-size:11px}
+ .login-panel{padding:22px;border-radius:20px}
+ .info-content{padding-left:16px}
+ footer{margin-top:auto}
+}
+@media(max-width:350px){
+ main{padding-inline:16px}.brand{font-size:16px;gap:6px}.brand .product-logo{width:28px;height:28px}
+ .language-compact button{padding-inline:7px}h1{font-size:29px}
+ .login-panel{padding:18px}.reading-flow{gap:18px}.login-layout{padding-top:24px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
 <main>
-<style>
-.input-wrap{transition:border-color 180ms ease,box-shadow 180ms ease}
-#submit,#reveal,summary{transition:transform 180ms cubic-bezier(.22,1,.36,1),background-color 180ms ease,box-shadow 180ms ease}
-#submit:not(:disabled):active{transform:scale(.96);box-shadow:0 2px 8px #6657e826}
-#reveal:active{transform:scale(.9);background:#ebe8ff}
-summary:active{transform:translateX(3px)}
-#error:not(:empty){animation:login-feedback 220ms ease-out}
-details[open] p{animation:login-feedback 220ms ease-out}
-@keyframes login-feedback{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-</style>
-<header class="brand"><img class="product-logo" src="/assets/paperswipe-logo.png" alt=""><span>PaperSwipe</span><span class="beta">邀请制内测</span></header>
-<div class="language-compact" role="radiogroup" aria-label="Language"><button type="button" role="radio" data-language="zh">简体中文</button><button type="button" role="radio" data-language="en">English</button></div>
-<style>.language-compact{display:flex;gap:4px;justify-content:flex-end;margin-top:20px}.language-compact button{border:1px solid transparent;background:transparent;color:#626776;padding:8px 12px;border-radius:10px;min-height:36px;font-size:12px;transition:background 180ms,transform 180ms}.language-compact button.is-selected{background:#ebe8ff;border-color:#d8d1fb;color:#503bd5}.language-compact button:active{transform:scale(.96)}@media(prefers-reduced-motion:reduce){.language-compact button{transition:none}}</style>
-<section class="intro" aria-labelledby="welcome"><div class="paper-mark" aria-hidden="true"><img class="product-logo" src="/assets/paperswipe-logo.png" alt=""></div><h1 id="welcome">找到值得读的论文。</h1><p>从一篇好论文开始。<br>输入专属邀请码，开启你的阅读探索。</p></section>
-<form id="login"><label for="token">邀请码</label><div class="input-wrap"><input id="token" name="token" type="password" required autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="粘贴团队发给你的邀请码" aria-describedby="token-hint error"><button id="reveal" type="button" aria-label="显示邀请码" aria-pressed="false">显示</button></div><p class="hint" id="token-hint">每个邀请码对应独立文献库，请勿转发。</p><button id="submit" type="submit">进入 PaperSwipe</button><p id="error" role="alert"></p></form>
-<p class="support">还没有邀请码？请联系邀请你加入内测的团队成员。</p>
-<footer class="privacy"><details><summary>你的数据如何使用</summary><p>我们保存你的收藏和检索历史。检索词会发送至论文数据源；启用模型后，研究描述和论文摘要会发送至模型服务。请勿输入未公开的敏感研究内容。需要删除数据或反馈问题，请联系发放邀请的团队成员。</p></details><p class="footnote">内测版本持续改进中，欢迎分享你的使用感受。</p></footer></main>
+<header class="login-header">
+  <div class="brand"><img class="product-logo" src="/assets/paperswipe-logo.png" alt=""><span>PaperSwipe</span></div>
+  <div class="language-compact" role="radiogroup" aria-label="Language"><button type="button" role="radio" data-language="zh">简体中文</button><button type="button" role="radio" data-language="en">English</button></div>
+</header>
+<div class="login-layout">
+<section class="intro" aria-labelledby="welcome">
+  <span class="beta">邀请制内测</span>
+  <h1 id="welcome">找到值得读的论文。</h1>
+  <p class="intro-copy">从一篇好论文开始。把感兴趣的研究，变成自己的阅读计划。</p>
+  <ul class="reading-flow" aria-label="What you can do">
+    <li><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Discover</span></li>
+    <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg><span>Collect</span></li>
+    <li><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-12 5h3"/></svg><span>Plan your reading</span></li>
+  </ul>
+</section>
+<div class="entry">
+<section class="login-panel" aria-labelledby="token-label">
+  <form id="login">
+    <label id="token-label" for="token">邀请码</label>
+    <div class="input-wrap"><input id="token" name="token" type="password" required autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="粘贴团队发给你的邀请码" aria-describedby="token-hint error"><button id="reveal" type="button" aria-label="显示邀请码" aria-pressed="false">显示</button></div>
+    <p class="hint" id="token-hint"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 8 4v6c0 5-8 8-8 8s-8-3-8-8V7z"/><path d="m8 12 3 3 5-5"/></svg><span>每个邀请码对应独立文献库，请勿转发。</span></p>
+    <button id="submit" type="submit">进入 PaperSwipe</button>
+    <p id="error" role="alert"></p>
+  </form>
+  <p class="entry-note">邀请码就是你的登录凭证，请妥善保存。</p>
+</section>
+<section class="login-help" aria-label="Before you join">
+  <details class="info-block" id="invite-help">
+    <summary><svg class="info-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3h.01"/></svg><span>还没有邀请码？</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="info-content"><p>请联系邀请你加入内测的团队成员，领取个人邀请码。</p><p>已有邀请码但无法登录？请完整复制，不要带上说明文字；仍有问题可联系邀请人。</p></div>
+  </details>
+  <details class="info-block" id="privacy-help">
+    <summary><svg class="info-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 8 4v6c0 5-8 8-8 8s-8-3-8-8V7z"/><path d="m8 12 3 3 5-5"/></svg><span>你的数据如何使用</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="info-content"><p>我们保存你的收藏和检索历史。检索词会发送至论文数据源；启用模型后，研究描述和论文摘要会发送至模型服务。</p><p>请勿输入未公开的敏感研究内容。需要删除数据或反馈问题，请联系发放邀请的团队成员。</p></div>
+  </details>
+</section>
+</div>
+</div>
+<footer>内测版本持续改进中，欢迎分享你的使用感受。</footer>
+</main>
 <script src="/platform.js"></script>
 <script src="/locales.js"></script>
 <script src="/i18n.js"></script>
@@ -38,7 +151,7 @@ details[open] p{animation:login-feedback 220ms ease-out}
 const form=document.querySelector('#login'),token=document.querySelector('#token'),button=document.querySelector('#submit'),error=document.querySelector('#error'),reveal=document.querySelector('#reveal');
 let pending=false;
 reveal.addEventListener('click',()=>{const visible=token.type==='password';token.type=visible?'text':'password';reveal.textContent=visible?'隐藏':'显示';reveal.setAttribute('aria-label',visible?'隐藏邀请码':'显示邀请码');reveal.setAttribute('aria-pressed',String(visible));});
-token.addEventListener('input',()=>{token.removeAttribute('aria-invalid');error.textContent='';});
+token.addEventListener('input',()=>{token.removeAttribute('aria-invalid');error.textContent='';token.dataset.complete=String(/^[a-f0-9]{64}$/i.test(token.value.trim()));});
 form.addEventListener('submit',async e=>{
  e.preventDefault();if(pending)return;const value=token.value.trim();
  if(!/^[a-f0-9]{64}$/i.test(value)){error.textContent='请粘贴完整的 64 位邀请码，不要包含前面的说明文字。';token.setAttribute('aria-invalid','true');token.focus();return;}
